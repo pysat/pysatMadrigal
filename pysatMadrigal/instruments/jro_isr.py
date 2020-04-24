@@ -39,6 +39,7 @@ import numpy as np
 
 from pysatMadrigal.instruments.methods import madrigal as mad_meth
 from pysat.instruments.methods import nasa_cdaweb as cdw
+from pysat.utils import coords
 
 import logging
 logger = logging.getLogger(__name__)
@@ -228,8 +229,6 @@ def calc_measurement_loc(self):
     have azimuth and elevation keys that match the format 'eldir#' and 'azdir#'
 
     """
-
-    from pysat.utils import coords
 
     az_keys = [kk[5:] for kk in list(self.data.keys())
                if kk.find('azdir') == 0]
