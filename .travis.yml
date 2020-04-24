@@ -28,9 +28,10 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
   # Create conda test environment
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy pandas xarray requests beautifulsoup4 lxml netCDF4 h5py nose pytest-cov pytest-flake8 pytest-ordering coveralls future
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy pandas xarray requests beautifulsoup4 lxml netCDF4 h5py nose pytest-cov pytest-ordering coveralls future
   - conda activate test-environment
   # Dependencies not available through conda, install through pip
+  - pip install pytest-flake8
   - pip install madrigalWeb
   - pip install PyForecastTools
   - pip install pysatCDF >/dev/null
@@ -39,6 +40,8 @@ install:
   - git clone https://github.com/pysat/pysat.git
   - cd pysat
   - git checkout develop-3
+  - python setup.py install
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)
   # set up data directory
   - mkdir /home/travis/build/pysatData
   - cd ../pysatMadrigal
