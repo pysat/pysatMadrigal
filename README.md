@@ -5,11 +5,11 @@
 
 # pysatMadrigal
 [![Documentation Status](https://readthedocs.org/projects/pysatMadrigal/badge/?version=latest)](http://pysatMadrigal.readthedocs.io/en/latest/?badge=latest)
-[![DOI](https://zenodo.org/badge/209358908.svg)](https://zenodo.org/badge/latestdoi/209358908)
+<!-- [![DOI](https://zenodo.org/badge/209358908.svg)](https://zenodo.org/badge/latestdoi/209358908) -->
 
 [![Build Status](https://travis-ci.org/pysat/pysatMadrigal.svg?branch=master)](https://travis-ci.org/pysat/pysatMadrigal)
 [![Coverage Status](https://coveralls.io/repos/github/pysat/pysatMadrigal/badge.svg?branch=master)](https://coveralls.io/github/pysat/pysatMadrigal?branch=master)
-[![Maintainability](https://api.codeclimate.com/v1/badges/83011911691b9d2076e9/maintainability)](https://codeclimate.com/github/pysat/pysatMadrigal/maintainability)
+<!-- [![Maintainability](https://api.codeclimate.com/v1/badges/83011911691b9d2076e9/maintainability)](https://codeclimate.com/github/pysat/pysatMadrigal/maintainability) -->
 
 pysatMadrigal allows users to run build simulated satellites for Two-Line Elements (TLE) and add empirical data.  It includes the pysat_ephem and pysat_sgp4 instrument modules which can be imported into pysat.
 
