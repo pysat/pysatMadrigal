@@ -4,21 +4,15 @@
 </div>
 
 # pysatMadrigal
-[![Documentation Status](https://readthedocs.org/projects/pysatMadrigal/badge/?version=latest)](http://pysatMadrigal.readthedocs.io/en/latest/?badge=latest)
+<!-- [![Documentation Status](https://readthedocs.org/projects/pysatMadrigal/badge/?version=latest)](http://pysatMadrigal.readthedocs.io/en/latest/?badge=latest) -->
 <!-- [![DOI](https://zenodo.org/badge/209358908.svg)](https://zenodo.org/badge/latestdoi/209358908) -->
 
 [![Build Status](https://travis-ci.com/pysat/pysatMadrigal.svg?branch=master)](https://travis-ci.com/pysat/pysatMadrigal)
 [![Coverage Status](https://coveralls.io/repos/github/pysat/pysatMadrigal/badge.svg?branch=master)](https://coveralls.io/github/pysat/pysatMadrigal?branch=master)
 <!-- [![Maintainability](https://api.codeclimate.com/v1/badges/83011911691b9d2076e9/maintainability)](https://codeclimate.com/github/pysat/pysatMadrigal/maintainability) -->
 
-pysatMadrigal allows users to run build simulated satellites for Two-Line Elements (TLE) and add empirical data.  It includes the pysat_ephem and pysat_sgp4 instrument modules which can be imported into pysat.
+pysatMadrigal allows users to import data from the Madrigal database into pysat.  It currently supports the Ion Velocity Meter on the Defense Meteorological Satellite (`dmsp_ivm`) and the Jicamarca Radio Observatory Incoherent Scatter Radar (`jro_isr`).  It also includes templates and an interface for interacting with madrigalWeb.
 
-Main Features
--------------
-- Simulate satellite orbits from TLEs and add data from empirical models
-- Import ionosphere and thermosphere model values through pyglow
-- Import magnetic coordinates through apexpy and aacgmv2
-- Import geomagnetic basis vectors through pysatMagVect
 
 Documentation
 ---------------------
