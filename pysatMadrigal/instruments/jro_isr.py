@@ -38,7 +38,7 @@ import functools
 import numpy as np
 
 from pysatMadrigal.instruments.methods import madrigal as mad_meth
-from pysat.instruments.methods import nasa_cdaweb as cdw
+from pysat.instruments.methods import general as mm_gen
 from pysat.utils import coords
 
 import logging
@@ -69,7 +69,7 @@ supported_tags = {ss: {'drifts': jro_fname1 + "drifts" + jro_fname2,
                        'oblique_rand': jro_fname1 + "?" + jro_fname2,
                        'oblique_long': jro_fname1 + "?" + jro_fname2}
                   for ss in sat_ids.keys()}
-list_files = functools.partial(cdw.list_files,
+list_files = functools.partial(mm_gen.list_files,
                                supported_tags=supported_tags)
 
 # madrigal tags
