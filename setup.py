@@ -17,7 +17,7 @@ with codecs.open(os.path.join(here, version_filename)) as version_file:
     version = version_file.read().strip()
 
 # Define requirements
-install_requires = ['pysat', 'scipy', 'pandas', 'xarray', 'numpy']
+install_requires = ['pysat', 'pandas', 'xarray', 'numpy', 'madrigalWeb', 'h5py']
 
 # Run setup
 setup(name='pysatMadrigal',
