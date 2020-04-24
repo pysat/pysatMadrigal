@@ -47,7 +47,7 @@ install:
 
 # command to run tests
 script:
- - pytest -vs --cov=pysat/ --flake8
+ - pytest -vs --cov=pysatMadrigal/ --flake8
 
 after_success:
  - coveralls
