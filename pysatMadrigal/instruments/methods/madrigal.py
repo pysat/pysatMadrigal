@@ -88,8 +88,9 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
     file_meta = filed['Metadata']['Data Parameters']
     # load up what is offered into pysat.Meta
     meta = pysat.Meta()
-    meta.info = {'acknowledgements': "See 'meta.Experiment_Notes' for " +
-                 "instrument specific acknowledgements\n" + cedar_rules(),
+    meta.info = {'acknowledgements':
+                 ' '.join(["See 'meta.Experiment_Notes' for instrument",
+                           "specific acknowledgements\n", cedar_rules()]),
                  'references': "See 'meta.Experiment_Notes' for references"}
     labels = []
     for item in file_meta:
@@ -121,8 +122,8 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
     time_keys = np.array(['year', 'month', 'day', 'hour', 'min', 'sec'])
     if not np.all([key in data.columns for key in time_keys]):
         time_keys = [key for key in time_keys if key not in data.columns]
-        raise ValueError("unable to construct time index, missing " +
-                         "{:}".format(time_keys))
+        raise ValueError(' '.join(["unable to construct time index, missing",
+                                   "{:}".format(time_keys)]))
 
     uts = 3600.0 * data.loc[:, 'hour'] + 60.0 * data.loc[:, 'min'] \
         + data.loc[:, 'sec']
@@ -542,7 +543,7 @@ def filter_data_single_date(self):
     # only do this if loading by date!
     if self._load_by_date and self.pad is None:
         # identify times for the loaded date
-        idx, = np.where((self.index >= self.date) &
-                        (self.index < (self.date+pds.DateOffset(days=1))))
+        idx, = np.where((self.index >= self.date)
+                        & (self.index < (self.date + pds.DateOffset(days=1))))
         # downselect from all data
         self.data = self[idx]

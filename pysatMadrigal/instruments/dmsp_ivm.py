@@ -202,14 +202,14 @@ def clean(inst):
 
     if inst.tag == 'utd':
         if inst.clean_level == 'clean':
-            idx, = np.where((inst['rpa_flag_ut'] <= 1) &
-                            (inst['idm_flag_ut'] <= 1))
+            idx, = np.where((inst['rpa_flag_ut'] <= 1)
+                            & (inst['idm_flag_ut'] <= 1))
         elif inst.clean_level == 'dusty':
-            idx, = np.where((inst['rpa_flag_ut'] <= 2) &
-                            (inst['idm_flag_ut'] <= 2))
+            idx, = np.where((inst['rpa_flag_ut'] <= 2)
+                            & (inst['idm_flag_ut'] <= 2))
         elif inst.clean_level == 'dirty':
-            idx, = np.where((inst['rpa_flag_ut'] <= 3) &
-                            (inst['idm_flag_ut'] <= 3))
+            idx, = np.where((inst['rpa_flag_ut'] <= 3)
+                            & (inst['idm_flag_ut'] <= 3))
         else:
             idx = slice(0, inst.index.shape[0])
     else:
