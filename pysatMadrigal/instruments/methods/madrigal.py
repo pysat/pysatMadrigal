@@ -12,7 +12,6 @@ import logging
 import numpy as np
 import os
 import pandas as pds
-import subprocess
 import sys
 
 import h5py
