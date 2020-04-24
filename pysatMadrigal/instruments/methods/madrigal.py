@@ -22,6 +22,7 @@ import pysat
 
 logger = logging.getLogger(__name__)
 
+
 def cedar_rules():
     """ General acknowledgement statement for Madrigal data.
 
@@ -154,9 +155,9 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
         data.index = time
 
         if np.any(time.duplicated()):
-            logger.warning("duplicated time indices, consider specifing " +
-                  "additional coordinates and storing the data as an xarray" +
-                  " DataSet")
+            logger.warning(' '.join(["duplicated time indices, consider",
+                                     "specifing additional coordinates and",
+                                     "storing the data as an xarray DataSet"]))
 
     return data, meta
 
@@ -250,7 +251,7 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
 def get_remote_filenames(inst_code=None, kindat=None, user=None,
                          password=None, web_data=None,
                          url="http://cedar.openmadrigal.org",
-                         start=dt.datetime(1900,1,1), stop=dt.datetime.now(),
+                         start=dt.datetime(1900, 1, 1), stop=dt.datetime.now(),
                          date_array=None):
     """Retrieve the remote filenames for a specified Madrigal instrument
     (and experiment)
@@ -359,6 +360,7 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
 
     return files
 
+
 def good_exp(exp, date_array=None):
     """ Determine if a Madrigal experiment has good data for specified dates
 
@@ -383,8 +385,9 @@ def good_exp(exp, date_array=None):
         if date_array is None:
             gflag = True
         else:
-            exp_start = dt.datetime(exp.startyear, exp.startmonth, exp.startday,
-                                    exp.starthour, exp.startmin, exp.startsec)
+            exp_start = dt.datetime(exp.startyear, exp.startmonth,
+                                    exp.startday, exp.starthour,
+                                    exp.startmin, exp.startsec)
             exp_end = dt.datetime(exp.endyear, exp.endmonth, exp.endday,
                                   exp.endhour, exp.endmin, exp.endsec)
 
@@ -395,10 +398,11 @@ def good_exp(exp, date_array=None):
 
     return gflag
 
+
 def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
                       password=None, supported_tags=None,
                       url="http://cedar.openmadrigal.org",
-                      two_digit_year_break=None, start=dt.datetime(1900,1,1),
+                      two_digit_year_break=None, start=dt.datetime(1900, 1, 1),
                       stop=dt.datetime.now()):
     """List files available from Madrigal.
 

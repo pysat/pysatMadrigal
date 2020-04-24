@@ -117,10 +117,11 @@ def init(self):
 
     """
 
-    logger.info("The Jicamarca Radio Observatory is operated by the Instituto " +
-          "Geofisico del Peru, Ministry of Education, with support from the" +
-          " National Science Foundation as contracted through Cornell" +
-          " University.  " + mad_meth.cedar_rules())
+    logger.info(' '.join(["The Jicamarca Radio Observatory is operated by",
+                          "the Instituto Geofisico del Peru, Ministry of",
+                          "Education, with support from the National Science",
+                          "Foundation as contracted through Cornell",
+                          "University. ", mad_meth.cedar_rules()]))
     return
 
 
@@ -196,11 +197,12 @@ def clean(self):
 
     if self.tag.find('oblique') == 0:
         # Oblique profile cleaning
-        logger.info('The double pulse, coded pulse, and long pulse modes ' +
-              'implemented at Jicamarca have different limitations arising ' +
-              'from different degrees of precision and accuracy. Users ' +
-              'should consult with the staff to determine which mode is ' +
-              'right for their application.')
+        logger.info(' '.join(['The double pulse, coded pulse, and long pulse',
+                              'modes implemented at Jicamarca have different',
+                              'limitations arising from different degrees of',
+                              'precision and accuracy. Users should consult',
+                              'with the staff to determine which mode is',
+                              'right for their application.']))
 
         if self.clean_level in ['clean', 'dusty', 'dirty']:
             logger.warning('this level 2 data has no quality flags')
@@ -213,8 +215,9 @@ def clean(self):
             ida, = np.where((self.data.indexes['gdalt'] > 200.0))
             idx['gdalt'] = np.unique(ida)
         else:
-            logger.warning("interpretation of drifts below 200 km should " +
-                  "always be done in partnership with the contact people")
+            logger.warning(' '.join(["interpretation of drifts below 200 km",
+                                     "should always be done in partnership",
+                                     "with the contact people"]))
 
     # downselect data based upon cleaning conditions above
     self.data = self[idx]
