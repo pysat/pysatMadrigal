@@ -32,7 +32,7 @@ class TestInstruments(InstTestClass):
 
     def setup(self):
         """Runs before every method to create a clean testing setup."""
-        self.package = 'pysat.instruments'
+        self.package = 'pysatMadrigal.instruments'
 
     def teardown(self):
         """Runs after every method to clean up previous testing."""
