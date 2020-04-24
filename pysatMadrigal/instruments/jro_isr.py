@@ -56,6 +56,7 @@ _test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
                     'oblique_stan': dt.datetime(2010, 4, 19),
                     'oblique_rand': dt.datetime(2000, 11, 9),
                     'oblique_long': dt.datetime(2010, 4, 12)}}
+pandas_format = False
 
 # support list files routine
 # use the default CDAWeb method
@@ -79,13 +80,6 @@ madrigal_tag = {'': {'drifts': 1910, 'drifts_ave': 1911, 'oblique_stan': 1800,
 list_remote_files = functools.partial(mad_meth.list_remote_files,
                                       supported_tags=supported_tags,
                                       inst_code=madrigal_inst_code)
-
-# let pysat know that data is spread across more than one file
-# multi_file_day=True
-
-# Set to False to specify using xarray (not using pandas)
-# Set to True if data will be returned via a pandas DataFrame
-pandas_format = False
 
 # support load routine
 load = functools.partial(mad_meth.load, xarray_coords=['gdalt'])

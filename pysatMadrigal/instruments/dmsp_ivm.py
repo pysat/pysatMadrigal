@@ -68,7 +68,7 @@ _test_dates = {'f11': {'utd': dt.datetime(1998, 1, 2)},
                'f13': {'utd': dt.datetime(1998, 1, 2)},
                'f14': {'utd': dt.datetime(1998, 1, 2)},
                'f15': {'utd': dt.datetime(2017, 12, 30)}}
-
+pandas_format = True
 
 # support list files routine
 # use the default CDAWeb method
@@ -95,13 +95,6 @@ madrigal_tag = {'f11': {'utd': 10241, '': 10111},
 list_remote_files = functools.partial(mad_meth.list_remote_files,
                                       supported_tags=supported_tags,
                                       inst_code=madrigal_inst_code)
-
-# let pysat know that data is spread across more than one file
-# multi_file_day=True
-
-# Set to False to specify using xarray (not using pandas)
-# Set to True if data will be returned via a pandas DataFrame
-pandas_format = True
 
 # support load routine
 load = mad_meth.load
