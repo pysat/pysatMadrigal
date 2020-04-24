@@ -17,7 +17,17 @@ with codecs.open(os.path.join(here, version_filename)) as version_file:
     version = version_file.read().strip()
 
 # Define requirements
-install_requires = ['pysat', 'pandas', 'xarray', 'numpy', 'madrigalWeb', 'h5py']
+install_requires = ['pysat', 'pandas', 'xarray', 'numpy']
+# packages with Fortran code
+fortran_install = ['madrigalWeb', 'h5py']
+# flag, True if on readthedocs
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+# include Fortran for normal install
+# read the docs doesn't do Fortran
+if not on_rtd:
+    # not on ReadTheDocs, add Fortran
+    install_requires.extend(fortran_install)
+
 
 # Run setup
 setup(name='pysatMadrigal',
