@@ -37,7 +37,7 @@ import datetime as dt
 import functools
 import numpy as np
 
-from pysat.instruments.methods import madrigal as mad_meth
+from pysatMadrigal.instruments.methods import madrigal as mad_meth
 from pysat.instruments.methods import nasa_cdaweb as cdw
 
 import logging
