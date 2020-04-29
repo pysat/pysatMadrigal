@@ -33,8 +33,6 @@ jobs:
         git checkout remove_all_inst
         python setup.py install
         export PYTHONPATH=$PYTHONPATH:$(pwd)
-        # set up data directory
-        mkdir /home/travis/build/pysatData
         cd ../pysatMadrigal
 
     - name: Lint with flake8
