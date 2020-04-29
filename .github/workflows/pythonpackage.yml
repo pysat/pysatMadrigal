@@ -36,6 +36,7 @@ jobs:
         python setup.py install
         # export PYTHONPATH=$PYTHONPATH:$(pwd)
         cd ../pysatMadrigal
+        echo $HOME
 
     - name: Lint with flake8
       run: |
