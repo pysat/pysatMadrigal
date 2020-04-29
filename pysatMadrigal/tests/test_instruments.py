@@ -1,8 +1,8 @@
 import pytest
 
 import pysatMadrigal
-from pysat.tests.instrument_test_class import generate_instrument_list
-from pysat.tests.instrument_test_class import InstTestClass
+from pysat.utils._instrument_test_class import generate_instrument_list
+from pysat.utils._instrument_test_class import InstTestClass
 
 instruments = generate_instrument_list(package=pysatMadrigal.instruments)
 
