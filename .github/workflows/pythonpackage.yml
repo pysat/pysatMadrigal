@@ -32,7 +32,7 @@ jobs:
         cd pysat
         git checkout remove_all_inst
         python setup.py install
-        export PYTHONPATH=$PYTHONPATH:$(pwd)
+        # export PYTHONPATH=$PYTHONPATH:$(pwd)
         cd ../pysatMadrigal
 
     - name: Lint with flake8
