@@ -49,3 +49,7 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -vs --cov=pysatMadrigal/
+
+    - name: Upload coverage report
+      run: |
+        coveralls
