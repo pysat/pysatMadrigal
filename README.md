@@ -9,6 +9,9 @@
 
 [![Build Status](https://travis-ci.com/pysat/pysatMadrigal.svg?branch=master)](https://travis-ci.com/pysat/pysatMadrigal)
 [![Coverage Status](https://coveralls.io/repos/github/pysat/pysatMadrigal/badge.svg?branch=master)](https://coveralls.io/github/pysat/pysatMadrigal?branch=master)
+[![DOI](https://zenodo.org/badge/258384773.svg)](https://zenodo.org/badge/latestdoi/258384773)
+
+
 <!-- [![Maintainability](https://api.codeclimate.com/v1/badges/83011911691b9d2076e9/maintainability)](https://codeclimate.com/github/pysat/pysatMadrigal/maintainability) -->
 
 pysatMadrigal allows users to import data from the Madrigal database into pysat.  It currently supports the Ion Velocity Meter on the Defense Meteorological Satellite (`dmsp_ivm`) and the Jicamarca Radio Observatory Incoherent Scatter Radar (`jro_isr`).  It also includes templates and an interface for interacting with madrigalWeb.
