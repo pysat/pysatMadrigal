@@ -7,7 +7,7 @@
 <!-- [![Documentation Status](https://readthedocs.org/projects/pysatMadrigal/badge/?version=latest)](http://pysatMadrigal.readthedocs.io/en/latest/?badge=latest) -->
 <!-- [![DOI](https://zenodo.org/badge/209358908.svg)](https://zenodo.org/badge/latestdoi/209358908) -->
 
-[![Build Status](https://travis-ci.com/pysat/pysatMadrigal.svg?branch=master)](https://travis-ci.com/pysat/pysatMadrigal)
+[![Build Status](https://travis-ci.org/pysat/pysatMadrigal.svg?branch=master)](https://travis-ci.com/pysat/pysatMadrigal)
 [![Coverage Status](https://coveralls.io/repos/github/pysat/pysatMadrigal/badge.svg?branch=master)](https://coveralls.io/github/pysat/pysatMadrigal?branch=master)
 [![DOI](https://zenodo.org/badge/258384773.svg)](https://zenodo.org/badge/latestdoi/258384773)
 
