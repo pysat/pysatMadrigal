@@ -63,8 +63,8 @@ def geodetic_to_geocentric(lat_in, lon_in=None, inverse=False):
     lat_out = np.degrees(np.arctan(rad_ratio_sq * tan_in))
 
     # Calculate the Earth radius at this latitude
-    rad_earth = rad_eq / np.sqrt(1.0 + eprime_sq *
-                                 np.sin(np.radians(lat_out))**2)
+    rad_earth = rad_eq / np.sqrt(1.0 + eprime_sq
+                                 * np.sin(np.radians(lat_out))**2)
 
     # longitude remains unchanged
     lon_out = lon_in

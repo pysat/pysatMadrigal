@@ -31,7 +31,7 @@ def test_geodetic_to_geocentric_mult():
     """Test array conversion from geodetic to geocentric coordinates"""
 
     arr = np.ones(shape=(10,), dtype=float)
-    lat, lon, rad = coords.geodetic_to_geocentric(45.0*arr, lon_in=8.0*arr)
+    lat, lon, rad = coords.geodetic_to_geocentric(45.0 * arr, lon_in=8.0 * arr)
 
     assert lat.shape == arr.shape
     assert lon.shape == arr.shape
@@ -45,7 +45,7 @@ def test_geocentric_to_geodetic_mult():
     """Test array conversion from geocentric to geodetic coordinates"""
 
     arr = np.ones(shape=(10,), dtype=float)
-    lat, lon, rad = coords.geodetic_to_geocentric(45.0*arr, lon_in=8.0*arr,
+    lat, lon, rad = coords.geodetic_to_geocentric(45.0 * arr, lon_in=8.0 * arr,
                                                   inverse=True)
 
     assert lat.shape == arr.shape
@@ -65,8 +65,8 @@ def test_geodetic_to_geocentric_inverse():
                                                       inverse=False)
     lat3, lon3, rad_e = coords.geodetic_to_geocentric(lat2, lon_in=lon2,
                                                       inverse=True)
-    assert abs(lon1-lon3) < 1.0e-6
-    assert abs(lat1-lat3) < 1.0e-6
+    assert abs(lon1 - lon3) < 1.0e-6
+    assert abs(lat1 - lat3) < 1.0e-6
 
 
 ###############################################
@@ -104,8 +104,8 @@ def test_geodetic_to_geocentric_horz_mult():
 
     arr = np.ones(shape=(10,), dtype=float)
     lat, lon, rad, az, el = \
-        coords.geodetic_to_geocentric_horizontal(45.0*arr, 8.0*arr,
-                                                 52.0*arr, 63.0*arr)
+        coords.geodetic_to_geocentric_horizontal(45.0 * arr, 8.0 * arr,
+                                                 52.0 * arr, 63.0 * arr)
 
     assert lat.shape == arr.shape
     assert lon.shape == arr.shape
@@ -124,8 +124,8 @@ def test_geocentric_to_geodetic_horz_mult():
 
     arr = np.ones(shape=(10,), dtype=float)
     lat, lon, rad, az, el = \
-        coords.geodetic_to_geocentric_horizontal(45.0*arr, 8.0*arr,
-                                                 52.0*arr, 63.0*arr,
+        coords.geodetic_to_geocentric_horizontal(45.0 * arr, 8.0 * arr,
+                                                 52.0 * arr, 63.0 * arr,
                                                  inverse=True)
 
     assert lat.shape == arr.shape
@@ -156,10 +156,10 @@ def test_geodetic_to_geocentric_horizontal_inverse():
         coords.geodetic_to_geocentric_horizontal(lat2, lon2, az2, el2,
                                                  inverse=True)
 
-    assert abs(lon1-lon3) < 1.0e-6
-    assert abs(lat1-lat3) < 1.0e-6
-    assert abs(az1-az3) < 1.0e-6
-    assert abs(el1-el3) < 1.0e-6
+    assert abs(lon1 - lon3) < 1.0e-6
+    assert abs(lat1 - lat3) < 1.0e-6
+    assert abs(az1 - az3) < 1.0e-6
+    assert abs(el1 - el3) < 1.0e-6
 
 
 ####################################
@@ -190,7 +190,7 @@ def test_spherical_to_cartesian_mult():
     """Test array conversion from spherical to cartesian coordinates"""
 
     arr = np.ones(shape=(10,), dtype=float)
-    x, y, z = coords.spherical_to_cartesian(45.0*arr, 30.0*arr, arr)
+    x, y, z = coords.spherical_to_cartesian(45.0 * arr, 30.0 * arr, arr)
 
     assert x.shape == arr.shape
     assert y.shape == arr.shape
@@ -204,7 +204,7 @@ def test_cartesian_to_spherical_mult():
 
     arr = np.ones(shape=(10,), dtype=float)
     x = 0.6123724356957946
-    az, el, r = coords.spherical_to_cartesian(x*arr, x*arr, 0.5*arr,
+    az, el, r = coords.spherical_to_cartesian(x * arr, x * arr, 0.5 * arr,
                                               inverse=True)
 
     assert az.shape == arr.shape
@@ -226,9 +226,9 @@ def test_spherical_to_cartesian_inverse():
     x2, y2, z2 = coords.spherical_to_cartesian(az, el, r,
                                                inverse=False)
 
-    assert abs(x1-x2) < 1.0e-6
-    assert abs(y1-y2) < 1.0e-6
-    assert abs(z1-z2) < 1.0e-6
+    assert abs(x1 - x2) < 1.0e-6
+    assert abs(y1 - y2) < 1.0e-6
+    assert abs(z1 - z2) < 1.0e-6
 
 
 ########################################
@@ -261,9 +261,9 @@ def test_global_to_local_cartesian_mult():
     """Test array conversion from global to local cartesian coordinates"""
 
     arr = np.ones(shape=(10,), dtype=float)
-    x, y, z = coords.global_to_local_cartesian(7000.0*arr, 8000.0*arr,
-                                               9000.0*arr, 37.5*arr,
-                                               289.0*arr, 6380.0*arr)
+    x, y, z = coords.global_to_local_cartesian(7000.0 * arr, 8000.0 * arr,
+                                               9000.0 * arr, 37.5 * arr,
+                                               289.0 * arr, 6380.0 * arr)
 
     assert x.shape == arr.shape
     assert y.shape == arr.shape
@@ -277,9 +277,9 @@ def test_local_cartesian_to_global_mult():
     """Test array conversion from local cartesian to global coordinates"""
 
     arr = np.ones(shape=(10,), dtype=float)
-    x, y, z = coords.global_to_local_cartesian(7000.0*arr, 8000.0*arr,
-                                               9000.0*arr, 37.5*arr,
-                                               289.0*arr, 6380.0*arr,
+    x, y, z = coords.global_to_local_cartesian(7000.0 * arr, 8000.0 * arr,
+                                               9000.0 * arr, 37.5 * arr,
+                                               289.0 * arr, 6380.0 * arr,
                                                inverse=True)
 
     assert x.shape == arr.shape
@@ -305,9 +305,9 @@ def test_global_to_local_cartesian_inverse():
     x3, y3, z3 = coords.global_to_local_cartesian(x2, y2, z2,
                                                   lat, lon, rad,
                                                   inverse=True)
-    assert abs(x1-x3) < 1.0e-6
-    assert abs(y1-y3) < 1.0e-6
-    assert abs(z1-z3) < 1.0e-6
+    assert abs(x1 - x3) < 1.0e-6
+    assert abs(y1 - y3) < 1.0e-6
+    assert abs(z1 - z3) < 1.0e-6
 
 
 ########################################
