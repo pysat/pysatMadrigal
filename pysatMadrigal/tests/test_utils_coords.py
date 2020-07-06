@@ -3,7 +3,7 @@ tests the pysat coords area
 """
 import numpy as np
 
-from pysatMadrigal import coords
+from pysatMadrigal.utils import coords
 
 
 def test_geodetic_to_geocentric_single():
