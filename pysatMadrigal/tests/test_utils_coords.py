@@ -3,7 +3,42 @@ tests the pysat coords area
 """
 import numpy as np
 
+import pytest
+
 from pysatMadrigal.utils import coords
+
+
+@pytest.mark.parametrize("Nvals", [1, 10])
+@pytest.mark.parametrize("inverse,input,target",
+                         [(False, [45.0, 8.0],
+                          [44.8075768, 8.0, 6367.48954386]),
+                          (True, [45.0, 8.0],
+                           [45.1924232, 8.0, 6367.3459085])])
+def test_geodetic_to_geocentric_multi(Nvals, input, inverse, target):
+    """Test array conversion from geodetic to geocentric coordinates"""
+
+    lat_in = input[0] * np.ones(shape=(Nvals,), dtype=float)
+    lon_in = input[1] * np.ones(shape=(Nvals,), dtype=float)
+
+    output = coords.geodetic_to_geocentric(lat_in, lon_in=lon_in,
+                                           inverse=inverse)
+
+    for i in range(3):
+        assert output[i].shape == lat_in.shape
+        assert abs(output[i] - target[i]).max() < 1.0e-6
+
+
+def test_geodetic_to_geocentric_and_back():
+    """Tests the reversibility of geodetic to geocentric conversions"""
+
+    input = [35.0, 17.0]
+    temp_vals = coords.geodetic_to_geocentric(input[0], lon_in=input[1],
+                                              inverse=False)
+    output = coords.geodetic_to_geocentric(temp_vals[0],
+                                           lon_in=temp_vals[1],
+                                           inverse=True)
+    for i in range(2):
+        assert abs(input[i] - output[i]) < 1.0e-6
 
 
 class TestGeodeticGeocentric():
@@ -19,66 +54,6 @@ class TestGeodeticGeocentric():
     def teardown(self):
         """Runs after every method to clean up previous testing."""
         del self.val, self.arr,
-
-    def test_geodetic_to_geocentric_single(self):
-        """Test conversion from geodetic to geocentric coordinates"""
-
-        lat, lon, rad = coords.geodetic_to_geocentric(self.val['lat'],
-                                                      lon_in=self.val['lon'])
-
-        assert abs(lat - 44.807576784018046) < 1.0e-6
-        assert abs(lon - 8.0) < 1.0e-6
-        assert abs(rad - 6367.489543863465) < 1.0e-6
-
-    def test_geocentric_to_geodetic_single(self):
-        """Test conversion from geocentric to geodetic coordinates"""
-
-        lat, lon, rad = coords.geodetic_to_geocentric(self.val['lat'],
-                                                      lon_in=self.val['lon'],
-                                                      inverse=True)
-
-        assert abs(lat - 45.192423215981954) < 1.0e-6
-        assert abs(lon - 8.0) < 1.0e-6
-        assert abs(rad - 6367.345908499981) < 1.0e-6
-
-    def test_geodetic_to_geocentric_mult(self):
-        """Test array conversion from geodetic to geocentric coordinates"""
-
-        lat, lon, rad = coords.geodetic_to_geocentric(self.arr['lat'],
-                                                      lon_in=self.arr['lon'])
-
-        assert lat.shape == self.arr['lat'].shape
-        assert lon.shape == self.arr['lat'].shape
-        assert rad.shape == self.arr['lat'].shape
-        assert abs(lat - 44.807576784018046).max() < 1.0e-6
-        assert abs(lon - 8.0).max() < 1.0e-6
-        assert abs(rad - 6367.489543863465).max() < 1.0e-6
-
-    def test_geocentric_to_geodetic_mult(self):
-        """Test array conversion from geocentric to geodetic coordinates"""
-
-        lat, lon, rad = coords.geodetic_to_geocentric(self.arr['lat'],
-                                                      lon_in=self.arr['lon'],
-                                                      inverse=True)
-
-        assert lat.shape == self.arr['lat'].shape
-        assert lon.shape == self.arr['lat'].shape
-        assert rad.shape == self.arr['lat'].shape
-        assert abs(lat - 45.192423215981954).max() < 1.0e-6
-        assert abs(lon - 8.0).max() < 1.0e-6
-        assert abs(rad - 6367.345908499981).max() < 1.0e-6
-
-    def test_geodetic_to_geocentric_inverse(self):
-        """Tests the reversibility of geodetic to geocentric conversions"""
-
-        lat1 = 37.5
-        lon1 = 117.3
-        lat2, lon2, rad_e = coords.geodetic_to_geocentric(lat1, lon_in=lon1,
-                                                          inverse=False)
-        lat3, lon3, rad_e = coords.geodetic_to_geocentric(lat2, lon_in=lon2,
-                                                          inverse=True)
-        assert abs(lon1 - lon3) < 1.0e-6
-        assert abs(lat1 - lat3) < 1.0e-6
 
     ###############################################
     # Geodetic / Geocentric Horizontal conversions
