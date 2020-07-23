@@ -30,9 +30,11 @@ def test_geodetic_to_geocentric(Nvals, input, inverse, target):
                                            inverse=inverse)
 
     for i in range(len(target)):
-        assert abs(output[i] - target[i]).max() < 1.0e-6
         if Nvals > 1:
+            assert abs(output[i] - target[i]).max() < 1.0e-6
             assert output[i].shape == lat_in.shape
+        else:
+            assert abs(output[i] - target[i]) < 1.0e-6
 
 
 def test_geodetic_to_geocentric_and_back():
