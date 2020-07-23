@@ -53,4 +53,4 @@ script:
  - pytest -vs --cov=pysatMadrigal/ --flake8
 
 after_success:
- - coveralls
+ - coveralls --rcfile=setup.cfg
