@@ -14,18 +14,25 @@ from pysatMadrigal.utils import coords
                           [44.8075768, 8.0, 6367.48954386]),
                           (True, [45.0, 8.0],
                            [45.1924232, 8.0, 6367.3459085])])
-def test_geodetic_to_geocentric_multi(Nvals, input, inverse, target):
+def test_geodetic_to_geocentric(Nvals, input, inverse, target):
     """Test array conversion from geodetic to geocentric coordinates"""
 
-    lat_in = input[0] * np.ones(shape=(Nvals,), dtype=float)
-    lon_in = input[1] * np.ones(shape=(Nvals,), dtype=float)
+    if Nvals > 1:
+        # inputs as an ndarray
+        lat_in = input[0] * np.ones(shape=(Nvals,), dtype=float)
+        lon_in = input[1] * np.ones(shape=(Nvals,), dtype=float)
+    else:
+        # inputs as a float
+        lat_in = input[0]
+        lon_in = input[1]
 
     output = coords.geodetic_to_geocentric(lat_in, lon_in=lon_in,
                                            inverse=inverse)
 
-    for i in range(3):
-        assert output[i].shape == lat_in.shape
+    for i in range(len(target)):
         assert abs(output[i] - target[i]).max() < 1.0e-6
+        if Nvals > 1:
+            assert output[i].shape == lat_in.shape
 
 
 def test_geodetic_to_geocentric_and_back():
