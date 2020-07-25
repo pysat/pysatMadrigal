@@ -109,11 +109,16 @@ def init(self):
 
     """
 
-    logger.info(' '.join(["The Jicamarca Radio Observatory is operated by",
-                          "the Instituto Geofisico del Peru, Ministry of",
-                          "Education, with support from the National Science",
-                          "Foundation as contracted through Cornell",
-                          "University. ", mad_meth.cedar_rules()]))
+    ackn_str = ' '.join(["The Jicamarca Radio Observatory is operated by",
+                         "the Instituto Geofisico del Peru, Ministry of",
+                         "Education, with support from the National Science",
+                         "Foundation as contracted through Cornell",
+                         "University. \n", mad_meth.cedar_rules()])
+
+    logger.info(ackn_str)
+    self.meta.acknowledgements = ackn_str
+    self.meta.references = "?"
+
     return
 
 
