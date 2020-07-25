@@ -376,10 +376,10 @@ def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
         add_drift_unit_vectors(inst)
 
     # Calculate the velocities
-    inst['ion_vel_pc_x'] = iv_x * inst['unit_ram_x'] + \
-        inst[cross_vel_key] * inst['unit_cross_x']
-    inst['ion_vel_pc_y'] = iv_x * inst['unit_ram_y'] + \
-        inst[cross_vel_key] * inst['unit_cross_y']
+    inst['ion_vel_pc_x'] = (iv_x * inst['unit_ram_x']
+                            + inst[cross_vel_key] * inst['unit_cross_x'])
+    inst['ion_vel_pc_y'] = (iv_x * inst['unit_ram_y']
+                            + inst[cross_vel_key] * inst['unit_cross_y'])
 
     # Flag the velocities as full (False) or partial (True)
     inst['partial'] = False
