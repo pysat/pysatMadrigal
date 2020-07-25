@@ -9,7 +9,9 @@ to a theoretical description of plasma the number density, plasma
 composition, plasma temperature, and plasma motion may be determined.
 The DM directly measures the arrival angle of plasma. Using the reported
 motion of the satellite the angle is converted into ion motion along
-two orthogonal directions, perpendicular to the satellite track.
+two orthogonal directions, perpendicular to the satellite track. The IVM is
+part of the Special Sensor for Ions, Electrons, and Scintillations (SSIES)
+instrument suite on DMSP.
 
 Downloads data from the National Science Foundation Madrigal Database.
 The routine is configured to utilize data files with instrument
@@ -123,6 +125,13 @@ def init(self):
     """
 
     logger.info(mad_meth.cedar_rules())
+    self.meta.acknowledgements = mad_meth.cedar_rules()
+    self.meta.references = ' '.join(('F. J. Rich, Users Guide for the Topside',
+                                     'Ionospheric Plasma Monitor (SSIES,',
+                                     'SSIES-2 and SSIES-3) on Spacecraft of',
+                                     'the Defense Meteorological Satellite',
+                                     'Program (Air Force Phillips Laboratory,',
+                                     'Hanscom AFB, MA, 1994), Vol. 1, p. 25.'))
     return
 
 
