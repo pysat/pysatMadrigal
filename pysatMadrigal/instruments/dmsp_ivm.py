@@ -322,15 +322,15 @@ def add_drift_unit_vectors(inst):
     inst.data.loc[inst.index[idx], 'unit_cross_x'] *= -1.0
     inst.data.loc[inst.index[idx], 'unit_cross_y'] *= -1.0
 
-    inst['unit_ram_r'] = inst['unit_ram_x'] * np.cos(theta) + \
-        inst['unit_ram_y'] * np.sin(theta)
-    inst['unit_ram_theta'] = -inst['unit_ram_x'] * np.sin(theta) + \
-        inst['unit_ram_y'] * np.cos(theta)
+    inst['unit_ram_r'] = (inst['unit_ram_x'] * np.cos(theta)
+                          + inst['unit_ram_y'] * np.sin(theta))
+    inst['unit_ram_theta'] = (-inst['unit_ram_x'] * np.sin(theta)
+                              + inst['unit_ram_y'] * np.cos(theta))
 
-    inst['unit_cross_r'] = inst['unit_cross_x'] * np.cos(theta) + \
-        inst['unit_cross_y'] * np.sin(theta)
-    inst['unit_cross_theta'] = -inst['unit_cross_x'] * np.sin(theta) + \
-        inst['unit_cross_y'] * np.cos(theta)
+    inst['unit_cross_r'] = (inst['unit_cross_x'] * np.cos(theta)
+                            + inst['unit_cross_y'] * np.sin(theta))
+    inst['unit_cross_theta'] = (-inst['unit_cross_x'] * np.sin(theta)
+                                + inst['unit_cross_y'] * np.cos(theta))
     return
 
 
