@@ -36,15 +36,11 @@ install:
   - pip install PyForecastTools
   - pip install pysatCDF >/dev/null
   # Custom pysat install
-  - cd ..
-  - git clone https://github.com/pysat/pysat.git
-  - cd pysat
-  - git checkout develop-3
-  - python setup.py install
+  - pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple pysat
   - export PYTHONPATH=$PYTHONPATH:$(pwd)
   # set up data directory
   - mkdir /home/travis/build/pysatData
-  - cd ../pysatMadrigal
+  # - cd ../pysatMadrigal
   # install pysatMadrigal
   - python setup.py install
 
