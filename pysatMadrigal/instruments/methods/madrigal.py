@@ -496,11 +496,11 @@ def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
 
     # parse these filenames to grab out the ones we want
     logger.info("Parsing filenames")
-    stored = pysat._files.parse_fixed_width_filenames(files, format_str)
+    stored = pysat.files.parse_fixed_width_filenames(files, format_str)
 
     # process the parsed filenames and return a properly formatted Series
     logger.info("Processing filenames")
-    return pysat._files.process_parsed_filenames(stored, two_digit_year_break)
+    return pysat.files.process_parsed_filenames(stored, two_digit_year_break)
 
 
 def filter_data_single_date(self):
