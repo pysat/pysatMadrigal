@@ -48,14 +48,14 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
     fnames : array-like
         iterable of filename strings, full path, to data files to be loaded.
         This input is nominally provided by pysat itself.
-    tag : string ('')
+    tag : string
         tag name used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. While
         tag defaults to None here, pysat provides '' as the default
-        tag unless specified by user at Instrument instantiation.
-    sat_id : string ('')
+        tag unless specified by user at Instrument instantiation. (default='')
+    sat_id : string
         Satellite ID used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself.
+        This input is nominally provided by pysat itself. (default='')
     xarray_coords : list
         List of keywords to use as coordinates if xarray output is desired
         instead of a Pandas DataFrame (default=[])
@@ -71,8 +71,9 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
     Examples
     --------
     ::
+
         inst = pysat.Instrument('jro', 'isr', 'drifts')
-        inst.load(2010,18)
+        inst.load(2010, 18)
 
     """
 
@@ -172,34 +173,29 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
     date_array : array-like
         list of datetimes to download data for. The sequence of dates need not
         be contiguous.
-    inst_code : string (None)
+    inst_code : string
         Madrigal instrument code(s), cast as a string.  If multiple are used,
-        separate them with commas.
-    kindat : string  (None)
+        separate them with commas. (default=None)
+    kindat : string
         Experiment instrument code(s), cast as a string.  If multiple are used,
-        separate them with commas.
-    data_path : string (None)
-        Path to directory to download data to.
-    user : string (None)
+        separate them with commas. (default=None)
+    data_path : string
+        Path to directory to download data to. (default=None)
+    user : string
         User string input used for download. Provided by user and passed via
-        pysat. If an account
-        is required for dowloads this routine here must error if user not
-        supplied.
-    password : string (None)
-        Password for data download.
-    url : string ('http://cedar.openmadrigal.org')
-        URL for Madrigal site
-    file_format : string ('hdf5')
+        pysat. If an account is required for dowloads this routine here must
+        error if user not supplied. (default=None)
+    password : string
+        Password for data download. (default=None)
+    url : string
+        URL for Madrigal site (default='http://cedar.openmadrigal.org')
+    file_format : string
         File format for Madrigal data.  Load routines currently only accept
         'hdf5', but any of the Madrigal options may be used here.
+        (default='hdf5')
 
-    Returns
-    --------
-    Void : (NoneType)
-        Downloads data to disk.
-
-    Notes
-    -----
+    Note
+    ----
     The user's names should be provided in field user. Ruby Payne-Scott should
     be entered as Ruby+Payne-Scott
 
@@ -258,40 +254,37 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
 
     Parameters
     ----------
-    inst_code : string (None)
+    inst_code : string
         Madrigal instrument code(s), cast as a string.  If multiple are used,
-        separate them with commas.
-    kindat : string (None)
+        separate them with commas. (default=None)
+    kindat : string
         Madrigal experiment code(s), cast as a string.  If multiple are used,
         separate them with commas.  If not supplied, all will be returned.
-    data_path : string (None)
-        Path to directory to download data to.
-    user : string (None)
+        (default=None)
+    data_path : string
+        Path to directory to download data to. (default=None)
+    user : string
         User string input used for download. Provided by user and passed via
-        pysat. If an account
-        is required for dowloads this routine here must error if user not
-        supplied.
-    password : string (None)
-        Password for data download.
-    web_data : MadrigalData (None)
+        pysat. If an account is required for dowloads this routine here must
+        error if user not supplied. (default=None)
+    password : string
+        Password for data download. (default=None)
+    web_data : MadrigalData
         Open connection to Madrigal database or None (will initiate using url)
-    url : string ('http://cedar.openmadrigal.org')
-        URL for Madrigal site
+        (default=None)
+    url : string
+        URL for Madrigal site (default='http://cedar.openmadrigal.org')
     start : dt.datetime
         Starting time for file list (defaults to 01-01-1900)
     stop : dt.datetime
         Ending time for the file list (defaults to time of run)
-    date_array : dt.datetime (None)
+    date_array : dt.datetime
         Array of datetimes to download data for. The sequence of dates need not
         be contiguous and will be used instead of start and stop if supplied.
+        (default=None)
 
-    Returns
-    -------
-    Void : (NoneType)
-        Downloads data to disk.
-
-    Notes
-    -----
+    Note
+    ----
     The user's names should be provided in field user. Ruby Payne-Scott should
     be entered as Ruby+Payne-Scott
 
@@ -408,45 +401,40 @@ def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
 
     Parameters
     ----------
-    tag : (string or NoneType)
+    tag : string or NoneType
         Denotes type of file to load.  Accepted types are <tag strings>.
         (default=None)
-    sat_id : (string or NoneType)
+    sat_id : string or NoneType
         Specifies the satellite ID for a constellation.  Not used.
         (default=None)
-    inst_code : string (None)
+    inst_code : string
         Madrigal instrument code(s), cast as a string.  If multiple are used,
-        separate them with commas.
-    kindat : string (None)
+        separate them with commas. (default=None)
+    kindat : string
         Madrigal experiment code(s), cast as a string.  If multiple are used,
         separate them with commas.  If not supplied, all will be returned.
-    data_path : string (None)
-        Path to directory to download data to.
-    user : string (None)
+        (default=None)
+    data_path : string
+        Path to directory to download data to. (default=None)
+    user : string
         User string input used for download. Provided by user and passed via
-        pysat. If an account
-        is required for dowloads this routine here must error if user not
-        supplied.
-    password : string (None)
-        Password for data download.
-    supported_tags : (dict or NoneType)
+        pysat. If an account is required for dowloads this routine here must
+        error if user not supplied. (default=None)
+    password : string
+        Password for data download. (default=None)
+    supported_tags : dict or NoneType
         keys are sat_id, each containing a dict keyed by tag
         where the values file format template strings. (default=None)
-    url : string ('http://cedar.openmadrigal.org')
-        URL for Madrigal site
+    url : string
+        URL for Madrigal site (default='http://cedar.openmadrigal.org')
     two_digit_year_break : int
         If filenames only store two digits for the year, then
         '1900' will be added for years >= two_digit_year_break
         and '2000' will be added for years < two_digit_year_break.
-    start : (dt.datetime)
+    start : dt.datetime
         Starting time for file list (defaults to 01-01-1900)
-    stop : (dt.datetime)
+    stop : dt.datetime
         Ending time for the file list (defaults to time of run)
-
-    Returns
-    -------
-    Void : (NoneType)
-        Downloads data to disk.
 
     Notes
     -----
@@ -464,6 +452,7 @@ def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
     This method is intended to be set in an instrument support file at the
     top level using functools.partial
     ::
+
         list_remote_files = functools.partial(mad_meth.list_remote_files,
                                               supported_tags=supported_tags,
                                               inst_code=madrigal_inst_code)
@@ -523,8 +512,11 @@ def filter_data_single_date(self):
 
     This routine is intended to be added to the Instrument
     nanokernel processing queue via
+    ::
+
         inst = pysat.Instrument()
         inst.custom.attach(filter_data_single_date, 'modify')
+
     This function will then be automatically applied to the
     Instrument object data on every load by the pysat nanokernel.
 
@@ -535,7 +527,10 @@ def filter_data_single_date(self):
     pysat instrument file to this one.
 
     within platform_name.py set
+    ::
+
         default = pysat.instruments.methods.madrigal.filter_data_single_date
+
     at the top level
 
     """

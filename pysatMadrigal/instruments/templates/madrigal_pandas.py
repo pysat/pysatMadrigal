@@ -20,18 +20,19 @@ Warnings
     Files can be safely downloaded without knowing the file_format keyword,
     or equivalently, how Madrigal names the files. See `Examples` for more.
 
-Parameters
+Properties
 ----------
-platform : string
+platform
     'madrigal'
-name : string
+name
     'pandas'
-tag : string
+tag
     ''
 
 Examples
 --------
 ::
+
     # for isolated use of a madrigal data set
     import pysat
     # download DMSP data from Madrigal
@@ -40,7 +41,7 @@ Examples
                             madrigal_tag=10241)
     dmsp.download(dt.datetime(2017, 12, 30), dt.datetime(2017, 12, 31),
                   user='Firstname+Lastname', password='email@address.com')
-    dmsp.load(2017,363)
+    dmsp.load(2017, 363)
 
     # for users that plan on using multiple Madrigal datasets
     # using this general interface then an additional parameter
@@ -75,16 +76,13 @@ Note
 
 """
 
-from __future__ import print_function
-from __future__ import absolute_import
-
 import datetime as dt
 import functools
+import logging
 
 from pysat.instruments.methods import madrigal as mad_meth
 from pysat.instruments.methods import nasa_cdaweb as cdw
 
-import logging
 logger = logging.getLogger(__name__)
 
 platform = 'madrigal'
@@ -94,27 +92,18 @@ sat_ids = {'': list(tags.keys())}
 # need to sort out test day setting for unit testing
 _test_dates = {'': {'': dt.datetime(2010, 1, 19)}}
 
-# support list files routine
-# use the default CDAWeb method
-#########
 # need a way to get the filename strings for a particular instrument
 # I've put in wildcards for now....
 #########
 jro_fname1 = '*{year:4d}{month:02d}{day:02d}'
 jro_fname2 = '.{version:03d}.hdf5'
-supported_tags = {ss: {'': jro_fname1 + "*" + jro_fname2}
+supported_tags = {ss: {'': '*'.join((jro_fname1, jro_fname2))}
                   for ss in sat_ids.keys()}
 list_files = functools.partial(cdw.list_files,
                                supported_tags=supported_tags)
 
-# let pysat know that data is spread across more than one file
-# multi_file_day=True
-
-# Set to False to specify using xarray (not using pandas)
-# Set to True if data will be returned via a pandas DataFrame
 pandas_format = True
 
-# support load routine
 load = mad_meth.load
 
 # support download routine
@@ -132,12 +121,6 @@ def init(self):
     ----------
     self : pysat.Instrument
         This object
-
-    Returns
-    --------
-    Void : (NoneType)
-        Object modified in place.
-
 
     """
 
@@ -166,30 +149,24 @@ def _general_download(date_array, tag='', sat_id='', data_path=None, user=None,
     date_array : array-like
         list of datetimes to download data for. The sequence of dates need not
         be contiguous.
-    tag : string ('')
+    tag : string
         Tag identifier used for particular dataset. This input is provided by
-        pysat.
-    sat_id : string  ('')
+        pysat. (default='')
+    sat_id : string
         Satellite ID string identifier used for particular dataset. This input
-        is provided by pysat.
-    data_path : string (None)
-        Path to directory to download data to.
-    user : string (None)
+        is provided by pysat. (default='')
+    data_path : string
+        Path to directory to download data to. (default=None)
+    user : string
         User string input used for download. Provided by user and passed via
-        pysat. If an account
-        is required for dowloads this routine here must error if user not
-        supplied.
-    password : string (None)
-        Password for data download.
+        pysat. If an account is required for dowloads this routine here must
+        error if user not supplied. (default=None)
+    password : string
+        Password for data download. (default=None)
     inst_code : int
-        Madrigal integer code used to identify platform
+        Madrigal integer code used to identify platform (default=None)
     kindat : int
-        Madrigal integer code used to identify data set
-
-    Returns
-    --------
-    Void : (NoneType)
-        Downloads data to disk.
+        Madrigal integer code used to identify data set (default=None)
 
     Notes
     -----
@@ -203,6 +180,7 @@ def _general_download(date_array, tag='', sat_id='', data_path=None, user=None,
     downloads.
 
     """
+
     mad_meth.download(date_array, inst_code=inst_code, kindat=kindat,
                       data_path=data_path, user=user, password=password)
 
@@ -210,13 +188,8 @@ def _general_download(date_array, tag='', sat_id='', data_path=None, user=None,
 def clean(self):
     """Placeholder routine that would normally return cleaned data
 
-    Returns
-    --------
-    Void : (NoneType)
-        data in inst is modified in-place.
-
-    Notes
-    --------
+    Note
+    ----
     Supports 'clean', 'dusty', 'dirty' in the sense that it prints
     a message noting there is no cleaning.
     'None' is also supported as it signifies no cleaning.
@@ -224,6 +197,7 @@ def clean(self):
     Routine is called by pysat, and not by the end user directly.
 
     """
+
     if self.clean_level in ['clean', 'dusty', 'dirty']:
         logger.warning('Generalized Madrigal data support has no cleaning.')
 

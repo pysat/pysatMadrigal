@@ -8,22 +8,25 @@ experiments.
 
 Downloads data from the JRO Madrigal Database.
 
-Parameters
+Properties
 ----------
-platform : string
+platform
     'jro'
-name : string
+name
     'isr'
-tag : string
+tag
     'drifts', 'drifts_ave', 'oblique_stan', 'oblique_rand', 'oblique_long'
 
-Example
--------
+Examples
+--------
+::
+
     import pysat
-    dmsp = pysat.Instrument('jro', 'isr', 'drifts', clean_level='clean')
-    dmsp.download(dt.datetime(2017, 12, 30), dt.datetime(2017, 12, 31),
-                  user='Firstname+Lastname', password='email@address.com')
-    dmsp.load(2017,363)
+    jro = pysat.Instrument('jro', 'isr', 'drifts', clean_level='clean')
+    jro.download(pysat.datetime(2017, 12, 30), pysat.datetime(2017, 12, 31),
+                 user='Firstname+Lastname', password='email@address.com')
+    jro.load(2017, 363)
+
 
 Note
 ----
@@ -104,19 +107,18 @@ def init(self):
     self : pysat.Instrument
         This object
 
-    Returns
-    --------
-    Void : (NoneType)
-        Object modified in place.
-
-
     """
 
-    logger.info(' '.join(["The Jicamarca Radio Observatory is operated by",
-                          "the Instituto Geofisico del Peru, Ministry of",
-                          "Education, with support from the National Science",
-                          "Foundation as contracted through Cornell",
-                          "University. ", mad_meth.cedar_rules()]))
+    ackn_str = ' '.join(["The Jicamarca Radio Observatory is a facility of",
+                         "the Instituto Geofisico del Peru operated",
+                         "with support from the NSF AGS-1433968",
+                         "through Cornell University.\n",
+                         mad_meth.cedar_rules()])
+
+    logger.info(ackn_str)
+    self.meta.acknowledgements = ackn_str
+    self.meta.references = "?"
+
     return
 
 
@@ -129,26 +131,20 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
     date_array : array-like
         list of datetimes to download data for. The sequence of dates need not
         be contiguous.
-    tag : string ('')
+    tag : string
         Tag identifier used for particular dataset. This input is provided by
-        pysat.
-    sat_id : string  ('')
+        pysat. (default='')
+    sat_id : string
         Satellite ID string identifier used for particular dataset. This input
-        is provided by pysat.
-    data_path : string (None)
-        Path to directory to download data to.
-    user : string (None)
+        is provided by pysat. (default='')
+    data_path : string
+        Path to directory to download data to. (default=None)
+    user : string
         User string input used for download. Provided by user and passed via
-        pysat. If an account
-        is required for dowloads this routine here must error if user not
-        supplied.
-    password : string (None)
-        Password for data download.
-
-    Returns
-    --------
-    Void : (NoneType)
-        Downloads data to disk.
+        pysat. If an account is required for dowloads this routine here must
+        error if user not supplied. (default=None)
+    password : string
+        Password for data download. (default=None)
 
     Notes
     -----
@@ -169,11 +165,6 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
 
 def clean(self):
     """Routine to return JRO ISR data cleaned to the specified level
-
-    Returns
-    --------
-    Void : (NoneType)
-        data in inst is modified in-place.
 
     Notes
     --------
