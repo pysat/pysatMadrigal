@@ -2,7 +2,7 @@
 """Supports the MIT Haystack GNSS TEC data products
 
 The Global Navigation Satellite System (GNSS) is used in conjunction with a
-world-winde receiver network to produce total electron content (TEC) data
+world-wide receiver network to produce total electron content (TEC) data
 products, including vertical and line-of-sight TEC.
 
 Downloads data from the MIT Haystack Madrigal Database.
@@ -58,13 +58,14 @@ pandas_format = False
 
 # support list files routine
 # use the default pysat method
-dname = '{year:4d}{month:02d}{day:02d}'
+dname = '{year:02d}{month:02d}{day:02d}'
 vname = '.{version:03d}'
 supported_tags = {ss: {'vtec': "gps{:s}g{:s}.hdf5".format(dname, vname),
                        'los': "los_{:s}{:s}.h5".format(dname, vname)}
                   for ss in sat_ids.keys()}
 list_files = functools.partial(ps_gen.list_files,
-                               supported_tags=supported_tags)
+                               supported_tags=supported_tags,
+                               two_digit_year_break=99)
 
 # madrigal tags
 madrigal_inst_code = 8000
@@ -77,46 +78,40 @@ list_remote_files = functools.partial(mad_meth.list_remote_files,
 
 
 def init(self):
-    """Initializes the Instrument object with values specific to JRO ISR
+    """Initializes the Instrument object with values specific to GNSS TEC
 
     Runs once upon instantiation.
 
-    Parameters
-    ----------
-    self : pysat.Instrument
-        This object
-
     """
 
-    ackn_str = ' '.join(["GPS TEC data products and access through the ",
-                         "Madrigal distributed data system are provided to ",
-                         "the community by the Massachusetts Institute of ",
-                         "Technology under support from U.S. National Science",
-                         " Foundation grant AGS-1242204. Data for the TEC ",
-                         "processing is provided by the following ",
-                         "organizations: UNAVCO, Scripps Orbit and Permanent",
-                         " Array Center, Institut Geographique National, ",
-                         "France, International GNSS Service, The Crustal ",
-                         "Dynamics Data Information System (CDDIS), National",
-                         " Geodetic Survey, Instituto Brasileiro de Geografia",
-                         " e Estatística, RAMSAC CORS of Instituto Geográfico",
-                         " Nacional del la República Agentina, Arecibo ",
-                         "Observatory, Low-Latitude Ionospheric Sensor ",
-                         "Network (LISN), Topcon Positioning Systems, Inc., ",
-                         "Canadian High Arctic Ionospheric Network, ",
-                         "Institute of Geology and Geophysics, Chinese ",
-                         "Academy of Sciences, China Meterorology ",
-                         "Administration, Centro di Ricerche Sismogiche, ",
-                         "Système d’Observation du Niveau des Eaux Littorales",
-                         " (SONEL), RENAG : REseau NAtional GPS permanent, ",
-                         "and GeoNet—the official source of geological ",
-                         "hazard information for New Zealand.\n",
-                         mad_meth.cedar_rules()])
+    ackn_str = ''.join(["GPS TEC data products and access through the ",
+                        "Madrigal distributed data system are provided to ",
+                        "the community by the Massachusetts Institute of ",
+                        "Technology under support from U.S. National Science",
+                        " Foundation grant AGS-1242204. Data for the TEC ",
+                        "processing is provided by the following ",
+                        "organizations: UNAVCO, Scripps Orbit and Permanent",
+                        " Array Center, Institut Geographique National, ",
+                        "France, International GNSS Service, The Crustal ",
+                        "Dynamics Data Information System (CDDIS), National",
+                        " Geodetic Survey, Instituto Brasileiro de Geografia",
+                        " e Estatística, RAMSAC CORS of Instituto Geográfico",
+                        " Nacional del la República Agentina, Arecibo ",
+                        "Observatory, Low-Latitude Ionospheric Sensor ",
+                        "Network (LISN), Topcon Positioning Systems, Inc., ",
+                        "Canadian High Arctic Ionospheric Network, ",
+                        "Institute of Geology and Geophysics, Chinese ",
+                        "Academy of Sciences, China Meterorology ",
+                        "Administration, Centro di Ricerche Sismogiche, ",
+                        "Système d’Observation du Niveau des Eaux Littorales",
+                        " (SONEL), RENAG : REseau NAtional GPS permanent, ",
+                        "and GeoNet—the official source of geological ",
+                        "hazard information for New Zealand.\n",
+                        mad_meth.cedar_rules()])
 
     logger.info(ackn_str)
-    self.meta.acknowledgements = ackn_str
-    self.meta.references = "".join(["Rideout and Coster (2006) ",
-                                    "doi:10.1007/s10291-006-0029-5"])
+    self.acknowledgements = ackn_str
+    self.references = "Rideout and Coster (2006) doi:10.1007/s10291-006-0029-5"
 
     return
 
@@ -145,8 +140,8 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
     password : string
         Password for data download. (default=None)
 
-    Notes
-    -----
+    Note
+    ----
     The user's names should be provided in field user. Anthea Coster should
     be entered as Anthea+Coster
 
@@ -160,6 +155,7 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
     mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
                       kindat=str(madrigal_tag[sat_id][tag]),
                       data_path=data_path, user=user, password=password)
+    return
 
 
 def load(fnames, tag=None, sat_id=None):
@@ -197,14 +193,9 @@ def load(fnames, tag=None, sat_id=None):
 def clean(self):
     """Routine to return GNSS TEC data at a specific level
 
-    Notes
-    --------
-    Supports 'clean', 'dusty', 'dirty'
-    'Clean' is unknown for oblique modes, over 200 km for drifts
-    'Dusty' is unknown for oblique modes, over 200 km for drifts
-    'Dirty' is unknown for oblique modes, over 200 km for drifts
-    'None' None
-
+    Note
+    ----
+    Supports 'clean', 'dusty', 'dirty', or 'None'.
     Routine is called by pysat, and not by the end user directly.
 
     """
