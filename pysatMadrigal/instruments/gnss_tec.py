@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 platform = 'gnss'
 name = 'tec'
 tags = {'vtec': 'vertical TEC', 'los': 'slant TEC'}
-sat_ids = {'': list(tags.keys())}
+sat_ids = {'': [tag for tag in tags.keys()]}
 _test_dates = {'': {'vtec': dt.datetime(2017, 11, 19),
                     'los': dt.datetime(2017, 11, 19)}}
 pandas_format = False
@@ -185,7 +185,7 @@ def load(fnames, tag=None, sat_id=None):
                'los': []}
 
     # Load the specified data
-    data, meta = mad_meth.load(fnames, tag, sat_id, xarray_coords=xcoords[tag])
+    data, meta = mad_meth.load(fnames, tag, sat_id)#, xarray_coords=xcoords[tag])
 
     return data, meta
 
@@ -200,8 +200,8 @@ def clean(self):
 
     """
     if self.tag == "vtec":
-        logging.info("".join(["Data provided at a clean level, further ",
-                              "cleaning may be performed using the ",
-                              "measurement error 'dtec'"]))
+        logger.info("".join(["Data provided at a clean level, further ",
+                             "cleaning may be performed using the ",
+                             "measurement error 'dtec'"]))
 
     return
