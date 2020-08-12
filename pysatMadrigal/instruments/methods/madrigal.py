@@ -12,7 +12,6 @@ import logging
 import numpy as np
 import os
 import pandas as pds
-import sys
 
 import h5py
 from madrigalWeb import madrigalWeb
@@ -36,9 +35,8 @@ def cedar_rules():
     return ackn
 
 
-# support load routine
 def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
-    """Loads data from Madrigal into Pandas.
+    """Loads data from Madrigal into Pandas or XArray
 
     This routine is called as needed by pysat. It is not intended
     for direct user interaction.
@@ -89,20 +87,11 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
     file_meta = filed['Metadata']['Data Parameters']
     # load up what is offered into pysat.Meta
     meta = pysat.Meta()
-    meta.info = {'acknowledgements':
-                 ' '.join(["See 'meta.Experiment_Notes' for instrument",
-                           "specific acknowledgements\n", cedar_rules()]),
-                 'references': "See 'meta.Experiment_Notes' for references"}
     labels = []
     for item in file_meta:
-        # handle difference in string output between python 2 and 3
-        name_string = item[0]
-        unit_string = item[3]
-        desc_string = item[1]
-        if sys.version_info[0] >= 3:
-            name_string = name_string.decode('UTF-8')
-            unit_string = unit_string.decode('UTF-8')
-            desc_string = desc_string.decode('UTF-8')
+        name_string = item[0].decode('UTF-8')
+        unit_string = item[3].decode('UTF-8')
+        desc_string = item[1].decode('UTF-8')
         labels.append(name_string)
         meta[name_string.lower()] = {'long_name': name_string,
                                      'units': unit_string,
@@ -115,10 +104,13 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
     for key in filed['Metadata']:
         if key != 'Data Parameters':
             setattr(meta, key.replace(' ', '_'), filed['Metadata'][key][:])
+
     # data into frame, with labels from metadata
     data = pds.DataFrame.from_records(file_data, columns=labels)
+
     # lowercase variable names
     data.columns = [item.lower() for item in data.columns]
+
     # datetime index from times
     time_keys = np.array(['year', 'month', 'day', 'hour', 'min', 'sec'])
     if not np.all([key in data.columns for key in time_keys]):
@@ -132,6 +124,7 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
                                                   month=data.loc[:, 'month'],
                                                   day=data.loc[:, 'day'],
                                                   uts=uts)
+
     # Declare index or recast as xarray
     if len(xarray_coords) > 0:
         if not np.all([xkey.lower() in data.columns
