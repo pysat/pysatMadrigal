@@ -14,7 +14,7 @@ platform
 name
     'tec'
 tag
-    'vtec', 'los'
+    'vtec'
 
 Examples
 --------
@@ -50,18 +50,16 @@ logger = logging.getLogger(__name__)
 
 platform = 'gnss'
 name = 'tec'
-tags = {'vtec': 'vertical TEC', 'los': 'slant TEC'}
+tags = {'vtec': 'vertical TEC'}
 sat_ids = {'': [tag for tag in tags.keys()]}
-_test_dates = {'': {'vtec': dt.datetime(2017, 11, 19),
-                    'los': dt.datetime(2017, 11, 19)}}
+_test_dates = {'': {'vtec': dt.datetime(2017, 11, 19)}}
 pandas_format = False
 
 # support list files routine
 # use the default pysat method
 dname = '{year:02d}{month:02d}{day:02d}'
 vname = '.{version:03d}'
-supported_tags = {ss: {'vtec': "gps{:s}g{:s}.hdf5".format(dname, vname),
-                       'los': "los_{:s}{:s}.h5".format(dname, vname)}
+supported_tags = {ss: {'vtec': "gps{:s}g{:s}.hdf5".format(dname, vname)}
                   for ss in sat_ids.keys()}
 list_files = functools.partial(ps_gen.list_files,
                                supported_tags=supported_tags,
@@ -69,7 +67,7 @@ list_files = functools.partial(ps_gen.list_files,
 
 # madrigal tags
 madrigal_inst_code = 8000
-madrigal_tag = {'': {'vtec': 3500, 'los': 3505}}
+madrigal_tag = {'': {'vtec': 3500}}  #, 'los': 3505}}
 
 # support listing files currently available on remote server (Madrigal)
 list_remote_files = functools.partial(mad_meth.list_remote_files,
@@ -181,11 +179,13 @@ def load(fnames, tag=None, sat_id=None):
 
     """
     # Define the xarray coordinate dimensions (apart from time)
-    xcoords = {'vtec': ['gdlat', 'glon', 'gdalt'],
-               'los': []}
+    xcoords = {'vtec': {('time', 'gdlat', 'glon', 'gdalt', 'kindat', 'kinst'):
+                        ['tec', 'dtec'],
+                        ('time'): ['year', 'month', 'day', 'hour', 'min',
+                                   'sec', 'ut1_unix', 'ut2_unix', 'recno']},}
 
     # Load the specified data
-    data, meta = mad_meth.load(fnames, tag, sat_id)#, xarray_coords=xcoords[tag])
+    data, meta = mad_meth.load(fnames, tag, sat_id, xarray_coords=xcoords[tag])
 
     return data, meta
 
