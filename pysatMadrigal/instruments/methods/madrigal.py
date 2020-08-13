@@ -61,7 +61,7 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
         inside the list instead of coordinate variable name strings. Each dict
         will have a tuple of coordinates as the key and a list of variable
         strings as the value.  For example,
-        xarray_coords=[{('time'): ['year', 'doy'], ('time', 'gdalt'):
+        xarray_coords=[{('time',): ['year', 'doy'], ('time', 'gdalt'):
         ['data1', 'data2']}]. (default=[])
 
     Returns
@@ -148,14 +148,14 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
         xdatasets = list()
         for xcoords in coord_order:
             if not np.all([xkey.lower() in data.columns for xkey in xcoords]):
-                raise ValueError(''.join(['unknown coordinate key in ',
-                                          '{:}, use only '.format(xcoords),
+                raise ValueError(''.join(['unknown coordinate key in [',
+                                          '{:}], use only: '.format(xcoords),
                                           '{:}'.format(data.columns)]))
             if not np.all([xkey.lower() in data.columns
                            for xkey in xarray_coords[xcoords]]):
-                raise ValueError(''.join(['unknown coordinate key in ',
+                raise ValueError(''.join(['unknown data variable in [',
                                           '{:}'.format(xarray_coords[xcoords]),
-                                          ', use only {:}'.format(
+                                          '], use only: {:}'.format(
                                               data.columns)]))
                 
 
@@ -179,20 +179,22 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
             xdatasets[0].merge(xdatasets[i])
 
         # Test to see that all data was retrieved
-        if len(xdatasets[0].variables) != len(data.columns):
-            raise ValueError('coordinates not supplied for all data columns')
+        test_variables = [xkey for xkey in xdatasets[0].variables.keys()]
+        if len(test_variables) != len(data.columns):
+            raise ValueError(''.join(['coordinates not supplied for all data ',
+                                      'columns: [{:}] != [{:}]'.format(
+                                          test_variables, data.columns)]))
 
         data = xdatasets[0]
     else:
         # Set the index to time, and put up a warning if there are duplicate
-        # times.  This could mean the data should be stored as an xarray
-        # DataSet
+        # times. This could mean the data should be stored as an xarray Dataset
         data.index = time
 
         if np.any(time.duplicated()):
-            logger.warning(' '.join(["duplicated time indices, consider",
-                                     "specifing additional coordinates and",
-                                     "storing the data as an xarray Dataset"]))
+            logger.warning(''.join(["duplicated time indices, consider ",
+                                    "specifing additional coordinates and ",
+                                    "storing the data as an xarray Dataset"]))
 
     return data, meta
 
