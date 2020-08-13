@@ -181,8 +181,8 @@ def load(fnames, tag=None, sat_id=None):
     # Define the xarray coordinate dimensions (apart from time)
     xcoords = {'vtec': {('time', 'gdlat', 'glon', 'gdalt', 'kindat', 'kinst'):
                         ['tec', 'dtec'],
-                        ('time'): ['year', 'month', 'day', 'hour', 'min',
-                                   'sec', 'ut1_unix', 'ut2_unix', 'recno']},}
+                        ('time',): ['year', 'month', 'day', 'hour', 'min',
+                                    'sec', 'ut1_unix', 'ut2_unix', 'recno']},}
 
     # Load the specified data
     data, meta = mad_meth.load(fnames, tag, sat_id, xarray_coords=xcoords[tag])
