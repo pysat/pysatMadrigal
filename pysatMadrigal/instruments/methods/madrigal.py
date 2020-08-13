@@ -56,7 +56,13 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
         This input is nominally provided by pysat itself. (default='')
     xarray_coords : list
         List of keywords to use as coordinates if xarray output is desired
-        instead of a Pandas DataFrame (default=[])
+        instead of a Pandas DataFrame.  Can build an xarray Dataset with
+        that that have different coordinate dimensions by providing a dict
+        inside the list instead of coordinate variable name strings. Each dict
+        will have a tuple of coordinates as the key and a list of variable
+        strings as the value.  For example,
+        xarray_coords=[{('time'): ['year', 'doy'], ('time', 'gdalt'):
+        ['data1', 'data2']}]. (default=[])
 
     Returns
     -------
@@ -66,18 +72,7 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
     metadata : pysat.Meta
         Metadata from the HDF5 file, as well as default values from pysat
 
-    Examples
-    --------
-    ::
-
-        inst = pysat.Instrument('jro', 'isr', 'drifts')
-        inst.load(2010, 18)
-
     """
-
-    # Ensure 'time' wasn't included as a coordinate, since it is the default
-    if 'time' in xarray_coords:
-        xarray_coords.pop(xarray_coords.index('time'))
 
     # Open the specified file
     filed = h5py.File(fnames[0], 'r')
@@ -125,23 +120,69 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
                                                   day=data.loc[:, 'day'],
                                                   uts=uts)
 
+    # Ensure we don't try to create an xarray object with only time as the
+    # coordinate
+    coord_len = len(xarray_coords)
+    if 'time' in xarray_coords:
+        coord_len -= 1
+
     # Declare index or recast as xarray
-    if len(xarray_coords) > 0:
-        if not np.all([xkey.lower() in data.columns
-                       for xkey in xarray_coords]):
-            estr = 'unknown coordinate key in {:}, '.format(xarray_coords)
-            estr += 'use only {:}'.format(data.columns)
-            raise ValueError(estr)
+    if coord_len > 0:
+        # If a list was provided, recast as a dict and grab the data columns
+        if not isinstance(xarray_coords, dict):
+            xarray_coords = {tuple(xarray_coords):
+                             [col for col in data.columns
+                              if col not in xarray_coords]}
 
-        # Append time to the data frame and add as the first coordinate
+        # Determine the order in which the keys should be processed:
+        #  Greatest to least number of dimensions
+        len_dict = {len(xcoords): xcoords
+                    for xcoords in xarray_coords.keys()}
+        coord_order = [len_dict[xkey] for xkey in sorted(
+            [lkey for lkey in len_dict.keys()], reverse=True)]
+
+        # Append time to the data frame
         data = data.assign(time=pds.Series(time, index=data.index))
-        xarray_coords.insert(0, 'time')
 
-        # Set the indices
-        data = data.set_index(xarray_coords)
+        # Cycle through each of the coordinate dimensions
+        xdatasets = list()
+        for xcoords in coord_order:
+            if not np.all([xkey.lower() in data.columns for xkey in xcoords]):
+                raise ValueError(''.join(['unknown coordinate key in ',
+                                          '{:}, use only '.format(xcoords),
+                                          '{:}'.format(data.columns)]))
+            if not np.all([xkey.lower() in data.columns
+                           for xkey in xarray_coords[xcoords]]):
+                raise ValueError(''.join(['unknown coordinate key in ',
+                                          '{:}'.format(xarray_coords[xcoords]),
+                                          ', use only {:}'.format(
+                                              data.columns)]))
+                
 
-        # Recast the data as an xarray
-        data = data.to_xarray()
+            # Select the desired data values
+            sel_data = data[list(xcoords) + xarray_coords[xcoords]]
+
+            # Set the indices
+            sel_data = sel_data.set_index(list(xcoords))
+
+            # Remove duplicates
+            sel_data = sel_data.drop_duplicates()
+
+            # Recast as an xarray, if more than one coordinate
+            if len(xcoords) == 1:
+                xdatasets.append(sel_data)
+            else:
+                xdatasets.append(sel_data.to_xarray())
+
+        # Merge all of the datasets
+        for i in np.arange(1, len(xdatasets)):
+            xdatasets[0].merge(xdatasets[i])
+
+        # Test to see that all data was retrieved
+        if len(xdatasets[0].variables) != len(data.columns):
+            raise ValueError('coordinates not supplied for all data columns')
+
+        data = xdatasets[0]
     else:
         # Set the index to time, and put up a warning if there are duplicate
         # times.  This could mean the data should be stored as an xarray
@@ -151,7 +192,7 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
         if np.any(time.duplicated()):
             logger.warning(' '.join(["duplicated time indices, consider",
                                      "specifing additional coordinates and",
-                                     "storing the data as an xarray DataSet"]))
+                                     "storing the data as an xarray Dataset"]))
 
     return data, meta
 
