@@ -56,7 +56,7 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
         This input is nominally provided by pysat itself. (default='')
     xarray_coords : list
         List of keywords to use as coordinates if xarray output is desired
-        instead of a Pandas DataFrame.  Can build an xarray Dataset with
+        instead of a Pandas DataFrame.  Can build an xarray Dataset
         that have different coordinate dimensions by providing a dict
         inside the list instead of coordinate variable name strings. Each dict
         will have a tuple of coordinates as the key and a list of variable
