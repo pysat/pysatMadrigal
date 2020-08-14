@@ -187,6 +187,9 @@ def load(fnames, tag=None, sat_id=None):
     # Load the specified data
     data, meta = mad_meth.load(fnames, tag, sat_id, xarray_coords=xcoords[tag])
 
+    # Squeeze the kindat and kinst 'coordinates', but keep them as floats
+    data = data.squeeze(dim=['kindat', 'kinst'])
+    
     return data, meta
 
 
