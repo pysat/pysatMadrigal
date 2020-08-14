@@ -176,7 +176,7 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
 
         # Merge all of the datasets
         for i in np.arange(1, len(xdatasets)):
-            xdatasets[0].merge(xdatasets[i])
+            xdatasets[0] = xdatasets[0].merge(xdatasets[i])
 
         # Test to see that all data was retrieved
         test_variables = [xkey for xkey in xdatasets[0].variables.keys()]
