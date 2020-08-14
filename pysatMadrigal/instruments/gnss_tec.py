@@ -189,6 +189,11 @@ def load(fnames, tag=None, sat_id=None):
 
     # Squeeze the kindat and kinst 'coordinates', but keep them as floats
     data = data.squeeze(dim=['kindat', 'kinst'])
+
+    # Fix the units for tec and dtec
+    if tag == 'vtec':
+        meta['tec'] = {'units': 'TECU'}
+        meta['dtec'] = {'units': 'TECU'}
     
     return data, meta
 
