@@ -157,7 +157,6 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
                                           '{:}'.format(xarray_coords[xcoords]),
                                           '], use only: {:}'.format(
                                               data.columns)]))
-                
 
             # Select the desired data values
             sel_data = data[list(xcoords) + xarray_coords[xcoords]]

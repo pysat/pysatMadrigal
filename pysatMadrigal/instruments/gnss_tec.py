@@ -38,7 +38,6 @@ Note
 
 import datetime as dt
 import functools
-import numpy as np
 
 from pysat.instruments.methods import general as ps_gen
 
@@ -67,7 +66,7 @@ list_files = functools.partial(ps_gen.list_files,
 
 # madrigal tags
 madrigal_inst_code = 8000
-madrigal_tag = {'': {'vtec': 3500}}  #, 'los': 3505}}
+madrigal_tag = {'': {'vtec': 3500}}  # , 'los': 3505}}
 
 # support listing files currently available on remote server (Madrigal)
 list_remote_files = functools.partial(mad_meth.list_remote_files,
@@ -91,9 +90,9 @@ def init(self):
                         "organizations: UNAVCO, Scripps Orbit and Permanent",
                         " Array Center, Institut Geographique National, ",
                         "France, International GNSS Service, The Crustal ",
-                        "Dynamics Data Information System (CDDIS), National",
+                        "Dynamics Data Information System (CDDIS), National ",
                         " Geodetic Survey, Instituto Brasileiro de Geografia",
-                        " e Estatística, RAMSAC CORS of Instituto Geográfico",
+                        "e Estatística, RAMSAC CORS of Instituto Geográfico",
                         " Nacional del la República Agentina, Arecibo ",
                         "Observatory, Low-Latitude Ionospheric Sensor ",
                         "Network (LISN), Topcon Positioning Systems, Inc., ",
@@ -181,8 +180,8 @@ def load(fnames, tag=None, sat_id=None):
     # Define the xarray coordinate dimensions (apart from time)
     xcoords = {'vtec': {('time', 'gdlat', 'glon', 'gdalt', 'kindat', 'kinst'):
                         ['tec', 'dtec'],
-                        ('time',): ['year', 'month', 'day', 'hour', 'min',
-                                    'sec', 'ut1_unix', 'ut2_unix', 'recno']},}
+                        ('time', ): ['year', 'month', 'day', 'hour', 'min',
+                                     'sec', 'ut1_unix', 'ut2_unix', 'recno']}}
 
     # Load the specified data
     data, meta = mad_meth.load(fnames, tag, sat_id, xarray_coords=xcoords[tag])
@@ -194,7 +193,7 @@ def load(fnames, tag=None, sat_id=None):
     if tag == 'vtec':
         meta['tec'] = {'units': 'TECU'}
         meta['dtec'] = {'units': 'TECU'}
-    
+
     return data, meta
 
 
