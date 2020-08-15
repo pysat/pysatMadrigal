@@ -116,8 +116,8 @@ def init(self):
                          mad_meth.cedar_rules()])
 
     logger.info(ackn_str)
-    self.meta.acknowledgements = ackn_str
-    self.meta.references = "?"
+    self.acknowledgements = ackn_str
+    self.references = "?"
 
     return
 
