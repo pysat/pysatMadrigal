@@ -136,7 +136,7 @@ class TestSphereCartesian():
     @pytest.mark.parametrize("kwargs,input,target",
                              [({}, ['az', 'el', 'r'],
                                ['x', 'y', 'z']),
-                              ({'inverse': False},  ['az', 'el', 'r'],
+                              ({'inverse': False}, ['az', 'el', 'r'],
                                ['x', 'y', 'z']),
                               ({'inverse': True}, ['x', 'y', 'z'],
                                ['az', 'el', 'r'])])
