@@ -125,7 +125,9 @@ class TestSphereCartesian():
     def setup(self):
         """Runs before every method to create a clean testing setup."""
         self.val = {'az': 45.0, 'el': 30.0, 'r': 1.0,
-                    'x': 0.6123724356957946, 'z': 0.5}
+                    'x': 0.6123724356957946,
+                    'y': 0.6123724356957946,
+                    'z': 0.5}
 
     def teardown(self):
         """Runs after every method to clean up previous testing."""
@@ -133,10 +135,10 @@ class TestSphereCartesian():
 
     @pytest.mark.parametrize("kwargs,input,target",
                              [({}, ['az', 'el', 'r'],
-                               ['x', 'x', 'z']),
+                               ['x', 'y', 'z']),
                               ({'inverse': False},  ['az', 'el', 'r'],
-                               ['x', 'x', 'z']),
-                              ({'inverse': True}, ['x', 'x', 'z'],
+                               ['x', 'y', 'z']),
+                              ({'inverse': True}, ['x', 'y', 'z'],
                                ['az', 'el', 'r'])])
     def test_spherical_to_cartesian(self, kwargs, input, target):
         """Test conversion from spherical to cartesian coordinates"""
@@ -158,14 +160,14 @@ class TestSphereCartesian():
         """Tests the reversibility of spherical to cartesian conversions"""
 
         az, el, r = coords.spherical_to_cartesian(self.val['x'],
-                                                  self.val['x'],
+                                                  self.val['y'],
                                                   self.val['z'],
                                                   inverse=True)
         x2, y2, z2 = coords.spherical_to_cartesian(az, el, r,
                                                    inverse=False)
 
         assert np.all(abs(self.val['x'] - x2) < 1.0e-6)
-        assert np.all(abs(self.val['x'] - y2) < 1.0e-6)
+        assert np.all(abs(self.val['y'] - y2) < 1.0e-6)
         assert np.all(abs(self.val['z'] - z2) < 1.0e-6)
 
 
@@ -175,7 +177,9 @@ class TestSphereCartesianArray(TestSphereCartesian):
         """Runs before every method to create a clean testing setup."""
         arr = np.ones(shape=(10,), dtype=float)
         self.val = {'az': 45.0 * arr, 'el': 30.0 * arr, 'r': 1.0 * arr,
-                    'x': 0.6123724356957946 * arr, 'z': 0.5 * arr}
+                    'x': 0.6123724356957946 * arr,
+                    'y': 0.6123724356957946 * arr,
+                    'z': 0.5 * arr}
 
     def teardown(self):
         """Runs after every method to clean up previous testing."""
