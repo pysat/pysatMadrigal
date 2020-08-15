@@ -9,31 +9,35 @@ to a theoretical description of plasma the number density, plasma
 composition, plasma temperature, and plasma motion may be determined.
 The DM directly measures the arrival angle of plasma. Using the reported
 motion of the satellite the angle is converted into ion motion along
-two orthogonal directions, perpendicular to the satellite track.
+two orthogonal directions, perpendicular to the satellite track. The IVM is
+part of the Special Sensor for Ions, Electrons, and Scintillations (SSIES)
+instrument suite on DMSP.
 
 Downloads data from the National Science Foundation Madrigal Database.
 The routine is configured to utilize data files with instrument
 performance flags generated at the Center for Space Sciences at the
 University of Texas at Dallas.
 
-Parameters
+Properties
 ----------
-platform : string
+platform
     'dmsp'
-name : string
+name
     'ivm'
-tag : string
+tag
     'utd', None
-sat_id : string
+sat_id
     ['f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18']
 
 Example
 -------
+::
+
     import pysat
     dmsp = pysat.Instrument('dmsp', 'ivm', 'utd', 'f15', clean_level='clean')
     dmsp.download(dt.datetime(2017, 12, 30), dt.datetime(2017, 12, 31),
                   user='Firstname+Lastname', password='email@address.com')
-    dmsp.load(2017,363)
+    dmsp.load(2017, 363)
 
 Note
 ----
@@ -41,20 +45,28 @@ Note
 
 Code development supported by NSF grant 1259508
 
-"""
+Custom Functions
+----------------
+add_drift_unit_vectors
+    Add unit vectors for the satellite velocity
+add_drifts_polar_cap_x_y
+    Add polar cap drifts in cartesian coordinates
+smooth_ram_drifts
+    Smooth the ram drifts using a rolling mean
+update_DMSP_ephemeris
+    Updates DMSP instrument data with DMSP ephemeris
 
-from __future__ import print_function
-from __future__ import absolute_import
+"""
 
 import datetime as dt
 import functools
+import logging
 import numpy as np
 import pandas as pds
 
 from pysatMadrigal.instruments.methods import madrigal as mad_meth
 from pysat.instruments.methods import general as mm_gen
 
-import logging
 logger = logging.getLogger(__name__)
 
 platform = 'dmsp'
@@ -110,15 +122,16 @@ def init(self):
     self : pysat.Instrument
         This object
 
-    Returns
-    --------
-    Void : (NoneType)
-        Object modified in place.
-
-
     """
 
     logger.info(mad_meth.cedar_rules())
+    self.meta.acknowledgements = mad_meth.cedar_rules()
+    self.meta.references = ' '.join(('F. J. Rich, Users Guide for the Topside',
+                                     'Ionospheric Plasma Monitor (SSIES,',
+                                     'SSIES-2 and SSIES-3) on Spacecraft of',
+                                     'the Defense Meteorological Satellite',
+                                     'Program (Air Force Phillips Laboratory,',
+                                     'Hanscom AFB, MA, 1994), Vol. 1, p. 25.'))
     return
 
 
@@ -131,26 +144,20 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
     date_array : array-like
         list of datetimes to download data for. The sequence of dates need not
         be contiguous.
-    tag : string ('')
+    tag : string
         Tag identifier used for particular dataset. This input is provided by
-        pysat.
-    sat_id : string  ('')
+        pysat. (default='')
+    sat_id : string
         Satellite ID string identifier used for particular dataset. This input
-        is provided by pysat.
-    data_path : string (None)
-        Path to directory to download data to.
-    user : string (None)
+        is provided by pysat. (default='')
+    data_path : string
+        Path to directory to download data to. (default=None)
+    user : string
         User string input used for download. Provided by user and passed via
-        pysat. If an account
-        is required for dowloads this routine here must error if user not
-        supplied.
-    password : string (None)
-        Password for data download.
-
-    Returns
-    --------
-    Void : (NoneType)
-        Downloads data to disk.
+        pysat. If an account is required for dowloads this routine here must
+        error if user not supplied. (default=None)
+    password : string
+        Password for data download. (default=None)
 
     Notes
     -----
@@ -185,14 +192,9 @@ def clean(inst):
 
     Parameters
     -----------
-    inst : (pysat.Instrument)
+    inst : pysat.Instrument
         Instrument class object, whose attribute clean_level is used to return
         the desired level of data selectivity.
-
-    Returns
-    --------
-    Void : (NoneType)
-        data in inst is modified in-place.
 
     Notes
     --------
@@ -329,15 +331,15 @@ def add_drift_unit_vectors(inst):
     inst.data.loc[inst.index[idx], 'unit_cross_x'] *= -1.0
     inst.data.loc[inst.index[idx], 'unit_cross_y'] *= -1.0
 
-    inst['unit_ram_r'] = inst['unit_ram_x'] * np.cos(theta) + \
-        inst['unit_ram_y'] * np.sin(theta)
-    inst['unit_ram_theta'] = -inst['unit_ram_x'] * np.sin(theta) + \
-        inst['unit_ram_y'] * np.cos(theta)
+    inst['unit_ram_r'] = (inst['unit_ram_x'] * np.cos(theta)
+                          + inst['unit_ram_y'] * np.sin(theta))
+    inst['unit_ram_theta'] = (-inst['unit_ram_x'] * np.sin(theta)
+                              + inst['unit_ram_y'] * np.cos(theta))
 
-    inst['unit_cross_r'] = inst['unit_cross_x'] * np.cos(theta) + \
-        inst['unit_cross_y'] * np.sin(theta)
-    inst['unit_cross_theta'] = -inst['unit_cross_x'] * np.sin(theta) + \
-        inst['unit_cross_y'] * np.cos(theta)
+    inst['unit_cross_r'] = (inst['unit_cross_x'] * np.cos(theta)
+                            + inst['unit_cross_y'] * np.sin(theta))
+    inst['unit_cross_theta'] = (-inst['unit_cross_x'] * np.sin(theta)
+                                + inst['unit_cross_y'] * np.cos(theta))
     return
 
 
@@ -365,6 +367,7 @@ def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
     -------
     Polar cap drifts assume there is no vertical component to the X-Y
     velocities
+
     """
 
     # Get the good RPA data, if available
@@ -382,10 +385,10 @@ def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
         add_drift_unit_vectors(inst)
 
     # Calculate the velocities
-    inst['ion_vel_pc_x'] = iv_x * inst['unit_ram_x'] + \
-        inst[cross_vel_key] * inst['unit_cross_x']
-    inst['ion_vel_pc_y'] = iv_x * inst['unit_ram_y'] + \
-        inst[cross_vel_key] * inst['unit_cross_y']
+    inst['ion_vel_pc_x'] = (iv_x * inst['unit_ram_x']
+                            + inst[cross_vel_key] * inst['unit_cross_x'])
+    inst['ion_vel_pc_y'] = (iv_x * inst['unit_ram_y']
+                            + inst[cross_vel_key] * inst['unit_cross_y'])
 
     # Flag the velocities as full (False) or partial (True)
     inst['partial'] = False
