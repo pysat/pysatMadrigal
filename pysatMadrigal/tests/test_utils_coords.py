@@ -13,10 +13,12 @@ class TestGeodeticGeocentric():
     def setup(self):
         """Runs before every method to create a clean testing setup."""
         self.val = {'lat': 45.0, 'lon': 8.0, 'az': 52.0, 'el': 63.0}
+        self.out = None
+        self.loc = None
 
     def teardown(self):
         """Runs after every method to clean up previous testing."""
-        del self.val
+        del self.val, self.out, self.loc
 
     @pytest.mark.parametrize("kwargs,target",
                              [({}, [44.8075768, 8.0, 6367.48954386]),
@@ -31,25 +33,22 @@ class TestGeodeticGeocentric():
                                                       lon_in=self.val['lon'],
                                                       **kwargs)
 
-        assert np.all(abs(lat - target[0]) < 1.0e-6)
-        assert np.all(abs(lon - target[1]) < 1.0e-6)
-        assert np.all(abs(rad - target[2]) < 1.0e-6)
-        if isinstance(lat, np.ndarray):
-            assert lat.shape == self.val['lat'].shape
-            assert lon.shape == self.val['lat'].shape
-            assert rad.shape == self.val['lat'].shape
+        for i, self.loc in enumerate(self.out):
+            assert np.all(abs(self.loc - target[i]) < 1.0e-6)
+            if isinstance(self.loc, np.ndarray):
+                assert self.loc.shape == self.val['lat'].shape
 
     def test_geodetic_to_geocentric_and_back(self):
         """Tests the reversibility of geodetic to geocentric conversions"""
 
-        lat2, lon2, rad = coords.geodetic_to_geocentric(self.val['lat'],
+        self.out = coords.geodetic_to_geocentric(self.val['lat'],
                                                         lon_in=self.val['lon'],
                                                         inverse=False)
-        lat3, lon3, rad = coords.geodetic_to_geocentric(lat2,
-                                                        lon_in=lon2,
+        self.loc = coords.geodetic_to_geocentric(self.out[0],
+                                                        lon_in=self.out[1],
                                                         inverse=True)
-        assert np.all(abs(self.val['lat'] - lat3) < 1.0e-6)
-        assert np.all(abs(self.val['lon'] - lon3) < 1.0e-6)
+        assert np.all(abs(self.val['lat'] - self.loc[0]) < 1.0e-6)
+        assert np.all(abs(self.val['lon'] - self.loc[1]) < 1.0e-6)
 
     @pytest.mark.parametrize("kwargs,target",
                              [({}, [44.8075768, 8.0, 6367.48954386,
@@ -63,24 +62,17 @@ class TestGeodeticGeocentric():
     def test_geodetic_to_geocentric_horizontal(self, kwargs, target):
         """Test conversion from geodetic to geocentric coordinates"""
 
-        lat, lon, rad, az, el = \
+        self.out = \
             coords.geodetic_to_geocentric_horizontal(self.val['lat'],
                                                      self.val['lon'],
                                                      self.val['az'],
                                                      self.val['el'],
                                                      **kwargs)
 
-        assert np.all(abs(lat - target[0]) < 1.0e-6)
-        assert np.all(abs(lon - target[1]) < 1.0e-6)
-        assert np.all(abs(rad - target[2]) < 1.0e-6)
-        assert np.all(abs(az - target[3]) < 1.0e-6)
-        assert np.all(abs(el - target[4]) < 1.0e-6)
-        if isinstance(lat, np.ndarray):
-            assert lat.shape == self.val['lat'].shape
-            assert lon.shape == self.val['lat'].shape
-            assert rad.shape == self.val['lat'].shape
-            assert az.shape == self.val['lat'].shape
-            assert el.shape == self.val['lat'].shape
+        for i, self.loc in enumerate(self.out):
+            assert np.all(abs(self.loc - target[i]) < 1.0e-6)
+            if isinstance(self.loc, np.ndarray):
+                assert self.loc.shape == self.val['lat'].shape
 
     def test_geodetic_to_geocentric_horizontal_and_back(self):
         """Tests the reversibility of geodetic to geocentric horiz conversions
@@ -89,20 +81,20 @@ class TestGeodeticGeocentric():
 
         """
 
-        lat2, lon2, rad_e, az2, el2 = \
+        self.out = \
             coords.geodetic_to_geocentric_horizontal(self.val['lat'],
                                                      self.val['lon'],
                                                      self.val['az'],
                                                      self.val['el'],
                                                      inverse=False)
-        lat3, lon3, rad_e, az3, el3 = \
-            coords.geodetic_to_geocentric_horizontal(lat2, lon2, az2, el2,
+        self.loc = \
+            coords.geodetic_to_geocentric_horizontal(self.out[0], self.out[1], self.out[3], self.out[4],
                                                      inverse=True)
 
-        assert np.all(abs(self.val['lon'] - lon3) < 1.0e-6)
-        assert np.all(abs(self.val['lat'] - lat3) < 1.0e-6)
-        assert np.all(abs(self.val['az'] - az3) < 1.0e-6)
-        assert np.all(abs(self.val['el'] - el3) < 1.0e-6)
+        assert np.all(abs(self.val['lon'] - self.loc[1]) < 1.0e-6)
+        assert np.all(abs(self.val['lat'] - self.loc[0]) < 1.0e-6)
+        assert np.all(abs(self.val['az'] - self.loc[3]) < 1.0e-6)
+        assert np.all(abs(self.val['el'] - self.loc[4]) < 1.0e-6)
 
 
 class TestGeodeticGeocentricArray(TestGeodeticGeocentric):
