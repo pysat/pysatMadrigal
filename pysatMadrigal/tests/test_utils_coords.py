@@ -29,9 +29,9 @@ class TestGeodeticGeocentric():
     def test_geodetic_to_geocentric(self, kwargs, target):
         """Test conversion from geodetic to geocentric coordinates"""
 
-        lat, lon, rad = coords.geodetic_to_geocentric(self.val['lat'],
-                                                      lon_in=self.val['lon'],
-                                                      **kwargs)
+        self.out = coords.geodetic_to_geocentric(self.val['lat'],
+                                                 lon_in=self.val['lon'],
+                                                 **kwargs)
 
         for i, self.loc in enumerate(self.out):
             assert np.all(abs(self.loc - target[i]) < 1.0e-6)
@@ -42,11 +42,11 @@ class TestGeodeticGeocentric():
         """Tests the reversibility of geodetic to geocentric conversions"""
 
         self.out = coords.geodetic_to_geocentric(self.val['lat'],
-                                                        lon_in=self.val['lon'],
-                                                        inverse=False)
+                                                 lon_in=self.val['lon'],
+                                                 inverse=False)
         self.loc = coords.geodetic_to_geocentric(self.out[0],
-                                                        lon_in=self.out[1],
-                                                        inverse=True)
+                                                 lon_in=self.out[1],
+                                                 inverse=True)
         assert np.all(abs(self.val['lat'] - self.loc[0]) < 1.0e-6)
         assert np.all(abs(self.val['lon'] - self.loc[1]) < 1.0e-6)
 
@@ -62,12 +62,11 @@ class TestGeodeticGeocentric():
     def test_geodetic_to_geocentric_horizontal(self, kwargs, target):
         """Test conversion from geodetic to geocentric coordinates"""
 
-        self.out = \
-            coords.geodetic_to_geocentric_horizontal(self.val['lat'],
-                                                     self.val['lon'],
-                                                     self.val['az'],
-                                                     self.val['el'],
-                                                     **kwargs)
+        self.out = coords.geodetic_to_geocentric_horizontal(self.val['lat'],
+                                                            self.val['lon'],
+                                                            self.val['az'],
+                                                            self.val['el'],
+                                                            **kwargs)
 
         for i, self.loc in enumerate(self.out):
             assert np.all(abs(self.loc - target[i]) < 1.0e-6)
@@ -81,18 +80,19 @@ class TestGeodeticGeocentric():
 
         """
 
-        self.out = \
-            coords.geodetic_to_geocentric_horizontal(self.val['lat'],
-                                                     self.val['lon'],
-                                                     self.val['az'],
-                                                     self.val['el'],
-                                                     inverse=False)
-        self.loc = \
-            coords.geodetic_to_geocentric_horizontal(self.out[0], self.out[1], self.out[3], self.out[4],
-                                                     inverse=True)
+        self.out = coords.geodetic_to_geocentric_horizontal(self.val['lat'],
+                                                            self.val['lon'],
+                                                            self.val['az'],
+                                                            self.val['el'],
+                                                            inverse=False)
+        self.loc = coords.geodetic_to_geocentric_horizontal(self.out[0],
+                                                            self.out[1],
+                                                            self.out[3],
+                                                            self.out[4],
+                                                            inverse=True)
 
-        assert np.all(abs(self.val['lon'] - self.loc[1]) < 1.0e-6)
         assert np.all(abs(self.val['lat'] - self.loc[0]) < 1.0e-6)
+        assert np.all(abs(self.val['lon'] - self.loc[1]) < 1.0e-6)
         assert np.all(abs(self.val['az'] - self.loc[3]) < 1.0e-6)
         assert np.all(abs(self.val['el'] - self.loc[4]) < 1.0e-6)
 
@@ -106,10 +106,12 @@ class TestGeodeticGeocentricArray(TestGeodeticGeocentric):
                     'lon': 8.0 * arr,
                     'az': 52.0 * arr,
                     'el': 63.0 * arr}
+        self.out = None
+        self.loc = None
 
     def teardown(self):
         """Runs after every method to clean up previous testing."""
-        del self.val
+        del self.val, self.out, self.loc
 
 
 class TestSphereCartesian():
@@ -120,10 +122,12 @@ class TestSphereCartesian():
                     'x': 0.6123724356957946,
                     'y': 0.6123724356957946,
                     'z': 0.5}
+        self.out = None
+        self.loc = None
 
     def teardown(self):
         """Runs after every method to clean up previous testing."""
-        del self.val
+        del self.val, self.out, self.loc
 
     @pytest.mark.parametrize("kwargs,input,target",
                              [({}, ['az', 'el', 'r'],
@@ -135,32 +139,27 @@ class TestSphereCartesian():
     def test_spherical_to_cartesian(self, kwargs, input, target):
         """Test conversion from spherical to cartesian coordinates"""
 
-        a, b, c = coords.spherical_to_cartesian(self.val[input[0]],
-                                                self.val[input[1]],
-                                                self.val[input[2]],
-                                                **kwargs)
+        self.out = coords.spherical_to_cartesian(self.val[input[0]],
+                                                 self.val[input[1]],
+                                                 self.val[input[2]],
+                                                 **kwargs)
 
-        assert np.all(abs(a - self.val[target[0]]) < 1.0e-6)
-        assert np.all(abs(b - self.val[target[1]]) < 1.0e-6)
-        assert np.all(abs(c - self.val[target[2]]) < 1.0e-6)
-        if isinstance(self.val['az'], np.ndarray):
-            assert a.shape == self.val['x'].shape
-            assert b.shape == self.val['x'].shape
-            assert c.shape == self.val['x'].shape
+        for i, self.loc in enumerate(self.out):
+            assert np.all(abs(self.loc - self.val[target[i]]) < 1.0e-6)
+            if isinstance(self.loc, np.ndarray):
+                assert self.loc.shape == self.val[input[0]].shape
 
     def test_spherical_to_cartesian_and_back(self):
         """Tests the reversibility of spherical to cartesian conversions"""
 
-        az, el, r = coords.spherical_to_cartesian(self.val['x'],
-                                                  self.val['y'],
-                                                  self.val['z'],
-                                                  inverse=True)
-        x2, y2, z2 = coords.spherical_to_cartesian(az, el, r,
-                                                   inverse=False)
+        self.out = coords.spherical_to_cartesian(self.val['x'], self.val['y'],
+                                                 self.val['z'], inverse=True)
+        self.out = coords.spherical_to_cartesian(self.out[0], self.out[1],
+                                                 self.out[2], inverse=False)
 
-        assert np.all(abs(self.val['x'] - x2) < 1.0e-6)
-        assert np.all(abs(self.val['y'] - y2) < 1.0e-6)
-        assert np.all(abs(self.val['z'] - z2) < 1.0e-6)
+        assert np.all(abs(self.val['x'] - self.out[0]) < 1.0e-6)
+        assert np.all(abs(self.val['y'] - self.out[1]) < 1.0e-6)
+        assert np.all(abs(self.val['z'] - self.out[2]) < 1.0e-6)
 
 
 class TestSphereCartesianArray(TestSphereCartesian):
@@ -172,10 +171,12 @@ class TestSphereCartesianArray(TestSphereCartesian):
                     'x': 0.6123724356957946 * arr,
                     'y': 0.6123724356957946 * arr,
                     'z': 0.5 * arr}
+        self.out = None
+        self.loc = None
 
     def teardown(self):
         """Runs after every method to clean up previous testing."""
-        del self.val
+        del self.val, self.out, self.loc
 
 
 class TestGlobalLocal():
@@ -184,10 +185,12 @@ class TestGlobalLocal():
         """Runs before every method to create a clean testing setup."""
         self.val = {'x': 7000.0, 'y': 8000.0, 'z': 9000.0,
                     'lat': 37.5, 'lon': 289.0, 'rad': 6380.0}
+        self.out = None
+        self.loc = None
 
     def teardown(self):
         """Runs after every method to clean up previous testing."""
-        del self.val
+        del self.val, self.out, self.loc
 
     @pytest.mark.parametrize("kwargs,target",
                              [({},
@@ -199,40 +202,38 @@ class TestGlobalLocal():
     def test_global_to_local_cartesian(self, kwargs, target):
         """Test conversion from global to local cartesian coordinates"""
 
-        x, y, z = coords.global_to_local_cartesian(self.val['x'],
-                                                   self.val['y'],
-                                                   self.val['z'],
-                                                   self.val['lat'],
-                                                   self.val['lon'],
-                                                   self.val['rad'],
-                                                   **kwargs)
+        self.out = coords.global_to_local_cartesian(self.val['x'],
+                                                    self.val['y'],
+                                                    self.val['z'],
+                                                    self.val['lat'],
+                                                    self.val['lon'],
+                                                    self.val['rad'],
+                                                    **kwargs)
 
-        assert np.all(abs(x - target[0]) < 1.0e-6)
-        assert np.all(abs(y - target[1]) < 1.0e-6)
-        assert np.all(abs(z - target[2]) < 1.0e-6)
-        if isinstance(self.val['x'], np.ndarray):
-            assert x.shape == self.val['x'].shape
-            assert y.shape == self.val['x'].shape
-            assert z.shape == self.val['x'].shape
+        for i, self.loc in enumerate(self.out):
+            assert np.all(abs(self.loc - target[i]) < 1.0e-6)
+            if isinstance(self.loc, np.ndarray):
+                assert self.loc.shape == self.val['x'].shape
 
     def test_global_to_local_cartesian_and_back(self):
         """Tests the reversibility of the global to loc cartesian transform"""
 
-        x2, y2, z2 = coords.global_to_local_cartesian(self.val['x'],
-                                                      self.val['y'],
-                                                      self.val['z'],
-                                                      self.val['lat'],
-                                                      self.val['lon'],
-                                                      self.val['rad'],
-                                                      inverse=False)
-        x3, y3, z3 = coords.global_to_local_cartesian(x2, y2, z2,
-                                                      self.val['lat'],
-                                                      self.val['lon'],
-                                                      self.val['rad'],
-                                                      inverse=True)
-        assert np.all(abs(self.val['x'] - x3) < 1.0e-6)
-        assert np.all(abs(self.val['y'] - y3) < 1.0e-6)
-        assert np.all(abs(self.val['z'] - z3) < 1.0e-6)
+        self.out = coords.global_to_local_cartesian(self.val['x'],
+                                                    self.val['y'],
+                                                    self.val['z'],
+                                                    self.val['lat'],
+                                                    self.val['lon'],
+                                                    self.val['rad'],
+                                                    inverse=False)
+        self.out = coords.global_to_local_cartesian(self.out[0], self.out[1],
+                                                    self.out[2],
+                                                    self.val['lat'],
+                                                    self.val['lon'],
+                                                    self.val['rad'],
+                                                    inverse=True)
+        assert np.all(abs(self.val['x'] - self.out[0]) < 1.0e-6)
+        assert np.all(abs(self.val['y'] - self.out[1]) < 1.0e-6)
+        assert np.all(abs(self.val['z'] - self.out[2]) < 1.0e-6)
 
 
 class TestGlobalLocalArray(TestGlobalLocal):
@@ -242,10 +243,12 @@ class TestGlobalLocalArray(TestGlobalLocal):
         arr = np.ones(shape=(10,), dtype=float)
         self.val = {'x': 7000.0 * arr, 'y': 8000.0 * arr, 'z': 9000.0 * arr,
                     'lat': 37.5 * arr, 'lon': 289.0 * arr, 'rad': 6380.0 * arr}
+        self.out = None
+        self.loc = None
 
     def teardown(self):
         """Runs after every method to clean up previous testing."""
-        del self.val
+        del self.val, self.out, self.loc
 
 
 class TestLocalHorizontalGlobal():
@@ -255,10 +258,12 @@ class TestLocalHorizontalGlobal():
         """Runs before every method to create a clean testing setup."""
         self.val = {'az': 30.0, 'el': 45.0, 'dist': 1000.0,
                     'lat': 45.0, 'lon': 0.0, 'alt': 400.0}
+        self.out = None
+        self.loc = None
 
     def teardown(self):
         """Runs after every method to clean up previous testing."""
-        del self.val
+        del self.val, self.out, self.loc
 
     @pytest.mark.parametrize("kwargs,target",
                              [({}, [50.4190376, -7.6940084, 7172.1548652]),
@@ -269,22 +274,18 @@ class TestLocalHorizontalGlobal():
     def test_local_horizontal_to_global_geo(self, kwargs, target):
         """Tests the conversion of the local horizontal to global geo"""
 
-        lat, lon, rad = \
-            coords.local_horizontal_to_global_geo(self.val['az'],
-                                                  self.val['el'],
-                                                  self.val['dist'],
-                                                  self.val['lat'],
-                                                  self.val['lon'],
-                                                  self.val['alt'],
-                                                  **kwargs)
+        self.out = coords.local_horizontal_to_global_geo(self.val['az'],
+                                                         self.val['el'],
+                                                         self.val['dist'],
+                                                         self.val['lat'],
+                                                         self.val['lon'],
+                                                         self.val['alt'],
+                                                         **kwargs)
 
-        assert np.all(abs(lat - target[0]) < 1.0e-6)
-        assert np.all(abs(lon - target[1]) < 1.0e-6)
-        assert np.all(abs(rad - target[2]) < 1.0e-6)
-        if isinstance(self.val['lat'], np.ndarray):
-            assert lat.shape == self.val['lat'].shape
-            assert lon.shape == self.val['lat'].shape
-            assert rad.shape == self.val['lat'].shape
+        for i, self.loc in enumerate(self.out):
+            assert np.all(abs(self.loc - target[i]) < 1.0e-6)
+            if isinstance(self.loc, np.ndarray):
+                assert self.loc.shape == self.val['lat'].shape
 
 
 class TestLocalHorizontalGlobalArray(TestLocalHorizontalGlobal):
@@ -295,7 +296,9 @@ class TestLocalHorizontalGlobalArray(TestLocalHorizontalGlobal):
         arr = np.ones(shape=(10,), dtype=float)
         self.val = {'az': 30.0 * arr, 'el': 45.0 * arr, 'dist': 1000.0 * arr,
                     'lat': 45.0 * arr, 'lon': 0.0 * arr, 'alt': 400.0 * arr}
+        self.out = None
+        self.loc = None
 
     def teardown(self):
         """Runs after every method to clean up previous testing."""
-        del self.val
+        del self.val, self.out, self.loc
