@@ -38,13 +38,14 @@ from __future__ import print_function
 from __future__ import absolute_import
 import datetime as dt
 import functools
+import logging
 import numpy as np
 
-from pysatMadrigal.instruments.methods import madrigal as mad_meth
 from pysat.instruments.methods import general as mm_gen
-from pysat.utils import coords
 
-import logging
+from pysatMadrigal.instruments.methods import madrigal as mad_meth
+from pysatMadrigal.utils import coords
+
 logger = logging.getLogger(__name__)
 
 
