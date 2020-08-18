@@ -161,11 +161,12 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
             # Select the desired data values
             sel_data = data[list(xcoords) + xarray_coords[xcoords]]
 
+            # Remove duplicates before indexing, to ensure data with the same
+            # values at different locations are kept
+            sel_data = sel_data.drop_duplicates()
+
             # Set the indices
             sel_data = sel_data.set_index(list(xcoords))
-
-            # Remove duplicates
-            sel_data = sel_data.drop_duplicates()
 
             # Recast as an xarray, if more than one coordinate
             if len(xcoords) == 1:
@@ -186,10 +187,11 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
 
         data = xdatasets[0]
     else:
-        # Set the index to time, and put up a warning if there are duplicate
-        # times. This could mean the data should be stored as an xarray Dataset
+        # Set the index to time
         data.index = time
 
+        # Raise a logging warning if there are duplicate times. This means the
+        # data should be stored as an xarray Dataset
         if np.any(time.duplicated()):
             logger.warning(''.join(["duplicated time indices, consider ",
                                     "specifing additional coordinates and ",
