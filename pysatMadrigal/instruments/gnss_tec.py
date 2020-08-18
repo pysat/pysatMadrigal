@@ -191,8 +191,8 @@ def load(fnames, tag=None, sat_id=None):
 
     # Fix the units for tec and dtec
     if tag == 'vtec':
-        meta['tec'] = {'units': 'TECU'}
-        meta['dtec'] = {'units': 'TECU'}
+        meta['tec'] = {meta.units_label: 'TECU'}
+        meta['dtec'] = {meta.units_label: 'TECU'}
 
     return data, meta
 
