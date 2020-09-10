@@ -85,9 +85,6 @@ list_remote_files = functools.partial(mad_meth.list_remote_files,
                                       supported_tags=supported_tags,
                                       inst_code=madrigal_inst_code)
 
-# support load routine
-load = functools.partial(mad_meth.load, xarray_coords=['gdalt'])
-
 # Madrigal will sometimes include multiple days within a file
 # labeled with a single date.
 # Filter out this extra data using the pysat nanokernel processing queue.
@@ -161,6 +158,81 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
     mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
                       kindat=str(madrigal_tag[sat_id][tag]),
                       data_path=data_path, user=user, password=password)
+
+
+def load(fnames, tag=None, sat_id=None):
+    """ Routine to load the GNSS TEC data
+
+    Parameters
+    -----------
+    fnames : list
+        List of filenames
+    tag : string or NoneType
+        tag name used to identify particular data set to be loaded.
+        This input is nominally provided by pysat itself. (default=None)
+    sat_id : string or NoneType
+        Satellite ID used to identify particular data set to be loaded.
+        This input is nominally provided by pysat itself. (default=None)
+
+    Returns
+    --------
+    data : xarray.Dataset
+        Object containing satellite data
+    meta : pysat.Meta
+        Object containing metadata such as column names and units
+
+    """
+    # Define the xarray coordinate dimensions (apart from time)
+    xcoords = {'drifts': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
+                           'kinst'): ['nwlos', 'range', 'vipn2', 'dvipn2',
+                                      'vipe1', 'dvipe1', 'vi72', 'dvi72',
+                                      'vi82', 'dvi82', 'paiwl', 'pacwl',
+                                      'pbiwl', 'pbcwl', 'pciel', 'pccel',
+                                      'pdiel', 'pdcel', 'jro10', 'jro11'],
+                          ('time', ): ['year', 'month', 'day', 'hour', 'min',
+                                       'sec', 'spcst', 'pl', 'cbadn', 'inttms',
+                                       'azdir7', 'eldir7', 'azdir8', 'eldir8',
+                                       'jro14', 'jro15', 'jro16', 'ut1_unix',
+                                       'ut2_unix', 'recno']},
+               'drifts_ave': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
+                               'kinst'): ['altav', 'range', 'vipn2', 'dvipn2',
+                                          'vipe1', 'dvipe1'],
+                              ('time', ): ['year', 'month', 'day', 'hour',
+                                           'min', 'sec', 'spcst', 'pl',
+                                           'cbadn', 'inttms', 'ut1_unix',
+                                           'ut2_unix', 'recno']},
+               'oblique_stan': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
+                                 'kinst'): ['rgate', 'ne', 'dne', 'te', 'dte',
+                                            'ti', 'dti', 'ph+', 'dph+', 'phe+',
+                                            'dphe+'],
+                                ('time', ): ['year', 'month', 'day', 'hour',
+                                             'min', 'sec', 'azm', 'elm',
+                                             'pl', 'inttms', 'tfreq',
+                                             'ut1_unix', 'ut2_unix', 'recno']},
+               'oblique_rand': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
+                                 'kinst'): ['rgate', 'pop', 'dpop', 'te', 'dte',
+                                            'ti', 'dti', 'ph+', 'dph+', 'phe+',
+                                            'dphe+'],
+                                ('time', ): ['year', 'month', 'day', 'hour',
+                                             'min', 'sec', 'azm', 'elm',
+                                             'pl', 'inttms', 'tfreq',
+                                             'ut1_unix', 'ut2_unix', 'recno']},
+               'oblique_long': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
+                                 'kinst'): ['rgate', 'pop', 'dpop', 'te', 'dte',
+                                            'ti', 'dti', 'ph+', 'dph+', 'phe+',
+                                            'dphe+'],
+                                ('time', ): ['year', 'month', 'day', 'hour',
+                                             'min', 'sec', 'azm', 'elm',
+                                             'pl', 'inttms', 'tfreq',
+                                             'ut1_unix', 'ut2_unix', 'recno']}}
+
+    # Load the specified data
+    data, meta = mad_meth.load(fnames, tag, sat_id, xarray_coords=xcoords[tag])
+
+    # Squeeze the kindat and kinst 'coordinates', but keep them as floats
+    data = data.squeeze(dim=['kindat', 'kinst', 'gdlatr', 'gdlonr'])
+
+    return data, meta
 
 
 def clean(self):
