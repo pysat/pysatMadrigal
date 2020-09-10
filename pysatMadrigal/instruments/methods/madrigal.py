@@ -66,8 +66,8 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
 
     Returns
     -------
-    data : pds.DataFrame or xr.DataSet
-        A pandas DataFrame or xarray DataSet holding the data from the HDF5
+    data : pds.DataFrame or xr.Dataset
+        A pandas DataFrame or xarray Dataset holding the data from the HDF5
         file
     metadata : pysat.Meta
         Metadata from the HDF5 file, as well as default values from pysat
@@ -105,7 +105,6 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
 
     # lowercase variable names
     data.columns = [item.lower() for item in data.columns]
-    len_data = len(data.columns)
 
     # datetime index from times
     time_keys = np.array(['year', 'month', 'day', 'hour', 'min', 'sec'])
@@ -178,11 +177,21 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
 
         # Test to see that all data was retrieved
         test_variables = [xkey for xkey in xdatasets[0].variables.keys()]
+        ltest = len(test_variables)
+        ldata = len(data.columns)
 
-        if len(test_variables) != len_data:
+        if ltest != ldata:
+            if ltest < ldata:
+                estr = 'missing: {:}'.format(
+                    ' '.join([dvar for dvar in data.columns
+                              if dvar not in test_variables]))
+            else:
+                estr = 'have extra: {:}'.format(
+                    ' '.join([tvar for tvar in test_variables
+                              if tvar not in data.columns]))
             raise ValueError(''.join(['coordinates not supplied for all data ',
-                                      'columns: [{:}] != [{:}]'.format(
-                                          test_variables, data.columns)]))
+                                      'columns: {:d} != '.format(ltest),
+                                      '{:d}; '.format(ldata), estr]))
 
         data = xdatasets[0]
     else:
