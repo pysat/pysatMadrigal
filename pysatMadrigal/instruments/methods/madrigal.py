@@ -105,6 +105,7 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
 
     # lowercase variable names
     data.columns = [item.lower() for item in data.columns]
+    len_data = len(data.columns)
 
     # datetime index from times
     time_keys = np.array(['year', 'month', 'day', 'hour', 'min', 'sec'])
@@ -168,11 +169,8 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
             # Set the indices
             sel_data = sel_data.set_index(list(xcoords))
 
-            # Recast as an xarray, if more than one coordinate
-            if len(xcoords) == 1:
-                xdatasets.append(sel_data)
-            else:
-                xdatasets.append(sel_data.to_xarray())
+            # Recast as an xarray
+            xdatasets.append(sel_data.to_xarray())
 
         # Merge all of the datasets
         for i in np.arange(1, len(xdatasets)):
@@ -180,7 +178,8 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
 
         # Test to see that all data was retrieved
         test_variables = [xkey for xkey in xdatasets[0].variables.keys()]
-        if len(test_variables) != len(data.columns):
+
+        if len(test_variables) != len_data:
             raise ValueError(''.join(['coordinates not supplied for all data ',
                                       'columns: [{:}] != [{:}]'.format(
                                           test_variables, data.columns)]))
