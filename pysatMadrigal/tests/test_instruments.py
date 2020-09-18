@@ -39,9 +39,9 @@ class TestInstruments(InstTestClass):
     def setup(self):
         """Runs before every method to create a clean testing setup
         """
-        self.package = pysatMadrigal.instruments
+        self.inst_loc = pysatMadrigal.instruments
 
     def teardown(self):
         """Runs after every method to clean up previous testing
         """
-        del self.package
+        del self.inst_loc
