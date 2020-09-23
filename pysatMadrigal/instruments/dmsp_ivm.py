@@ -26,7 +26,7 @@ name
     'ivm'
 tag
     'utd', None
-sat_id
+inst_id
     ['f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18']
 
 Example
@@ -72,9 +72,9 @@ logger = logging.getLogger(__name__)
 platform = 'dmsp'
 name = 'ivm'
 tags = {'utd': 'UTDallas DMSP data processing', '': 'Level 2 data processing'}
-sat_ids = {'f11': ['utd', ''], 'f12': ['utd', ''], 'f13': ['utd', ''],
-           'f14': ['utd', ''], 'f15': ['utd', ''], 'f16': [''], 'f17': [''],
-           'f18': ['']}
+inst_ids = {'f11': ['utd', ''], 'f12': ['utd', ''], 'f13': ['utd', ''],
+            'f14': ['utd', ''], 'f15': ['utd', ''], 'f16': [''], 'f17': [''],
+            'f18': ['']}
 _test_dates = {'f11': {'utd': dt.datetime(1998, 1, 2)},
                'f12': {'utd': dt.datetime(1998, 1, 2)},
                'f13': {'utd': dt.datetime(1998, 1, 2)},
@@ -88,7 +88,7 @@ dmsp_fname1 = {'utd': 'dms_ut_{year:4d}{month:02d}{day:02d}_',
                '': 'dms_{year:4d}{month:02d}{day:02d}_'}
 dmsp_fname2 = {'utd': '.{version:03d}.hdf5', '': 's?.{version:03d}.hdf5'}
 supported_tags = {ss: {kk: dmsp_fname1[kk] + ss[1:] + dmsp_fname2[kk]
-                       for kk in sat_ids[ss]} for ss in sat_ids.keys()}
+                       for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 list_files = functools.partial(mm_gen.list_files,
                                supported_tags=supported_tags)
 
@@ -135,7 +135,7 @@ def init(self):
     return
 
 
-def download(date_array, tag='', sat_id='', data_path=None, user=None,
+def download(date_array, tag='', inst_id='', data_path=None, user=None,
              password=None):
     """Downloads data from Madrigal.
 
@@ -147,7 +147,7 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
     tag : string
         Tag identifier used for particular dataset. This input is provided by
         pysat. (default='')
-    sat_id : string
+    inst_id : string
         Satellite ID string identifier used for particular dataset. This input
         is provided by pysat. (default='')
     data_path : string
@@ -172,7 +172,7 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
 
     """
     mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
-                      kindat=str(madrigal_tag[sat_id][tag]),
+                      kindat=str(madrigal_tag[inst_id][tag]),
                       data_path=data_path, user=user, password=password)
 
 
@@ -272,7 +272,7 @@ def update_DMSP_ephemeris(inst, ephem=None):
         inst.data = pds.DataFrame(None)
         return
 
-    if ephem.sat_id != inst.sat_id:
+    if ephem.inst_id != inst.inst_id:
         raise ValueError('ephemera provided for the wrong satellite')
 
     if ephem.date != inst.date:

@@ -37,7 +37,7 @@ def cedar_rules():
 
 
 # support load routine
-def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
+def load(fnames, tag=None, inst_id=None, xarray_coords=[]):
     """Loads data from Madrigal into Pandas.
 
     This routine is called as needed by pysat. It is not intended
@@ -53,7 +53,7 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
         This input is nominally provided by pysat itself. While
         tag defaults to None here, pysat provides '' as the default
         tag unless specified by user at Instrument instantiation. (default='')
-    sat_id : string
+    inst_id : string
         Satellite ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default='')
     xarray_coords : list
@@ -392,7 +392,7 @@ def good_exp(exp, date_array=None):
     return gflag
 
 
-def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
+def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
                       password=None, supported_tags=None,
                       url="http://cedar.openmadrigal.org",
                       two_digit_year_break=None, start=dt.datetime(1900, 1, 1),
@@ -404,7 +404,7 @@ def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
     tag : string or NoneType
         Denotes type of file to load.  Accepted types are <tag strings>.
         (default=None)
-    sat_id : string or NoneType
+    inst_id : string or NoneType
         Specifies the satellite ID for a constellation.  Not used.
         (default=None)
     inst_code : string
@@ -423,7 +423,7 @@ def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
     password : string
         Password for data download. (default=None)
     supported_tags : dict or NoneType
-        keys are sat_id, each containing a dict keyed by tag
+        keys are inst_id, each containing a dict keyed by tag
         where the values file format template strings. (default=None)
     url : string
         URL for Madrigal site (default='http://cedar.openmadrigal.org')
@@ -474,7 +474,7 @@ def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
 
     # Test input
     try:
-        format_str = supported_tags[sat_id][tag]
+        format_str = supported_tags[inst_id][tag]
     except KeyError:
         raise ValueError('Problem parsing supported_tags')
 
