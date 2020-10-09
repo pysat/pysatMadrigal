@@ -1,12 +1,13 @@
 import tempfile
 import pytest
 
-import pysatMadrigal
+import pysat
 from pysat.utils import generate_instrument_list
 from pysat.tests.instrument_test_class import InstTestClass
 
-instruments = generate_instrument_list(inst_loc=pysatMadrigal.instruments)
+import pysatMadrigal
 
+instruments = generate_instrument_list(inst_loc=pysatMadrigal.instruments)
 method_list = [func for func in dir(InstTestClass)
                if callable(getattr(InstTestClass, func))]
 
