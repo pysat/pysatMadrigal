@@ -193,7 +193,8 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_format='hdf5'):
                             raise ValueError(''.join(['all provided data ',
                                                       'variables [',
                                                       '{:}] are '.format(
-                                                    xarray_coords[xcoords]),
+                                                          xarray_coords[
+                                                              xcoords]),
                                                       'unknown, use only: ',
                                                       '{:}'.format(
                                                           data.columns)]))
