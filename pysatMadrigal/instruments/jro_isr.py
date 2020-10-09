@@ -38,13 +38,14 @@ from __future__ import print_function
 from __future__ import absolute_import
 import datetime as dt
 import functools
+import logging
 import numpy as np
 
-from pysatMadrigal.instruments.methods import madrigal as mad_meth
 from pysat.instruments.methods import general as mm_gen
-from pysat.utils import coords
 
-import logging
+from pysatMadrigal.instruments.methods import madrigal as mad_meth
+from pysatMadrigal.utils import coords
+
 logger = logging.getLogger(__name__)
 
 
@@ -54,7 +55,7 @@ tags = {'drifts': 'Drifts and wind', 'drifts_ave': 'Averaged drifts',
         'oblique_stan': 'Standard Faraday rotation double-pulse',
         'oblique_rand': 'Randomized Faraday rotation double-pulse',
         'oblique_long': 'Long pulse Faraday rotation'}
-sat_ids = {'': list(tags.keys())}
+inst_ids = {'': list(tags.keys())}
 _test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
                     'drifts_ave': dt.datetime(2010, 1, 19),
                     'oblique_stan': dt.datetime(2010, 4, 19),
@@ -71,7 +72,7 @@ supported_tags = {ss: {'drifts': jro_fname1 + "drifts" + jro_fname2,
                        'oblique_stan': jro_fname1 + jro_fname2,
                        'oblique_rand': jro_fname1 + "?" + jro_fname2,
                        'oblique_long': jro_fname1 + "?" + jro_fname2}
-                  for ss in sat_ids.keys()}
+                  for ss in inst_ids.keys()}
 list_files = functools.partial(mm_gen.list_files,
                                supported_tags=supported_tags)
 
@@ -113,13 +114,13 @@ def init(self):
                          mad_meth.cedar_rules()])
 
     logger.info(ackn_str)
-    self.meta.acknowledgements = ackn_str
-    self.meta.references = "?"
+    self.acknowledgements = ackn_str
+    self.references = "?"
 
     return
 
 
-def download(date_array, tag='', sat_id='', data_path=None, user=None,
+def download(date_array, tag='', inst_id='', data_path=None, user=None,
              password=None):
     """Downloads data from Madrigal.
 
@@ -131,7 +132,7 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
     tag : string
         Tag identifier used for particular dataset. This input is provided by
         pysat. (default='')
-    sat_id : string
+    inst_id : string
         Satellite ID string identifier used for particular dataset. This input
         is provided by pysat. (default='')
     data_path : string
@@ -156,7 +157,7 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
 
     """
     mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
-                      kindat=str(madrigal_tag[sat_id][tag]),
+                      kindat=str(madrigal_tag[inst_id][tag]),
                       data_path=data_path, user=user, password=password)
 
 

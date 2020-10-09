@@ -88,7 +88,7 @@ logger = logging.getLogger(__name__)
 platform = 'madrigal'
 name = 'pandas'
 tags = {'': 'General Madrigal data access loaded into pysat via pandas.'}
-sat_ids = {'': list(tags.keys())}
+inst_ids = {'': list(tags.keys())}
 # need to sort out test day setting for unit testing
 _test_dates = {'': {'': dt.datetime(2010, 1, 19)}}
 
@@ -98,7 +98,7 @@ _test_dates = {'': {'': dt.datetime(2010, 1, 19)}}
 jro_fname1 = '*{year:4d}{month:02d}{day:02d}'
 jro_fname2 = '.{version:03d}.hdf5'
 supported_tags = {ss: {'': '*'.join((jro_fname1, jro_fname2))}
-                  for ss in sat_ids.keys()}
+                  for ss in inst_ids.keys()}
 list_files = functools.partial(cdw.list_files,
                                supported_tags=supported_tags)
 
@@ -134,7 +134,7 @@ def init(self):
     return
 
 
-def _general_download(date_array, tag='', sat_id='', data_path=None, user=None,
+def _general_download(date_array, tag='', inst_id='', data_path=None, user=None,
                       password=None, inst_code=None, kindat=None):
     """Downloads data from Madrigal.
 
@@ -152,7 +152,7 @@ def _general_download(date_array, tag='', sat_id='', data_path=None, user=None,
     tag : string
         Tag identifier used for particular dataset. This input is provided by
         pysat. (default='')
-    sat_id : string
+    inst_id : string
         Satellite ID string identifier used for particular dataset. This input
         is provided by pysat. (default='')
     data_path : string
