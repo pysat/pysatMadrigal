@@ -400,10 +400,10 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
     # TODO, implement user and password values in test code
     # specific to each instrument
     if user is None:
-        print('No user information supplied for download.')
+        logger.warning('No user information supplied for download.')
         user = 'pysat_testing'
     if password is None:
-        print('Please provide email address in password field.')
+        logger.warning('Please provide email address in password field.')
         password = 'pysat_testing@not_real_email.org'
 
     # If date_array supplied, overwrite start and stop
