@@ -18,7 +18,7 @@ with codecs.open(os.path.join(here, version_filename)) as version_file:
 
 # Define requirements
 # netCDF support requires netCDF4-Python or scipy installation
-install_requires = ['pysat', 'pandas', 'xarray', 'numpy', 'netCDF4-Python']
+install_requires = ['pysat', 'pandas', 'xarray', 'numpy', 'netCDF4']
 
 # packages with Fortran code
 fortran_install = ['madrigalWeb', 'h5py']
