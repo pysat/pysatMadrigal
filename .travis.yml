@@ -37,7 +37,7 @@ install:
   - pip install pysatCDF >/dev/null
   # Custom pysat install
   - cd ..
-  - git clone https://github.com/pysat/pysat.git
+  - git clone --single-branch --branch develop-3 https://github.com/pysat/pysat.git
   - cd pysat
   - git checkout develop-3
   - python setup.py install
