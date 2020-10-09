@@ -187,11 +187,26 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_format='hdf5'):
                                                       data.columns)]))
                     if not np.all([xkey.lower() in data.columns
                                    for xkey in xarray_coords[xcoords]]):
-                        raise ValueError(''.join(['unknown data variable in [',
-                                                  '{:}'.format(
-                                                      xarray_coords[xcoords]),
-                                                  '], use only: {:}'.format(
-                                                      data.columns)]))
+                        data_mask = [xkey.lower() in data.columns
+                                     for xkey in xarray_coords[xcoords]]
+                        if np.all(~np.array(data_mask)):
+                            raise ValueError(''.join(['all provided data ',
+                                                      'variables [',
+                                                      '{:}] are '.format(
+                                                    xarray_coords[xcoords]),
+                                                      'unknown, use only: ',
+                                                      '{:}'.format(
+                                                          data.columns)]))
+                        else:
+                            logger.warning(''.join(['unknown data variable in',
+                                                    ' [{:}], use only'.format(
+                                                        xarray_coords[xcoords]),
+                                                    ': {:}'.format(
+                                                        data.columns)]))
+
+                            # Remove the coordinates that aren't present
+                            temp = np.array(xarray_coords[xcoords])[data_mask]
+                            xarray_coords[xcoords] = list(temp)
 
                     # Select the desired data values
                     sel_data = data[list(xcoords) + xarray_coords[xcoords]]
