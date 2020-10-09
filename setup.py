@@ -17,11 +17,15 @@ with codecs.open(os.path.join(here, version_filename)) as version_file:
     version = version_file.read().strip()
 
 # Define requirements
-install_requires = ['pysat', 'pandas', 'xarray', 'numpy']
+# netCDF support requires netCDF4-Python or scipy installation
+install_requires = ['pysat', 'pandas', 'xarray', 'numpy', 'netCDF4-Python']
+
 # packages with Fortran code
 fortran_install = ['madrigalWeb', 'h5py']
+
 # flag, True if on readthedocs
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
+
 # include Fortran for normal install
 # read the docs doesn't do Fortran
 if not on_rtd:
@@ -43,6 +47,7 @@ setup(name='pysatMadrigal',
                    "Intended Audience :: Science/Research",
                    'License :: OSI Approved :: BSD License',
                    "Natural Language :: English",
+                   "Programming Language :: Python :: 3 :: Only",
                    "Programming Language :: Python :: 3.6",
                    "Programming Language :: Python :: 3.7",
                    "Programming Language :: Python :: 3.8",
