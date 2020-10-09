@@ -38,6 +38,7 @@ Note
 
 import datetime as dt
 import functools
+import numpy as np
 
 from pysat.instruments.methods import general as ps_gen
 
@@ -50,7 +51,7 @@ logger = logging.getLogger(__name__)
 platform = 'gnss'
 name = 'tec'
 tags = {'vtec': 'vertical TEC'}
-sat_ids = {'': [tag for tag in tags.keys()]}
+inst_ids = {'': [tag for tag in tags.keys()]}
 _test_dates = {'': {'vtec': dt.datetime(2017, 11, 19)}}
 pandas_format = False
 
@@ -59,7 +60,7 @@ pandas_format = False
 dname = '{year:02d}{month:02d}{day:02d}'
 vname = '.{version:03d}'
 supported_tags = {ss: {'vtec': "gps{:s}g{:s}.hdf5".format(dname, vname)}
-                  for ss in sat_ids.keys()}
+                  for ss in inst_ids.keys()}
 list_files = functools.partial(ps_gen.list_files,
                                supported_tags=supported_tags,
                                two_digit_year_break=99)
@@ -113,8 +114,9 @@ def init(self):
     return
 
 
-def download(date_array, tag='', sat_id='', data_path=None, user=None,
-             password=None):
+def download(date_array, tag='', inst_id='', data_path=None, user=None,
+             password=None, url='http://cedar.openmadrigal.org',
+             file_format='netCDF4'):
     """Downloads data from Madrigal.
 
     Parameters
@@ -125,7 +127,7 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
     tag : string
         Tag identifier used for particular dataset. This input is provided by
         pysat. (default='')
-    sat_id : string
+    inst_id : string
         Satellite ID string identifier used for particular dataset. This input
         is provided by pysat. (default='')
     data_path : string
@@ -136,6 +138,12 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
         error if user not supplied. (default=None)
     password : string
         Password for data download. (default=None)
+    url : string
+        URL for Madrigal site (default='http://cedar.openmadrigal.org')
+    file_format : string
+        File format for Madrigal data.  Load routines currently only accepts
+        'hdf5' and 'netCDF4', but any of the Madrigal options may be used
+        here. (default='netCDF4')
 
     Note
     ----
@@ -150,12 +158,13 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
 
     """
     mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
-                      kindat=str(madrigal_tag[sat_id][tag]),
-                      data_path=data_path, user=user, password=password)
+                      kindat=str(madrigal_tag[inst_id][tag]),
+                      data_path=data_path, user=user, password=password,
+                      file_format=file_format, url=url)
     return
 
 
-def load(fnames, tag=None, sat_id=None):
+def load(fnames, tag=None, inst_id=None, file_format='netCDF4'):
     """ Routine to load the GNSS TEC data
 
     Parameters
@@ -165,9 +174,13 @@ def load(fnames, tag=None, sat_id=None):
     tag : string or NoneType
         tag name used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
-    sat_id : string or NoneType
+    inst_id : string or NoneType
         Satellite ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
+    file_format : string
+        File format for Madrigal data. Currently only accepts 'hdf5' and
+        'netCDF4', but any of the Madrigal options may be used  here.
+        (default='netCDF4')
 
     Returns
     --------
@@ -178,16 +191,22 @@ def load(fnames, tag=None, sat_id=None):
 
     """
     # Define the xarray coordinate dimensions (apart from time)
-    xcoords = {'vtec': {('time', 'gdlat', 'glon', 'gdalt', 'kindat', 'kinst'):
-                        ['tec', 'dtec'],
+    # Not needed for netCDF
+    xcoords = {'vtec': {('time', 'gdlat', 'glon', 'kindat', 'kinst'):
+                        ['gdalt', 'tec', 'dtec'],
                         ('time', ): ['year', 'month', 'day', 'hour', 'min',
                                      'sec', 'ut1_unix', 'ut2_unix', 'recno']}}
 
     # Load the specified data
-    data, meta = mad_meth.load(fnames, tag, sat_id, xarray_coords=xcoords[tag])
+    data, meta = mad_meth.load(fnames, tag, inst_id,
+                               xarray_coords=xcoords[tag],
+                               file_format=file_format)
 
     # Squeeze the kindat and kinst 'coordinates', but keep them as floats
-    data = data.squeeze(dim=['kindat', 'kinst'])
+    squeeze_dims = np.array(['kindat', 'kinst'])
+    squeeze_mask = [sdim in data.coords for sdim in squeeze_dims]
+    if np.any(squeeze_mask):
+        data = data.squeeze(dim=squeeze_dims[squeeze_mask])
 
     # Fix the units for tec and dtec
     if tag == 'vtec':

@@ -4,14 +4,12 @@ pysat, reducing the amount of user intervention.
 
  """
 
-from __future__ import absolute_import
-from __future__ import print_function
-
 import datetime as dt
 import logging
 import numpy as np
 import os
 import pandas as pds
+import xarray as xr
 
 import h5py
 from madrigalWeb import madrigalWeb
@@ -35,7 +33,7 @@ def cedar_rules():
     return ackn
 
 
-def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
+def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_format='hdf5'):
     """Loads data from Madrigal into Pandas or XArray
 
     This routine is called as needed by pysat. It is not intended
@@ -51,7 +49,7 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
         This input is nominally provided by pysat itself. While
         tag defaults to None here, pysat provides '' as the default
         tag unless specified by user at Instrument instantiation. (default='')
-    sat_id : string
+    inst_id : string
         Satellite ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default='')
     xarray_coords : list
@@ -61,8 +59,11 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
         inside the list instead of coordinate variable name strings. Each dict
         will have a tuple of coordinates as the key and a list of variable
         strings as the value.  For example,
-        xarray_coords=[{('time',): ['year', 'doy'], ('time', 'gdalt'):
-        ['data1', 'data2']}]. (default=[])
+        xarray_coords=[{('time',): ['year', 'doy'],
+                        ('time', 'gdalt'): ['data1', 'data2']}]. (default=[])
+    file_format : string
+        File format for Madrigal data.  Currently only accept 'netcdf4' and
+        'hdf5'. (default='hdf5')
 
     Returns
     -------
@@ -73,137 +74,181 @@ def load(fnames, tag=None, sat_id=None, xarray_coords=[]):
         Metadata from the HDF5 file, as well as default values from pysat
 
     """
+    # Test the file format
+    file_format = file_format.lower()
+    if file_format not in ['netcdf4', 'hdf5']:
+        raise ValueError('unknown file format {:s}'.format(file_format))
 
-    # Open the specified file
-    filed = h5py.File(fnames[0], 'r')
-    # data
-    file_data = filed['Data']['Table Layout']
-    # metadata
-    file_meta = filed['Metadata']['Data Parameters']
-    # load up what is offered into pysat.Meta
+    # Initialize the output
     meta = pysat.Meta()
     labels = []
-    for item in file_meta:
-        name_string = item[0].decode('UTF-8')
-        unit_string = item[3].decode('UTF-8')
-        desc_string = item[1].decode('UTF-8')
-        labels.append(name_string)
-        meta[name_string.lower()] = {'long_name': name_string,
-                                     'units': unit_string,
-                                     'desc': desc_string}
+    fdata = []
 
-    # add additional metadata notes
-    # custom attributes attached to meta are attached to
-    # corresponding Instrument object when pysat receives
-    # data and meta from this routine
-    for key in filed['Metadata']:
-        if key != 'Data Parameters':
-            setattr(meta, key.replace(' ', '_'), filed['Metadata'][key][:])
+    # Load the file data
+    for fname in fnames:
+        if file_format == "netcdf4":
+            # Xarray natively opens netCDF data into a Dataset
+            file_data = xr.open_dataset(fname)
 
-    # data into frame, with labels from metadata
-    data = pds.DataFrame.from_records(file_data, columns=labels)
+            # Currently not saving file header data, as all metadata is at
+            # the data variable level
+            if len(labels) == 0:
+                for item in file_data.data_vars.keys():
+                    name_string = item
+                    unit_string = file_data[item].attrs['units']
+                    desc_string = file_data[item].attrs['description']
+                    labels.append(name_string)
+                    meta[name_string.lower()] = {'long_name': name_string,
+                                                 'units': unit_string,
+                                                 'desc': desc_string}
 
-    # lowercase variable names
-    data.columns = [item.lower() for item in data.columns]
+            # Add an index
+            file_data = file_data.rename({'timestamps': 'time'})
+            data = file_data.set_index(time='time')
 
-    # datetime index from times
-    time_keys = np.array(['year', 'month', 'day', 'hour', 'min', 'sec'])
-    if not np.all([key in data.columns for key in time_keys]):
-        time_keys = [key for key in time_keys if key not in data.columns]
-        raise ValueError(' '.join(["unable to construct time index, missing",
-                                   "{:}".format(time_keys)]))
+        elif file_format == "hdf5":
+            # Open the specified file and get the data and metadata
+            filed = h5py.File(fname, 'r')
+            file_data = filed['Data']['Table Layout']
+            file_meta = filed['Metadata']['Data Parameters']
 
-    uts = 3600.0 * data.loc[:, 'hour'] + 60.0 * data.loc[:, 'min'] \
-        + data.loc[:, 'sec']
-    time = pysat.utils.time.create_datetime_index(year=data.loc[:, 'year'],
-                                                  month=data.loc[:, 'month'],
-                                                  day=data.loc[:, 'day'],
-                                                  uts=uts)
+            # load up what is offered into pysat.Meta if this is the first file
+            if len(labels) == 0:
+                for item in file_meta:
+                    name_string = item[0].decode('UTF-8')
+                    unit_string = item[3].decode('UTF-8')
+                    desc_string = item[1].decode('UTF-8')
+                    labels.append(name_string)
+                    meta[name_string.lower()] = {'long_name': name_string,
+                                                 'units': unit_string,
+                                                 'desc': desc_string}
 
-    # Ensure we don't try to create an xarray object with only time as the
-    # coordinate
-    coord_len = len(xarray_coords)
-    if 'time' in xarray_coords:
-        coord_len -= 1
+            # Add additional metadata notes. Custom attributes attached to meta
+            # are attached to corresponding Instrument object when pysat
+            # receives data and meta from this routine
+            for key in filed['Metadata']:
+                if key != 'Data Parameters':
+                    setattr(meta, key.replace(' ', '_'),
+                            filed['Metadata'][key][:])
 
-    # Declare index or recast as xarray
-    if coord_len > 0:
-        # If a list was provided, recast as a dict and grab the data columns
-        if not isinstance(xarray_coords, dict):
-            xarray_coords = {tuple(xarray_coords):
-                             [col for col in data.columns
-                              if col not in xarray_coords]}
+            # data into frame, with labels from metadata
+            data = pds.DataFrame.from_records(file_data, columns=labels)
 
-        # Determine the order in which the keys should be processed:
-        #  Greatest to least number of dimensions
-        len_dict = {len(xcoords): xcoords
-                    for xcoords in xarray_coords.keys()}
-        coord_order = [len_dict[xkey] for xkey in sorted(
-            [lkey for lkey in len_dict.keys()], reverse=True)]
+            # lowercase variable names
+            data.columns = [item.lower() for item in data.columns]
 
-        # Append time to the data frame
-        data = data.assign(time=pds.Series(time, index=data.index))
+            # datetime index from times
+            time_keys = np.array(['year', 'month', 'day', 'hour', 'min', 'sec'])
+            if not np.all([key in data.columns for key in time_keys]):
+                time_keys = [key for key in time_keys
+                             if key not in data.columns]
+                raise ValueError(' '.join(["unable to construct time index, ",
+                                           "missing {:}".format(time_keys)]))
 
-        # Cycle through each of the coordinate dimensions
-        xdatasets = list()
-        for xcoords in coord_order:
-            if not np.all([xkey.lower() in data.columns for xkey in xcoords]):
-                raise ValueError(''.join(['unknown coordinate key in [',
-                                          '{:}], use only: '.format(xcoords),
-                                          '{:}'.format(data.columns)]))
-            if not np.all([xkey.lower() in data.columns
-                           for xkey in xarray_coords[xcoords]]):
-                raise ValueError(''.join(['unknown data variable in [',
-                                          '{:}'.format(xarray_coords[xcoords]),
-                                          '], use only: {:}'.format(
-                                              data.columns)]))
+            uts = 3600.0 * data.loc[:, 'hour'] + 60.0 * data.loc[:, 'min'] \
+                + data.loc[:, 'sec']
+            time = pysat.utils.time.create_datetime_index(
+                year=data.loc[:, 'year'], month=data.loc[:, 'month'],
+                day=data.loc[:, 'day'], uts=uts)
 
-            # Select the desired data values
-            sel_data = data[list(xcoords) + xarray_coords[xcoords]]
+            # Ensure we don't try to create an xarray object with only time as
+            # the coordinate
+            coord_len = len(xarray_coords)
+            if 'time' in xarray_coords:
+                coord_len -= 1
 
-            # Remove duplicates before indexing, to ensure data with the same
-            # values at different locations are kept
-            sel_data = sel_data.drop_duplicates()
+            # Declare index or recast as xarray
+            if coord_len > 0:
+                # If a list was provided, recast as a dict and grab the data
+                # columns
+                if not isinstance(xarray_coords, dict):
+                    xarray_coords = {tuple(xarray_coords):
+                                     [col for col in data.columns
+                                      if col not in xarray_coords]}
 
-            # Set the indices
-            sel_data = sel_data.set_index(list(xcoords))
+                # Determine the order in which the keys should be processed:
+                #  Greatest to least number of dimensions
+                len_dict = {len(xcoords): xcoords
+                            for xcoords in xarray_coords.keys()}
+                coord_order = [len_dict[xkey] for xkey in sorted(
+                    [lkey for lkey in len_dict.keys()], reverse=True)]
 
-            # Recast as an xarray
-            xdatasets.append(sel_data.to_xarray())
+                # Append time to the data frame
+                data = data.assign(time=pds.Series(time, index=data.index))
 
-        # Merge all of the datasets
-        for i in np.arange(1, len(xdatasets)):
-            xdatasets[0] = xdatasets[0].merge(xdatasets[i])
+                # Cycle through each of the coordinate dimensions
+                xdatasets = list()
+                for xcoords in coord_order:
+                    if not np.all([xkey.lower() in data.columns
+                                   for xkey in xcoords]):
+                        raise ValueError(''.join(['unknown coordinate key in ',
+                                                  '[{:}], use'.format(xcoords),
+                                                  ' only: {:}'.format(
+                                                      data.columns)]))
+                    if not np.all([xkey.lower() in data.columns
+                                   for xkey in xarray_coords[xcoords]]):
+                        raise ValueError(''.join(['unknown data variable in [',
+                                                  '{:}'.format(
+                                                      xarray_coords[xcoords]),
+                                                  '], use only: {:}'.format(
+                                                      data.columns)]))
 
-        # Test to see that all data was retrieved
-        test_variables = [xkey for xkey in xdatasets[0].variables.keys()]
-        ltest = len(test_variables)
-        ldata = len(data.columns)
+                    # Select the desired data values
+                    sel_data = data[list(xcoords) + xarray_coords[xcoords]]
 
-        if ltest != ldata:
-            if ltest < ldata:
-                estr = 'missing: {:}'.format(
-                    ' '.join([dvar for dvar in data.columns
-                              if dvar not in test_variables]))
+                    # Remove duplicates before indexing, to ensure data with
+                    # the same values at different locations are kept
+                    sel_data = sel_data.drop_duplicates()
+
+                    # Set the indices
+                    sel_data = sel_data.set_index(list(xcoords))
+
+                    # Recast as an xarray
+                    xdatasets.append(sel_data.to_xarray())
+
+                # Merge all of the datasets
+                for i in np.arange(1, len(xdatasets)):
+                    xdatasets[0] = xdatasets[0].merge(xdatasets[i])
+
+                # Test to see that all data was retrieved
+                test_variables = [xkey for xkey
+                                  in xdatasets[0].variables.keys()]
+                ltest = len(test_variables)
+                ldata = len(data.columns)
+
+                if ltest != ldata:
+                    if ltest < ldata:
+                        estr = 'missing: {:}'.format(
+                            ' '.join([dvar for dvar in data.columns
+                                      if dvar not in test_variables]))
+                    else:
+                        estr = 'have extra: {:}'.format(
+                            ' '.join([tvar for tvar in test_variables
+                                      if tvar not in data.columns]))
+                        raise ValueError(''.join(['coordinates not supplied ',
+                                                  'for all data columns: ',
+                                                  '{:d} != '.format(ltest),
+                                                  '{:d}; '.format(ldata),
+                                                  estr]))
+
+                data = xdatasets[0]
             else:
-                estr = 'have extra: {:}'.format(
-                    ' '.join([tvar for tvar in test_variables
-                              if tvar not in data.columns]))
-            raise ValueError(''.join(['coordinates not supplied for all data ',
-                                      'columns: {:d} != '.format(ltest),
-                                      '{:d}; '.format(ldata), estr]))
+                # Set the index to time
+                data.index = time
 
-        data = xdatasets[0]
-    else:
-        # Set the index to time
-        data.index = time
+                # Raise a logging warning if there are duplicate times. This
+                # means the data should be stored as an xarray Dataset
+                if np.any(time.duplicated()):
+                    logger.warning(''.join(["duplicated time indices, consider",
+                                            " specifing additional coordinates",
+                                            " and storing the data as an ",
+                                            "xarray Dataset"]))
+        fdata.append(data)
 
-        # Raise a logging warning if there are duplicate times. This means the
-        # data should be stored as an xarray Dataset
-        if np.any(time.duplicated()):
-            logger.warning(''.join(["duplicated time indices, consider ",
-                                    "specifing additional coordinates and ",
-                                    "storing the data as an xarray Dataset"]))
+    # If multiple files were loaded, merge the data together
+    for i in np.arange(1, len(fdata)):
+        fdata[0] = fdata[0].merge(fdata[i])
+    data = fdata[0]
 
     return data, meta
 
@@ -235,9 +280,9 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
     url : string
         URL for Madrigal site (default='http://cedar.openmadrigal.org')
     file_format : string
-        File format for Madrigal data.  Load routines currently only accept
-        'hdf5', but any of the Madrigal options may be used here.
-        (default='hdf5')
+        File format for Madrigal data.  Load routines currently only accepts
+        'hdf5' and 'netCDF4', but any of the Madrigal options may be used
+        here. (default='hdf5')
 
     Note
     ----
@@ -437,7 +482,7 @@ def good_exp(exp, date_array=None):
     return gflag
 
 
-def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
+def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
                       password=None, supported_tags=None,
                       url="http://cedar.openmadrigal.org",
                       two_digit_year_break=None, start=dt.datetime(1900, 1, 1),
@@ -449,7 +494,7 @@ def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
     tag : string or NoneType
         Denotes type of file to load.  Accepted types are <tag strings>.
         (default=None)
-    sat_id : string or NoneType
+    inst_id : string or NoneType
         Specifies the satellite ID for a constellation.  Not used.
         (default=None)
     inst_code : string
@@ -468,7 +513,7 @@ def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
     password : string
         Password for data download. (default=None)
     supported_tags : dict or NoneType
-        keys are sat_id, each containing a dict keyed by tag
+        keys are inst_id, each containing a dict keyed by tag
         where the values file format template strings. (default=None)
     url : string
         URL for Madrigal site (default='http://cedar.openmadrigal.org')
@@ -519,7 +564,7 @@ def list_remote_files(tag, sat_id, inst_code=None, kindat=None, user=None,
 
     # Test input
     try:
-        format_str = supported_tags[sat_id][tag]
+        format_str = supported_tags[inst_id][tag]
     except KeyError:
         raise ValueError('Problem parsing supported_tags')
 
