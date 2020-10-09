@@ -90,7 +90,7 @@ dmsp_fname1 = {'utd': 'dms_ut_{year:4d}{month:02d}{day:02d}_',
 dmsp_fname2 = {'utd': '.{version:03d}.hdf5', '': 's?.{version:03d}.hdf5'}
 supported_tags = {ss: {kk: dmsp_fname1[kk] + ss[1:] + dmsp_fname2[kk]
                        for kk in inst_ids[ss]} for ss in inst_ids.keys()}
-list_files = functools.partial(mm_gen.list_files,
+list_files = functools.partial(ps_gen.list_files,
                                supported_tags=supported_tags)
 
 # madrigal tags
