@@ -161,7 +161,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
                       data_path=data_path, user=user, password=password)
 
 
-def load(fnames, tag=None, sat_id=None):
+def load(fnames, tag=None, inst_id=None):
     """ Routine to load the GNSS TEC data
 
     Parameters
@@ -171,7 +171,7 @@ def load(fnames, tag=None, sat_id=None):
     tag : string or NoneType
         tag name used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
-    sat_id : string or NoneType
+    inst_id : string or NoneType
         Satellite ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
 
@@ -228,7 +228,7 @@ def load(fnames, tag=None, sat_id=None):
                                              'ut1_unix', 'ut2_unix', 'recno']}}
 
     # Load the specified data
-    data, meta = mad_meth.load(fnames, tag, sat_id, xarray_coords=xcoords[tag])
+    data, meta = mad_meth.load(fnames, tag, inst_id, xarray_coords=xcoords[tag])
 
     # Squeeze the kindat and kinst 'coordinates', but keep them as floats
     data = data.squeeze(dim=['kindat', 'kinst', 'gdlatr', 'gdlonr'])
