@@ -73,8 +73,8 @@ platform = 'dmsp'
 name = 'ivm'
 tags = {'utd': 'UTDallas DMSP data processing', '': 'Level 2 data processing'}
 inst_ids = {'f11': ['utd', ''], 'f12': ['utd', ''], 'f13': ['utd', ''],
-           'f14': ['utd', ''], 'f15': ['utd', ''], 'f16': [''], 'f17': [''],
-           'f18': ['']}
+            'f14': ['utd', ''], 'f15': ['utd', ''], 'f16': [''], 'f17': [''],
+            'f18': ['']}
 _test_dates = {'f11': {'utd': dt.datetime(1998, 1, 2)},
                'f12': {'utd': dt.datetime(1998, 1, 2)},
                'f13': {'utd': dt.datetime(1998, 1, 2)},
