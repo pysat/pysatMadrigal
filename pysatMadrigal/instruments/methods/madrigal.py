@@ -104,10 +104,10 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
 
             # Reset timestamp as datetime and set it as an index
             file_data = file_data.rename({'timestamps': 'time'})
-            time = np.array([dt.datetime.fromtimestamp(tt)
-                             for tt in file_data['time']])
-            file_data = file_data.update({'time': ('time', time)})
-            data = file_data.set_index(time=file_data['time'])
+            time_data = np.array([dt.datetime.fromtimestamp(tt)
+                                  for tt in file_data['time']])
+            file_data = file_data.update({'time': ('time', time_data)})
+            data = file_data.set_index(time='time')
 
         elif file_type == "hdf5":
             # Open the specified file and get the data and metadata
