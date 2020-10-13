@@ -159,8 +159,9 @@ def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
         A class containing the verified available files
 
     """
-    supported_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
-        file_type=file_type)
+    if supported_tags[inst_id][tag].find('{file_type}') > 0:
+        supported_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
+            file_type=file_type)
 
     out = ps_gen.list_files(
         tag=tag, inst_id=inst_id, data_path=data_path, format_str=format_str,
