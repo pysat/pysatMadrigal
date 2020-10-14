@@ -66,15 +66,13 @@ pandas_format = False
 # support list files routine
 # use the default CDAWeb method
 jro_fname1 = 'jro{year:4d}{month:02d}{day:02d}'
-jro_fname2 = '.{version:03d}.hdf5'
+jro_fname2 = '.{version:03d}.{file_type}'
 supported_tags = {ss: {'drifts': jro_fname1 + "drifts" + jro_fname2,
                        'drifts_ave': jro_fname1 + "drifts_avg" + jro_fname2,
                        'oblique_stan': jro_fname1 + jro_fname2,
                        'oblique_rand': jro_fname1 + "?" + jro_fname2,
                        'oblique_long': jro_fname1 + "?" + jro_fname2}
                   for ss in inst_ids.keys()}
-list_files = functools.partial(mm_gen.list_files,
-                               supported_tags=supported_tags)
 
 # madrigal tags
 madrigal_inst_code = 10
@@ -120,8 +118,63 @@ def init(self):
     return
 
 
+def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
+               supported_tags=supported_tags,
+               fake_daily_files_from_monthly=False,
+               delimiter=None, file_type=''):
+    """Return a Pandas Series of every data file for this Instrument
+
+    
+    Parameters
+    -----------
+    tag : string or NoneType
+        Denotes type of file to load.  Accepted types are <tag strings>.
+        (default=None)
+    inst_id : string or NoneType
+        Specifies the satellite ID for a constellation.  Not used.
+        (default=None)
+    data_path : string or NoneType
+        Path to data directory.  If None is specified, the value previously
+        set in Instrument.files.data_path is used.  (default=None)
+    format_str : string or NoneType
+        User specified file format.  If None is specified, the default
+        formats associated with the supplied tags are used. (default=None)
+    supported_tags : dict or NoneType
+        keys are inst_id, each containing a dict keyed by tag
+        where the values file format template strings. (default=None)
+    fake_daily_files_from_monthly : bool
+        Some CDAWeb instrument data files are stored by month, interfering
+        with pysat's functionality of loading by day. This flag, when true,
+        appends daily dates to monthly files internally. These dates are
+        used by load routine in this module to provide data by day.
+    delimiter : string
+        Delimiter string upon which files will be split (e.g., '.')
+    file_type : string
+        File format for Madrigal data.  Load routines currently only accepts
+        'hdf5' and 'netCDF4', but any of the Madrigal options may be used
+        here. (default='netCDF4')
+
+    Returns
+    --------
+    out : pysat.Files.from_os : pysat._files.Files
+        A class containing the verified available files
+
+    """
+    if supported_tags[inst_id][tag].find('{file_type}') > 0:
+        supported_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
+            file_type=file_type)
+
+    out = ps_gen.list_files(
+        tag=tag, inst_id=inst_id, data_path=data_path, format_str=format_str,
+        supported_tags=supported_tags,
+        fake_daily_files_from_monthly=fake_daily_files_from_monthly,
+        delimiter=delimiter)
+
+    return out
+
+
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
-             password=None, file_format='hdf5'):
+             password=None, file_type='hdf5'):
     """Downloads data from Madrigal.
 
     Parameters
@@ -143,7 +196,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
         error if user not supplied. (default=None)
     password : string
         Password for data download. (default=None)
-    file_format : string
+    file_type : string
         File format for Madrigal data.  Currently only accept 'netcdf4' and
         'hdf5'. (default='hdf5')
 
@@ -161,11 +214,12 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     """
     mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
                       kindat=str(madrigal_tag[inst_id][tag]),
-                      data_path=data_path, user=user, password=password)
+                      data_path=data_path, user=user, password=password,
+                      file_type=file_type)
 
 
-def load(fnames, tag=None, inst_id=None, file_format='hdf5'):
-    """ Routine to load the GNSS TEC data
+def load(fnames, tag=None, inst_id=None, file_type='hdf5'):
+    """ Routine to load the JRO ISR data
 
     Parameters
     -----------
@@ -177,7 +231,7 @@ def load(fnames, tag=None, inst_id=None, file_format='hdf5'):
     inst_id : string or NoneType
         Satellite ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
-    file_format : string
+    file_type : string
         File format for Madrigal data.  Currently only accept 'netcdf4' and
         'hdf5'. (default='hdf5')
 
@@ -236,7 +290,7 @@ def load(fnames, tag=None, inst_id=None, file_format='hdf5'):
     # Load the specified data
     data, meta = mad_meth.load(fnames, tag, inst_id,
                                xarray_coords=xcoords[tag],
-                               file_format=file_format)
+                               file_type=file_type)
 
     # Squeeze the kindat and kinst 'coordinates', but keep them as floats
     data = data.squeeze(dim=['kindat', 'kinst', 'gdlatr', 'gdlonr'])
@@ -249,10 +303,10 @@ def clean(self):
 
     Notes
     --------
-    Supports 'clean', 'dusty', 'dirty'
-    'Clean' is unknown for oblique modes, over 200 km for drifts
-    'Dusty' is unknown for oblique modes, over 200 km for drifts
-    'Dirty' is unknown for oblique modes, over 200 km for drifts
+    Supports 'clean'
+    'clean' is unknown for oblique modes, over 200 km for drifts
+    'dusty' is the same as clean
+    'Dirty' is the same as clean
     'None' None
 
     Routine is called by pysat, and not by the end user directly.
