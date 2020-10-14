@@ -102,12 +102,10 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                                                  'units': unit_string,
                                                  'desc': desc_string}
 
-            # Reset timestamp as datetime and set it as an index
+            # Reset UNIX timestamp as datetime and set it as an index
             file_data = file_data.rename({'timestamps': 'time'})
-            time_data = np.array([dt.datetime.fromtimestamp(tt)
-                                  for tt in file_data['time']])
-            file_data = file_data.update({'time': ('time', time_data)})
-            data = file_data.set_index(time='time')
+            time_data = pds.to_datetime(file_data['time'], unit='s')
+            data = file_data.assign_coords({'time': ('time', time_data)})
 
         elif file_type == "hdf5":
             # Open the specified file and get the data and metadata
