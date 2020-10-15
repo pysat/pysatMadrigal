@@ -85,10 +85,10 @@ pandas_format = True
 
 # support list files routine
 # use the default CDAWeb method
-dmsp_fname1 = {'utd': 'dms_ut_{year:4d}{month:02d}{day:02d}_',
-               '': 'dms_{year:4d}{month:02d}{day:02d}_'}
-dmsp_fname2 = {'utd': '.{version:03d}.{file_type}',
-               '': 's?.{version:03d}.{file_type}'}
+dmsp_fname1 = {'utd': 'dms_ut_{{year:4d}}{{month:02d}}{{day:02d}}_',
+               '': 'dms_{{year:4d}}{{month:02d}}{{day:02d}}_'}
+dmsp_fname2 = {'utd': '.{{version:03d}}.{file_type}',
+               '': 's?.{{version:03d}}.{file_type}'}
 supported_tags = {ss: {kk: dmsp_fname1[kk] + ss[1:] + dmsp_fname2[kk]
                        for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 

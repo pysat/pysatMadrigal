@@ -316,7 +316,7 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
 
     """
 
-    if file_type not in file_typees:
+    if file_type not in file_types:
         raise ValueError("Unknown file format {:}, accepts {:}".format(
             file_type, file_types))
 

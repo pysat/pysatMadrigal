@@ -41,7 +41,7 @@ import functools
 import logging
 import numpy as np
 
-from pysat.instruments.methods import general as mm_gen
+from pysat.instruments.methods import general as ps_gen
 
 from pysatMadrigal.instruments.methods import madrigal as mad_meth
 from pysatMadrigal.utils import coords
@@ -65,8 +65,8 @@ pandas_format = False
 
 # support list files routine
 # use the default CDAWeb method
-jro_fname1 = 'jro{year:4d}{month:02d}{day:02d}'
-jro_fname2 = '.{version:03d}.{file_type}'
+jro_fname1 = 'jro{{year:4d}}{{month:02d}}{{day:02d}}'
+jro_fname2 = '.{{version:03d}}.{file_type}'
 supported_tags = {ss: {'drifts': jro_fname1 + "drifts" + jro_fname2,
                        'drifts_ave': jro_fname1 + "drifts_avg" + jro_fname2,
                        'oblique_stan': jro_fname1 + jro_fname2,
