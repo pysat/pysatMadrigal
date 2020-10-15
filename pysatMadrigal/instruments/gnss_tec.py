@@ -116,7 +116,7 @@ def init(self):
 def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
                supported_tags=supported_tags,
                fake_daily_files_from_monthly=False, two_digit_year_break=99,
-               delimiter=None, file_type=''):
+               delimiter=None, file_type='netCDF4'):
     """Return a Pandas Series of every data file for this Instrument
 
     
