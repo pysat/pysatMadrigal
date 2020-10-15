@@ -17,6 +17,7 @@ from madrigalWeb import madrigalWeb
 import pysat
 
 logger = logging.getLogger(__name__)
+file_types = ['hdf5', 'netCDF4', 'simple']
 
 
 def cedar_rules():
@@ -33,7 +34,7 @@ def cedar_rules():
     return ackn
 
 
-def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_format='hdf5'):
+def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
     """Loads data from Madrigal into Pandas or XArray
 
     This routine is called as needed by pysat. It is not intended
@@ -61,8 +62,8 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_format='hdf5'):
         strings as the value.  For example,
         xarray_coords=[{('time',): ['year', 'doy'],
                         ('time', 'gdalt'): ['data1', 'data2']}]. (default=[])
-    file_format : string
-        File format for Madrigal data.  Currently only accepts 'netcdf4' and
+    file_type : string
+        File format for Madrigal data.  Currently only accept 'netCDF4' and
         'hdf5'. (default='hdf5')
 
     Returns
@@ -75,9 +76,8 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_format='hdf5'):
 
     """
     # Test the file format
-    file_format = file_format.lower()
-    if file_format not in ['netcdf4', 'hdf5']:
-        raise ValueError('unknown file format {:s}'.format(file_format))
+    if file_type not in ['netCDF4', 'hdf5']:
+        raise ValueError('unknown file format {:s}'.format(file_type))
 
     # Initialize the output
     meta = pysat.Meta()
@@ -86,7 +86,7 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_format='hdf5'):
 
     # Load the file data
     for fname in fnames:
-        if file_format == "netcdf4":
+        if file_type == "netCDF4":
             # Xarray natively opens netCDF data into a Dataset
             file_data = xr.open_dataset(fname)
 
@@ -104,11 +104,12 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_format='hdf5'):
                     # remove any metadata from xarray
                     file_data[item].attrs = {}
 
-            # Add an index
+            # Reset UNIX timestamp as datetime and set it as an index
             file_data = file_data.rename({'timestamps': 'time'})
-            data = file_data.set_index(time='time')
+            time_data = pds.to_datetime(file_data['time'], unit='s')
+            data = file_data.assign_coords({'time': ('time', time_data)})
 
-        elif file_format == "hdf5":
+        elif file_type == "hdf5":
             # Open the specified file and get the data and metadata
             filed = h5py.File(fname, 'r')
             file_data = filed['Data']['Table Layout']
@@ -273,7 +274,7 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_format='hdf5'):
 
 def download(date_array, inst_code=None, kindat=None, data_path=None,
              user=None, password=None, url="http://cedar.openmadrigal.org",
-             file_format='hdf5'):
+             file_type='hdf5'):
     """Downloads data from Madrigal.
 
     Parameters
@@ -297,7 +298,7 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
         Password for data download. (default=None)
     url : string
         URL for Madrigal site (default='http://cedar.openmadrigal.org')
-    file_format : string
+    file_type : string
         File format for Madrigal data.  Load routines currently only accepts
         'hdf5' and 'netCDF4', but any of the Madrigal options may be used
         here. (default='hdf5')
@@ -314,6 +315,10 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
     downloads.
 
     """
+
+    if file_type not in file_typees:
+        raise ValueError("Unknown file format {:}, accepts {:}".format(
+            file_type, file_types))
 
     if inst_code is None:
         raise ValueError("Must supply Madrigal instrument code")
@@ -345,11 +350,19 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
                                  start=start, stop=stop)
 
     for mad_file in files:
+        # Build the local filename
         local_file = os.path.join(data_path, os.path.basename(mad_file.name))
+        if local_file.find(file_type) <= 0:
+            split_file = local_file.split(".")
+            split_file[-1] = file_type
+            local_file = ".".join(split_file)
 
         if not os.path.isfile(local_file):
             web_data.downloadFile(mad_file.name, local_file, user, password,
-                                  "pysat", format=file_format)
+                                  "pysat", format=file_type)
+            print(os.path.isfile(local_file))
+
+    return
 
 
 def get_remote_filenames(inst_code=None, kindat=None, user=None,
@@ -544,8 +557,8 @@ def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
     stop : dt.datetime
         Ending time for the file list (defaults to time of run)
 
-    Notes
-    -----
+    Note
+    ----
     The user's names should be provided in field user. Ruby Payne-Scott should
     be entered as Ruby+Payne-Scott
 
@@ -600,13 +613,13 @@ def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
     return pysat._files.process_parsed_filenames(stored, two_digit_year_break)
 
 
-def filter_data_single_date(self):
+def filter_data_single_date(inst):
     """Filters data to a single date.
 
     Parameters
     ----------
-    self : pysat.Instrument
-        This object
+    inst : pysat.Instrument
+        Instrument object to which this routine should be attached
 
     Note
     ----
@@ -644,9 +657,12 @@ def filter_data_single_date(self):
     """
 
     # only do this if loading by date!
-    if self._load_by_date and self.pad is None:
+    if inst._load_by_date and inst.pad is None:
         # identify times for the loaded date
-        idx, = np.where((self.index >= self.date)
-                        & (self.index < (self.date + pds.DateOffset(days=1))))
+        idx, = np.where((inst.index >= inst.date)
+                        & (inst.index < (inst.date + pds.DateOffset(days=1))))
+
         # downselect from all data
-        self.data = self[idx]
+        inst.data = inst[idx]
+
+    return

@@ -87,11 +87,10 @@ pandas_format = True
 # use the default CDAWeb method
 dmsp_fname1 = {'utd': 'dms_ut_{year:4d}{month:02d}{day:02d}_',
                '': 'dms_{year:4d}{month:02d}{day:02d}_'}
-dmsp_fname2 = {'utd': '.{version:03d}.hdf5', '': 's?.{version:03d}.hdf5'}
+dmsp_fname2 = {'utd': '.{version:03d}.{file_type}',
+               '': 's?.{version:03d}.{file_type}'}
 supported_tags = {ss: {kk: dmsp_fname1[kk] + ss[1:] + dmsp_fname2[kk]
                        for kk in inst_ids[ss]} for ss in inst_ids.keys()}
-list_files = functools.partial(ps_gen.list_files,
-                               supported_tags=supported_tags)
 
 # madrigal tags
 madrigal_inst_code = 8100
@@ -136,8 +135,63 @@ def init(self):
     return
 
 
+def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
+               supported_tags=supported_tags,
+               fake_daily_files_from_monthly=False, delimiter=None,
+               file_type=''):
+    """Return a Pandas Series of every data file for this Instrument
+
+    
+    Parameters
+    -----------
+    tag : string or NoneType
+        Denotes type of file to load.  Accepted types are <tag strings>.
+        (default=None)
+    inst_id : string or NoneType
+        Specifies the satellite ID for a constellation.  Not used.
+        (default=None)
+    data_path : string or NoneType
+        Path to data directory.  If None is specified, the value previously
+        set in Instrument.files.data_path is used.  (default=None)
+    format_str : string or NoneType
+        User specified file format.  If None is specified, the default
+        formats associated with the supplied tags are used. (default=None)
+    supported_tags : dict or NoneType
+        keys are inst_id, each containing a dict keyed by tag
+        where the values file format template strings. (default=None)
+    fake_daily_files_from_monthly : bool
+        Some CDAWeb instrument data files are stored by month, interfering
+        with pysat's functionality of loading by day. This flag, when true,
+        appends daily dates to monthly files internally. These dates are
+        used by load routine in this module to provide data by day.
+    delimiter : string
+        Delimiter string upon which files will be split (e.g., '.')
+    file_type : string
+        File format for Madrigal data.  Load routines currently only accepts
+        'hdf5' and 'netCDF4', but any of the Madrigal options may be used
+        here. (default='netCDF4')
+
+    Returns
+    --------
+    out : pysat.Files.from_os : pysat._files.Files
+        A class containing the verified available files
+
+    """
+    if supported_tags[inst_id][tag].find('{file_type}') > 0:
+        supported_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
+            file_type=file_type)
+
+    out = ps_gen.list_files(
+        tag=tag, inst_id=inst_id, data_path=data_path, format_str=format_str,
+        supported_tags=supported_tags,
+        fake_daily_files_from_monthly=fake_daily_files_from_monthly,
+        delimiter=delimiter)
+
+    return out
+
+
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
-             password=None):
+             password=None, file_type='hdf5'):
     """Downloads data from Madrigal.
 
     Parameters
@@ -159,9 +213,13 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
         error if user not supplied. (default=None)
     password : string
         Password for data download. (default=None)
+    file_type : string
+        File format for Madrigal data.  Load routines currently only accepts
+        'hdf5' and 'netCDF4', but any of the Madrigal options may be used
+        here. (default='hdf5')
 
-    Notes
-    -----
+    Note
+    ----
     The user's names should be provided in field user. Ritu Karidhal should
     be entered as Ritu+Karidhal
 
@@ -175,53 +233,44 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
                       kindat=str(madrigal_tag[inst_id][tag]),
                       data_path=data_path, user=user, password=password)
+    return
 
 
-def default(inst):
-    pass
-
-
-def clean(inst):
+def clean(self):
     """Routine to return DMSP IVM data cleaned to the specified level
 
-    'Clean' enforces that both RPA and DM flags are <= 1
-    'Dusty' <= 2
-    'Dirty' <= 3
-    'None' None
+    Note
+    ----
+    Supports 'clean', 'dusty', 'dirty'
+
+    'clean' enforces that both RPA and DM flags are <= 1
+    'dusty' <= 2
+    'dirty' <= 3
+    'none' Causes pysat to skip this routine
 
     Routine is called by pysat, and not by the end user directly.
 
-    Parameters
-    -----------
-    inst : pysat.Instrument
-        Instrument class object, whose attribute clean_level is used to return
-        the desired level of data selectivity.
-
-    Notes
-    --------
-    Supports 'clean', 'dusty', 'dirty'
-
     """
 
-    if inst.tag == 'utd':
-        if inst.clean_level == 'clean':
-            idx, = np.where((inst['rpa_flag_ut'] <= 1)
-                            & (inst['idm_flag_ut'] <= 1))
-        elif inst.clean_level == 'dusty':
-            idx, = np.where((inst['rpa_flag_ut'] <= 2)
-                            & (inst['idm_flag_ut'] <= 2))
-        elif inst.clean_level == 'dirty':
-            idx, = np.where((inst['rpa_flag_ut'] <= 3)
-                            & (inst['idm_flag_ut'] <= 3))
+    if self.tag == 'utd':
+        if self.clean_level == 'clean':
+            idx, = np.where((self['rpa_flag_ut'] <= 1)
+                            & (self['idm_flag_ut'] <= 1))
+        elif self.clean_level == 'dusty':
+            idx, = np.where((self['rpa_flag_ut'] <= 2)
+                            & (self['idm_flag_ut'] <= 2))
+        elif self.clean_level == 'dirty':
+            idx, = np.where((self['rpa_flag_ut'] <= 3)
+                            & (self['idm_flag_ut'] <= 3))
         else:
-            idx = slice(0, inst.index.shape[0])
+            idx = slice(0, self.index.shape[0])
     else:
-        if inst.clean_level in ['clean', 'dusty', 'dirty']:
+        if self.clean_level in ['clean', 'dusty', 'dirty']:
             logger.warning('this level 1 data has no quality flags')
-        idx = slice(0, inst.index.shape[0])
+        idx = slice(0, self.index.shape[0])
 
     # downselect data based upon cleaning conditions above
-    inst.data = inst[idx]
+    self.data = self[idx]
 
     return
 
