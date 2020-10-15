@@ -175,7 +175,7 @@ def load(fnames, tag=None, inst_id=None, file_format='hdf5'):
         tag name used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
     inst_id : string or NoneType
-        Satellite ID used to identify particular data set to be loaded.
+        Instrument ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
     file_format : string
         File format for Madrigal data.  Currently only accept 'netcdf4' and

@@ -62,7 +62,7 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_format='hdf5'):
         xarray_coords=[{('time',): ['year', 'doy'],
                         ('time', 'gdalt'): ['data1', 'data2']}]. (default=[])
     file_format : string
-        File format for Madrigal data.  Currently only accept 'netcdf4' and
+        File format for Madrigal data.  Currently only accepts 'netcdf4' and
         'hdf5'. (default='hdf5')
 
     Returns
@@ -101,6 +101,8 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_format='hdf5'):
                     meta[name_string.lower()] = {'long_name': name_string,
                                                  'units': unit_string,
                                                  'desc': desc_string}
+                    # remove any metadata from xarray
+                    file_data[item].attrs = {}
 
             # Add an index
             file_data = file_data.rename({'timestamps': 'time'})

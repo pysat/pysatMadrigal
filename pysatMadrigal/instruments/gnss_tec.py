@@ -92,7 +92,7 @@ def init(self):
                         " Array Center, Institut Geographique National, ",
                         "France, International GNSS Service, The Crustal ",
                         "Dynamics Data Information System (CDDIS), National ",
-                        " Geodetic Survey, Instituto Brasileiro de Geografia",
+                        "Geodetic Survey, Instituto Brasileiro de Geografia",
                         "e Estatística, RAMSAC CORS of Instituto Geográfico",
                         " Nacional del la República Agentina, Arecibo ",
                         "Observatory, Low-Latitude Ionospheric Sensor ",
@@ -128,14 +128,13 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
         Tag identifier used for particular dataset. This input is provided by
         pysat. (default='')
     inst_id : string
-        Satellite ID string identifier used for particular dataset. This input
+        Instrument ID string identifier used for particular dataset. This input
         is provided by pysat. (default='')
     data_path : string
         Path to directory to download data to. (default=None)
     user : string
         User string input used for download. Provided by user and passed via
-        pysat. If an account is required for dowloads this routine here must
-        error if user not supplied. (default=None)
+        pysat. (default=None)
     password : string
         Password for data download. (default=None)
     url : string
@@ -175,11 +174,11 @@ def load(fnames, tag=None, inst_id=None, file_format='netCDF4'):
         tag name used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
     inst_id : string or NoneType
-        Satellite ID used to identify particular data set to be loaded.
+        Instrument ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
     file_format : string
         File format for Madrigal data. Currently only accepts 'hdf5' and
-        'netCDF4', but any of the Madrigal options may be used  here.
+        'netCDF4', but any of the supported Madrigal options may be used here.
         (default='netCDF4')
 
     Returns
