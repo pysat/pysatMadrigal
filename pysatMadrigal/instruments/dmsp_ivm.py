@@ -138,7 +138,7 @@ def init(self):
 def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
                supported_tags=supported_tags,
                fake_daily_files_from_monthly=False, delimiter=None,
-               file_type=''):
+               file_type='hdf5'):
     """Return a Pandas Series of every data file for this Instrument
 
     

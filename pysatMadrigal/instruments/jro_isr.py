@@ -118,21 +118,21 @@ def init(self):
     return
 
 
-def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
+def list_files(tag='', inst_id='', data_path=None, format_str=None,
                supported_tags=supported_tags,
                fake_daily_files_from_monthly=False,
-               delimiter=None, file_type=''):
+               delimiter=None, file_type='hdf5'):
     """Return a Pandas Series of every data file for this Instrument
 
     
     Parameters
     -----------
-    tag : string or NoneType
+    tag : string
         Denotes type of file to load.  Accepted types are <tag strings>.
-        (default=None)
-    inst_id : string or NoneType
+        (default='')
+    inst_id : string
         Specifies the satellite ID for a constellation.  Not used.
-        (default=None)
+        (default='')
     data_path : string or NoneType
         Path to data directory.  If None is specified, the value previously
         set in Instrument.files.data_path is used.  (default=None)
