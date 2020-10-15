@@ -101,6 +101,8 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                     meta[name_string.lower()] = {'long_name': name_string,
                                                  'units': unit_string,
                                                  'desc': desc_string}
+                    # remove any metadata from xarray
+                    file_data[item].attrs = {}
 
             # Reset UNIX timestamp as datetime and set it as an index
             file_data = file_data.rename({'timestamps': 'time'})
