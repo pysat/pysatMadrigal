@@ -360,7 +360,6 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
         if not os.path.isfile(local_file):
             web_data.downloadFile(mad_file.name, local_file, user, password,
                                   "pysat", format=file_type)
-            print(os.path.isfile(local_file))
 
     return
 
