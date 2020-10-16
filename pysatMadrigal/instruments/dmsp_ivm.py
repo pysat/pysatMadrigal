@@ -70,21 +70,19 @@ from pysatMadrigal.instruments.methods import madrigal as mad_meth
 
 logger = logging.getLogger(__name__)
 
+# ----------------------------------------------------------------------------
+# Instrument attributes
+
 platform = 'dmsp'
 name = 'ivm'
 tags = {'utd': 'UTDallas DMSP data processing', '': 'Level 2 data processing'}
 inst_ids = {'f11': ['utd', ''], 'f12': ['utd', ''], 'f13': ['utd', ''],
             'f14': ['utd', ''], 'f15': ['utd', ''], 'f16': [''], 'f17': [''],
             'f18': ['']}
-_test_dates = {'f11': {'utd': dt.datetime(1998, 1, 2)},
-               'f12': {'utd': dt.datetime(1998, 1, 2)},
-               'f13': {'utd': dt.datetime(1998, 1, 2)},
-               'f14': {'utd': dt.datetime(1998, 1, 2)},
-               'f15': {'utd': dt.datetime(2017, 12, 30)}}
+
 pandas_format = True
 
-# support list files routine
-# use the default CDAWeb method
+# Local attributes
 dmsp_fname1 = {'utd': 'dms_ut_{{year:4d}}{{month:02d}}{{day:02d}}_',
                '': 'dms_{{year:4d}}{{month:02d}}{{day:02d}}_'}
 dmsp_fname2 = {'utd': '.{{version:03d}}.{file_type}',
@@ -103,13 +101,17 @@ madrigal_tag = {'f11': {'utd': 10241, '': 10111},
                 'f17': {'': 10117},
                 'f18': {'': 10118}, }
 
-# support listing files currently available on remote server (Madrigal)
-list_remote_files = functools.partial(mad_meth.list_remote_files,
-                                      supported_tags=supported_tags,
-                                      inst_code=madrigal_inst_code)
+# ----------------------------------------------------------------------------
+# Instrument test attributes
 
-# support load routine
-load = mad_meth.load
+_test_dates = {'f11': {'utd': dt.datetime(1998, 1, 2)},
+               'f12': {'utd': dt.datetime(1998, 1, 2)},
+               'f13': {'utd': dt.datetime(1998, 1, 2)},
+               'f14': {'utd': dt.datetime(1998, 1, 2)},
+               'f15': {'utd': dt.datetime(2017, 12, 30)}}
+
+# ----------------------------------------------------------------------------
+# Instrument methods
 
 
 def init(self):
@@ -135,15 +137,67 @@ def init(self):
     return
 
 
+def clean(self):
+    """Routine to return DMSP IVM data cleaned to the specified level
+
+    Note
+    ----
+    Supports 'clean', 'dusty', 'dirty'
+
+    'clean' enforces that both RPA and DM flags are <= 1
+    'dusty' <= 2
+    'dirty' <= 3
+    'none' Causes pysat to skip this routine
+
+    Routine is called by pysat, and not by the end user directly.
+
+    """
+
+    if self.tag == 'utd':
+        if self.clean_level == 'clean':
+            idx, = np.where((self['rpa_flag_ut'] <= 1)
+                            & (self['idm_flag_ut'] <= 1))
+        elif self.clean_level == 'dusty':
+            idx, = np.where((self['rpa_flag_ut'] <= 2)
+                            & (self['idm_flag_ut'] <= 2))
+        elif self.clean_level == 'dirty':
+            idx, = np.where((self['rpa_flag_ut'] <= 3)
+                            & (self['idm_flag_ut'] <= 3))
+        else:
+            idx = slice(0, self.index.shape[0])
+    else:
+        if self.clean_level in ['clean', 'dusty', 'dirty']:
+            logger.warning('this level 1 data has no quality flags')
+        idx = slice(0, self.index.shape[0])
+
+    # downselect data based upon cleaning conditions above
+    self.data = self[idx]
+
+    return
+
+
+# ----------------------------------------------------------------------------
+# Instrument functions
+#
+# Use the default Madrigal and pysat methods
+
+# Set the list_remote_files routine
+list_remote_files = functools.partial(mad_meth.list_remote_files,
+                                      supported_tags=supported_tags,
+                                      inst_code=madrigal_inst_code)
+
+# Set the load routine
+load = mad_meth.load
+
+
 def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
                supported_tags=supported_tags,
                fake_daily_files_from_monthly=False, delimiter=None,
                file_type='hdf5'):
     """Return a Pandas Series of every data file for this Instrument
 
-    
     Parameters
-    -----------
+    ----------
     tag : string or NoneType
         Denotes type of file to load.  Accepted types are <tag strings>.
         (default=None)
@@ -172,7 +226,7 @@ def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
         here. (default='netCDF4')
 
     Returns
-    --------
+    -------
     out : pysat.Files.from_os : pysat._files.Files
         A class containing the verified available files
 
@@ -236,59 +290,22 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     return
 
 
-def clean(self):
-    """Routine to return DMSP IVM data cleaned to the specified level
-
-    Note
-    ----
-    Supports 'clean', 'dusty', 'dirty'
-
-    'clean' enforces that both RPA and DM flags are <= 1
-    'dusty' <= 2
-    'dirty' <= 3
-    'none' Causes pysat to skip this routine
-
-    Routine is called by pysat, and not by the end user directly.
-
-    """
-
-    if self.tag == 'utd':
-        if self.clean_level == 'clean':
-            idx, = np.where((self['rpa_flag_ut'] <= 1)
-                            & (self['idm_flag_ut'] <= 1))
-        elif self.clean_level == 'dusty':
-            idx, = np.where((self['rpa_flag_ut'] <= 2)
-                            & (self['idm_flag_ut'] <= 2))
-        elif self.clean_level == 'dirty':
-            idx, = np.where((self['rpa_flag_ut'] <= 3)
-                            & (self['idm_flag_ut'] <= 3))
-        else:
-            idx = slice(0, self.index.shape[0])
-    else:
-        if self.clean_level in ['clean', 'dusty', 'dirty']:
-            logger.warning('this level 1 data has no quality flags')
-        idx = slice(0, self.index.shape[0])
-
-    # downselect data based upon cleaning conditions above
-    self.data = self[idx]
-
-    return
+# ----------------------------------------------------------------------------
+# Local functions
 
 
 def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_vel_key='ion_v_sat_for'):
     """ Smooth the ram drifts using a rolling mean
 
     Parameters
-    -----------
+    ----------
+    inst : pysat.Instrument
+        DMSP IVM Instrument object
     rpa_flag_key : string or NoneType
         RPA flag key, if None will not select any data. The UTD RPA flag key
         is 'rpa_flag_ut' (default=None)
     rpa_vel_key : string
         RPA velocity data key (default='ion_v_sat_for')
-
-    Returns
-    ---------
-     RPA data in instrument object
 
     """
 
@@ -307,12 +324,10 @@ def update_DMSP_ephemeris(inst, ephem=None):
 
     Parameters
     ----------
+    inst : pysat.Instrument
+       DMSP IVM Instrumet object
     ephem : pysat.Instrument or NoneType
-        dmsp_ivm_ephem instrument object
-
-    Returns
-    ---------
-    Updates 'mlt' and 'mlat'
+        DMSP IVM_EPHEM instrument object
 
     """
 
@@ -347,15 +362,13 @@ def update_DMSP_ephemeris(inst, ephem=None):
 def add_drift_unit_vectors(inst):
     """ Add unit vectors for the satellite velocity
 
-    Returns
-    ---------
-    Adds unit vectors in cartesian and polar coordinates for RAM and
-    cross-track directions
-        - 'unit_ram_x', 'unit_ram_y', 'unit_ram_r', 'unit_ram_theta'
-        - 'unit_cross_x', 'unit_cross_y', 'unit_cross_r', 'unit_cross_theta'
+    Parameters
+    ----------
+    inst : pysat.Instrument
+        DMSP IVM Instrument object
 
-    Notes
-    ---------
+    Note
+    ----
     Assumes that the RAM vector is pointed perfectly forward
 
     """
@@ -399,7 +412,9 @@ def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
     """ Add polar cap drifts in cartesian coordinates
 
     Parameters
-    ------------
+    ----------
+    inst : pysat.Instrument
+        DMSP IVM Instrument object
     rpa_flag_key : string or NoneType
         RPA flag key, if None will not select any data. The UTD RPA flag key
         is 'rpa_flag_ut' (default=None)
@@ -408,15 +423,13 @@ def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
     cross_vel_key : string
         Cross-track velocity data key (default='ion_v_sat_left')
 
-    Returns
-    ----------
-    Adds 'ion_vel_pc_x', 'ion_vel_pc_y', and 'partial'.  The last data key
-    indicates whether RPA data was available (False) or not (True).
-
     Notes
     -------
     Polar cap drifts assume there is no vertical component to the X-Y
-    velocities
+    velocities.
+
+    Adds 'ion_vel_pc_x', 'ion_vel_pc_y', and 'partial'.  The last data key
+    indicates whether RPA data was available (False) or not (True).
 
     """
 

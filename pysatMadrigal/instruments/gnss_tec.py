@@ -47,17 +47,17 @@ from pysatMadrigal.instruments.methods import madrigal as mad_meth
 import logging
 logger = logging.getLogger(__name__)
 
+# ----------------------------------------------------------------------------
+# Instrument attributes
 
 platform = 'gnss'
 name = 'tec'
 tags = {'vtec': 'vertical TEC'}
 inst_ids = {'': [tag for tag in tags.keys()]}
-_test_dates = {'': {'vtec': dt.datetime(2017, 11, 19)}}
+
 pandas_format = False
 
-# Support for the list files routine
-# Use the default pysat method within a local routine that defines the
-# file type
+# Local attributes
 dname = '{{year:02d}}{{month:02d}}{{day:02d}}'
 vname = '.{{version:03d}}'
 supported_tags = {ss: {'vtec': ''.join(['gps', dname, 'g', vname,
@@ -68,10 +68,13 @@ supported_tags = {ss: {'vtec': ''.join(['gps', dname, 'g', vname,
 madrigal_inst_code = 8000
 madrigal_tag = {'': {'vtec': 3500}}  # , 'los': 3505}}
 
-# support listing files currently available on remote server (Madrigal)
-list_remote_files = functools.partial(mad_meth.list_remote_files,
-                                      supported_tags=supported_tags,
-                                      inst_code=madrigal_inst_code)
+# ----------------------------------------------------------------------------
+# Instrument test attributes
+
+_test_dates = {'': {'vtec': dt.datetime(2017, 11, 19)}}
+
+# ----------------------------------------------------------------------------
+# Instrument methods
 
 
 def init(self):
@@ -109,8 +112,36 @@ def init(self):
     logger.info(ackn_str)
     self.acknowledgements = ackn_str
     self.references = "Rideout and Coster (2006) doi:10.1007/s10291-006-0029-5"
-    
+
     return
+
+
+def clean(self):
+    """Routine to return GNSS TEC data at a specific level
+
+    Note
+    ----
+    Supports 'clean', 'dusty', 'dirty', or 'None'.
+    Routine is called by pysat, and not by the end user directly.
+
+    """
+    if self.tag == "vtec":
+        logger.info("".join(["Data provided at a clean level, further ",
+                             "cleaning may be performed using the ",
+                             "measurement error 'dtec'"]))
+
+    return
+
+
+# ----------------------------------------------------------------------------
+# Instrument functions
+#
+# Use the default Madrigal methods
+
+# support listing files currently available on remote server (Madrigal)
+list_remote_files = functools.partial(mad_meth.list_remote_files,
+                                      supported_tags=supported_tags,
+                                      inst_code=madrigal_inst_code)
 
 
 def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
@@ -119,7 +150,6 @@ def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
                delimiter=None, file_type='netCDF4'):
     """Return a Pandas Series of every data file for this Instrument
 
-    
     Parameters
     -----------
     tag : string or NoneType
@@ -154,7 +184,7 @@ def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
         here. (default='netCDF4')
 
     Returns
-    --------
+    -------
     out : pysat.Files.from_os : pysat._files.Files
         A class containing the verified available files
 
@@ -272,20 +302,3 @@ def load(fnames, tag=None, inst_id=None, file_type='netCDF4'):
         meta['dtec'] = {meta.units_label: 'TECU'}
 
     return data, meta
-
-
-def clean(self):
-    """Routine to return GNSS TEC data at a specific level
-
-    Note
-    ----
-    Supports 'clean', 'dusty', 'dirty', or 'None'.
-    Routine is called by pysat, and not by the end user directly.
-
-    """
-    if self.tag == "vtec":
-        logger.info("".join(["Data provided at a clean level, further ",
-                             "cleaning may be performed using the ",
-                             "measurement error 'dtec'"]))
-
-    return

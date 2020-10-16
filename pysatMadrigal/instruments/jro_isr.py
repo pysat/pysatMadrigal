@@ -46,6 +46,8 @@ from pysatMadrigal.utils import coords
 
 logger = logging.getLogger(__name__)
 
+# ----------------------------------------------------------------------------
+# Instrument attributes
 
 platform = 'jro'
 name = 'isr'
@@ -54,15 +56,10 @@ tags = {'drifts': 'Drifts and wind', 'drifts_ave': 'Averaged drifts',
         'oblique_rand': 'Randomized Faraday rotation double-pulse',
         'oblique_long': 'Long pulse Faraday rotation'}
 inst_ids = {'': list(tags.keys())}
-_test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
-                    'drifts_ave': dt.datetime(2010, 1, 19),
-                    'oblique_stan': dt.datetime(2010, 4, 19),
-                    'oblique_rand': dt.datetime(2000, 11, 9),
-                    'oblique_long': dt.datetime(2010, 4, 12)}}
+
 pandas_format = False
 
-# support list files routine
-# use the default CDAWeb method
+# Local attributes
 jro_fname1 = 'jro{{year:4d}}{{month:02d}}{{day:02d}}'
 jro_fname2 = '.{{version:03d}}.{file_type}'
 supported_tags = {ss: {'drifts': jro_fname1 + "drifts" + jro_fname2,
@@ -72,15 +69,22 @@ supported_tags = {ss: {'drifts': jro_fname1 + "drifts" + jro_fname2,
                        'oblique_long': jro_fname1 + "?" + jro_fname2}
                   for ss in inst_ids.keys()}
 
-# madrigal tags
+# Madrigal tags
 madrigal_inst_code = 10
 madrigal_tag = {'': {'drifts': 1910, 'drifts_ave': 1911, 'oblique_stan': 1800,
                      'oblique_rand': 1801, 'oblique_long': 1802}, }
 
-# support listing files currently available on remote server (Madrigal)
-list_remote_files = functools.partial(mad_meth.list_remote_files,
-                                      supported_tags=supported_tags,
-                                      inst_code=madrigal_inst_code)
+# ----------------------------------------------------------------------------
+# Instrument test attributes
+
+_test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
+                    'drifts_ave': dt.datetime(2010, 1, 19),
+                    'oblique_stan': dt.datetime(2010, 4, 19),
+                    'oblique_rand': dt.datetime(2000, 11, 9),
+                    'oblique_long': dt.datetime(2010, 4, 12)}}
+
+# ----------------------------------------------------------------------------
+# Instrument methods
 
 # Madrigal will sometimes include multiple days within a file
 # labeled with a single date.
@@ -93,14 +97,6 @@ default = mad_meth.filter_data_single_date
 
 def init(self):
     """Initializes the Instrument object with values specific to JRO ISR
-
-    Runs once upon instantiation.
-
-    Parameters
-    ----------
-    self : pysat.Instrument
-        This object
-
     """
 
     ackn_str = ' '.join(["The Jicamarca Radio Observatory is a facility of",
@@ -111,9 +107,68 @@ def init(self):
 
     logger.info(ackn_str)
     self.acknowledgements = ackn_str
-    self.references = "?"
+    self.references = "Depends on the radar experiment; contact PI"
 
     return
+
+
+def clean(self):
+    """Routine to return JRO ISR data cleaned to the specified level
+
+    Note
+    ----
+    Supports 'clean'
+    'clean' is unknown for oblique modes, over 200 km for drifts
+    'dusty' is the same as clean
+    'Dirty' is the same as clean
+    'None' None
+
+    Routine is called by pysat, and not by the end user directly.
+
+    """
+
+    # Default to selecting all of the data
+    idx = {'gdalt': [i for i in range(self.data.indexes['gdalt'].shape[0])]}
+
+    if self.tag.find('oblique') == 0:
+        # Oblique profile cleaning
+        logger.info(' '.join(['The double pulse, coded pulse, and long pulse',
+                              'modes implemented at Jicamarca have different',
+                              'limitations arising from different degrees of',
+                              'precision and accuracy. Users should consult',
+                              'with the staff to determine which mode is',
+                              'right for their application.']))
+
+        if self.clean_level in ['clean', 'dusty', 'dirty']:
+            logger.warning('this level 2 data has no quality flags')
+    else:
+        # Ion drift cleaning
+        if self.clean_level in ['clean', 'dusty', 'dirty']:
+            if self.clean_level in ['clean', 'dusty']:
+                logger.warning('this level 2 data has no quality flags')
+
+            ida, = np.where((self.data.indexes['gdalt'] > 200.0))
+            idx['gdalt'] = np.unique(ida)
+        else:
+            logger.warning(' '.join(["interpretation of drifts below 200 km",
+                                     "should always be done in partnership",
+                                     "with the contact people"]))
+
+    # downselect data based upon cleaning conditions above
+    self.data = self[idx]
+
+    return
+
+
+# ----------------------------------------------------------------------------
+# Instrument functions
+#
+# Use the default Madrigal and pysat methods
+
+# Set list_remote_files routine
+list_remote_files = functools.partial(mad_meth.list_remote_files,
+                                      supported_tags=supported_tags,
+                                      inst_code=madrigal_inst_code)
 
 
 def list_files(tag='', inst_id='', data_path=None, format_str=None,
@@ -122,9 +177,8 @@ def list_files(tag='', inst_id='', data_path=None, format_str=None,
                delimiter=None, file_type='hdf5'):
     """Return a Pandas Series of every data file for this Instrument
 
-    
     Parameters
-    -----------
+    ----------
     tag : string
         Denotes type of file to load.  Accepted types are <tag strings>.
         (default='')
@@ -153,7 +207,7 @@ def list_files(tag='', inst_id='', data_path=None, format_str=None,
         here. (default='netCDF4')
 
     Returns
-    --------
+    -------
     out : pysat.Files.from_os : pysat._files.Files
         A class containing the verified available files
 
@@ -296,67 +350,28 @@ def load(fnames, tag=None, inst_id=None, file_type='hdf5'):
     return data, meta
 
 
-def clean(self):
-    """Routine to return JRO ISR data cleaned to the specified level
-
-    Notes
-    --------
-    Supports 'clean'
-    'clean' is unknown for oblique modes, over 200 km for drifts
-    'dusty' is the same as clean
-    'Dirty' is the same as clean
-    'None' None
-
-    Routine is called by pysat, and not by the end user directly.
-
-    """
-
-    # Default to selecting all of the data
-    idx = {'gdalt': [i for i in range(self.data.indexes['gdalt'].shape[0])]}
-
-    if self.tag.find('oblique') == 0:
-        # Oblique profile cleaning
-        logger.info(' '.join(['The double pulse, coded pulse, and long pulse',
-                              'modes implemented at Jicamarca have different',
-                              'limitations arising from different degrees of',
-                              'precision and accuracy. Users should consult',
-                              'with the staff to determine which mode is',
-                              'right for their application.']))
-
-        if self.clean_level in ['clean', 'dusty', 'dirty']:
-            logger.warning('this level 2 data has no quality flags')
-    else:
-        # Ion drift cleaning
-        if self.clean_level in ['clean', 'dusty', 'dirty']:
-            if self.clean_level in ['clean', 'dusty']:
-                logger.warning('this level 2 data has no quality flags')
-
-            ida, = np.where((self.data.indexes['gdalt'] > 200.0))
-            idx['gdalt'] = np.unique(ida)
-        else:
-            logger.warning(' '.join(["interpretation of drifts below 200 km",
-                                     "should always be done in partnership",
-                                     "with the contact people"]))
-
-    # downselect data based upon cleaning conditions above
-    self.data = self[idx]
-
-    return
+# ----------------------------------------------------------------------------
+# Local functions
 
 
-def calc_measurement_loc(self):
+def calc_measurement_loc(inst):
     """ Calculate the instrument measurement location in geographic coordinates
 
-    Returns
-    -------
-    Void : adds 'gdlat#', 'gdlon#' to the instrument, for all directions that
+    Parameters
+    ----------
+    inst : pysat.Instrument
+        JRO ISR Instrument object
+
+    Note
+    ----
+    Adds 'gdlat#', 'gdlon#' to the instrument, for all directions that
     have azimuth and elevation keys that match the format 'eldir#' and 'azdir#'
 
     """
 
-    az_keys = [kk[5:] for kk in list(self.data.keys())
+    az_keys = [kk[5:] for kk in list(inst.data.keys())
                if kk.find('azdir') == 0]
-    el_keys = [kk[5:] for kk in list(self.data.keys())
+    el_keys = [kk[5:] for kk in list(inst.data.keys())
                if kk.find('eldir') == 0]
     good_dir = list()
 
@@ -379,36 +394,36 @@ def calc_measurement_loc(self):
         lon_key = 'gdlon{:d}'.format(dd)
         # JRO is located 520 m above sea level (jro.igp.gob.pe./english/)
         # Also, altitude has already been calculated
-        gdaltr = np.ones(shape=self['gdlonr'].shape) * 0.52
-        gdlat, gdlon, _ = coords.local_horizontal_to_global_geo(self[az_key],
-                                                                self[el_key],
-                                                                self['range'],
-                                                                self['gdlatr'],
-                                                                self['gdlonr'],
+        gdaltr = np.ones(shape=inst['gdlonr'].shape) * 0.52
+        gdlat, gdlon, _ = coords.local_horizontal_to_global_geo(inst[az_key],
+                                                                inst[el_key],
+                                                                inst['range'],
+                                                                inst['gdlatr'],
+                                                                inst['gdlonr'],
                                                                 gdaltr,
                                                                 geodetic=True)
 
         # Assigning as data, to ensure that the number of coordinates match
         # the number of data dimensions
-        self.data = self.data.assign({lat_key: gdlat, lon_key: gdlon})
+        inst.data = inst.data.assign({lat_key: gdlat, lon_key: gdlon})
 
         # Add metadata for the new data values
         bm_label = "Beam {:d} ".format(dd)
-        self.meta[lat_key] = {self.meta.units_label: 'degrees',
-                              self.meta.name_label: bm_label + 'latitude',
-                              self.meta.desc_label: bm_label + 'latitude',
-                              self.meta.plot_label: bm_label + 'Latitude',
-                              self.meta.axis_label: bm_label + 'Latitude',
-                              self.meta.scale_label: 'linear',
-                              self.meta.min_label: -90.0,
-                              self.meta.max_label: 90.0,
-                              self.meta.fill_label: np.nan}
-        self.meta[lon_key] = {self.meta.units_label: 'degrees',
-                              self.meta.name_label: bm_label + 'longitude',
-                              self.meta.desc_label: bm_label + 'longitude',
-                              self.meta.plot_label: bm_label + 'Longitude',
-                              self.meta.axis_label: bm_label + 'Longitude',
-                              self.meta.scale_label: 'linear',
-                              self.meta.fill_label: np.nan}
+        inst.meta[lat_key] = {inst.meta.units_label: 'degrees',
+                              inst.meta.name_label: bm_label + 'latitude',
+                              inst.meta.desc_label: bm_label + 'latitude',
+                              inst.meta.plot_label: bm_label + 'Latitude',
+                              inst.meta.axis_label: bm_label + 'Latitude',
+                              inst.meta.scale_label: 'linear',
+                              inst.meta.min_label: -90.0,
+                              inst.meta.max_label: 90.0,
+                              inst.meta.fill_label: np.nan}
+        inst.meta[lon_key] = {inst.meta.units_label: 'degrees',
+                              inst.meta.name_label: bm_label + 'longitude',
+                              inst.meta.desc_label: bm_label + 'longitude',
+                              inst.meta.plot_label: bm_label + 'Longitude',
+                              inst.meta.axis_label: bm_label + 'Longitude',
+                              inst.meta.scale_label: 'linear',
+                              inst.meta.fill_label: np.nan}
 
     return
