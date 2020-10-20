@@ -89,10 +89,6 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[]):
     file_meta = filed['Metadata']['Data Parameters']
     # load up what is offered into pysat.Meta
     meta = pysat.Meta()
-    meta.acknowledgements = "".join(("See 'meta.Experiment_Notes' for ",
-                                     "instrument specific acknowledgements\n",
-                                     cedar_rules()))
-    meta.references = "See 'meta.Experiment_Notes' for references"
 
     labels = []
     for item in file_meta:
