@@ -119,8 +119,10 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[]):
                 ('Independent_Spatial_Parameters', ': '),
                 ('Experiment_Notes', '')]
     for mad_var in mad_vars:
-        temp = [mad_var[1].join(snip) for snip in getattr(meta, mad_var[0])]
-        setattr(meta, mad_var[0], temp)
+        snips = [[snip.decode('UTF-8') for snip in items] for items in
+                 getattr(meta, mad_var[0])]
+        snips = [mad_var[1].join(snip) for snip in snips]
+        setattr(meta, mad_var[0], snips)
 
     # data into frame, with labels from metadata
     data = pds.DataFrame.from_records(file_data, columns=labels)
