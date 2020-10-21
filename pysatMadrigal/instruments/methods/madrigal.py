@@ -74,6 +74,10 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
     metadata : pysat.Meta
         Metadata from the HDF5 file, as well as default values from pysat
 
+    Note
+    ----
+    Currently HDF5 reading breaks if a different file type was used previously
+
     """
     # Test the file format
     if file_type not in ['netCDF4', 'hdf5']:
