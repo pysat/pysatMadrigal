@@ -86,7 +86,10 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
     # Load the file data
     if file_type == "netCDF4":
         # Xarray natively opens netCDF data into a Dataset
-        file_data = xr.open_dataset(fnames, combine='by_coords')
+        if len(fnames) == 1:
+            file_data = xr.open_dataset(fnames[0])
+        else:
+            file_data = xr.open_mfdataset(fnames, combine='by_coords')
 
         # Currently not saving file header data, as all metadata is at
         # the data variable level
