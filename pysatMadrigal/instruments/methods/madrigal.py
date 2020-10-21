@@ -82,34 +82,41 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
     # Initialize the output
     meta = pysat.Meta()
     labels = []
-    fdata = []
 
     # Load the file data
-    for fname in fnames:
-        if file_type == "netCDF4":
-            # Xarray natively opens netCDF data into a Dataset
-            file_data = xr.open_dataset(fname)
+    if file_type == "netCDF4":
+        # Xarray natively opens netCDF data into a Dataset
+        file_data = xr.open_dataset(fnames, combine='by_coords')
 
-            # Currently not saving file header data, as all metadata is at
-            # the data variable level
-            if len(labels) == 0:
-                for item in file_data.data_vars.keys():
-                    name_string = item
-                    unit_string = file_data[item].attrs['units']
-                    desc_string = file_data[item].attrs['description']
-                    labels.append(name_string)
-                    meta[name_string.lower()] = {'long_name': name_string,
-                                                 'units': unit_string,
-                                                 'desc': desc_string}
-                    # remove any metadata from xarray
-                    file_data[item].attrs = {}
+        # Currently not saving file header data, as all metadata is at
+        # the data variable level
+        if len(labels) == 0:
+            for item in file_data.data_vars.keys():
+                name_string = item
+                unit_string = file_data[item].attrs['units']
+                desc_string = file_data[item].attrs['description']
+                labels.append(name_string)
+                meta[name_string.lower()] = {'long_name': name_string,
+                                             'units': unit_string,
+                                             'desc': desc_string}
+                # remove any metadata from xarray
+                file_data[item].attrs = {}
 
-            # Reset UNIX timestamp as datetime and set it as an index
-            file_data = file_data.rename({'timestamps': 'time'})
-            time_data = pds.to_datetime(file_data['time'].values, unit='s')
-            data = file_data.assign_coords({'time': ('time', time_data)})
+        # Reset UNIX timestamp as datetime and set it as an index
+        file_data = file_data.rename({'timestamps': 'time'})
+        time_data = pds.to_datetime(file_data['time'].values, unit='s')
+        data = file_data.assign_coords({'time': ('time', time_data)})
 
-        elif file_type == "hdf5":
+    elif file_type == "hdf5":
+        # Ensure we don't try to create an xarray object with only time as
+        # the coordinate
+        coord_len = len(xarray_coords)
+        if 'time' in xarray_coords:
+            coord_len -= 1
+
+        # Cycle through all the filenames
+        fdata = []
+        for fname in fnames:
             # Open the specified file and get the data and metadata
             filed = h5py.File(fname, 'r')
             file_data = filed['Data']['Table Layout']
@@ -153,12 +160,6 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
             time = pysat.utils.time.create_datetime_index(
                 year=data.loc[:, 'year'], month=data.loc[:, 'month'],
                 day=data.loc[:, 'day'], uts=uts)
-
-            # Ensure we don't try to create an xarray object with only time as
-            # the coordinate
-            coord_len = len(xarray_coords)
-            if 'time' in xarray_coords:
-                coord_len -= 1
 
             # Declare index or recast as xarray
             if coord_len > 0:
@@ -226,12 +227,10 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                     xdatasets.append(sel_data.to_xarray())
 
                 # Merge all of the datasets
-                for i in np.arange(1, len(xdatasets)):
-                    xdatasets[0] = xdatasets[0].merge(xdatasets[i])
+                data = xr.merge(xdatasets)
 
                 # Test to see that all data was retrieved
-                test_variables = [xkey for xkey
-                                  in xdatasets[0].variables.keys()]
+                test_variables = [xkey for xkey in data.variables.keys()]
                 ltest = len(test_variables)
                 ldata = len(data.columns)
 
@@ -249,8 +248,6 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                                                   '{:d} != '.format(ltest),
                                                   '{:d}; '.format(ldata),
                                                   estr]))
-
-                data = xdatasets[0]
             else:
                 # Set the index to time
                 data.index = time
@@ -262,12 +259,18 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                                             " specifing additional coordinates",
                                             " and storing the data as an ",
                                             "xarray Dataset"]))
-        fdata.append(data)
 
-    # If multiple files were loaded, merge the data together
-    for i in np.arange(1, len(fdata)):
-        fdata[0] = fdata[0].merge(fdata[i])
-    data = fdata[0]
+            # Compile a list of the data objects
+            fdata.append(data)
+
+        # If multiple files were loaded, merge the data together
+        if len(fdata) == 1:
+            data = fdata[0]
+        else:
+            if coord_len > 0:
+                data = xr.merge(fdata)
+            else:
+                data = pds.merge(fdata)
 
     return data, meta
 
