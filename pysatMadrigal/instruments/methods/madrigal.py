@@ -226,23 +226,25 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                     # Recast as an xarray
                     xdatasets.append(sel_data.to_xarray())
 
+                # Get the necessary information to test the data
+                ltest = len(test_variables)
+                lcols = data.columns
+                ldata = len(lcols)
+
                 # Merge all of the datasets
                 data = xr.merge(xdatasets)
+                test_variables = [xkey for xkey in data.variables.keys()]
 
                 # Test to see that all data was retrieved
-                test_variables = [xkey for xkey in data.variables.keys()]
-                ltest = len(test_variables)
-                ldata = len(data.columns)
-
                 if ltest != ldata:
                     if ltest < ldata:
                         estr = 'missing: {:}'.format(
-                            ' '.join([dvar for dvar in data.columns
+                            ' '.join([dvar for dvar in lcols
                                       if dvar not in test_variables]))
                     else:
                         estr = 'have extra: {:}'.format(
                             ' '.join([tvar for tvar in test_variables
-                                      if tvar not in data.columns]))
+                                      if tvar not in lcols]))
                         raise ValueError(''.join(['coordinates not supplied ',
                                                   'for all data columns: ',
                                                   '{:d} != '.format(ltest),
