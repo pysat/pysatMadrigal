@@ -234,13 +234,13 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                     xdatasets.append(sel_data.to_xarray())
 
                 # Get the necessary information to test the data
-                ltest = len(test_variables)
                 lcols = data.columns
                 ldata = len(lcols)
 
                 # Merge all of the datasets
                 data = xr.merge(xdatasets)
                 test_variables = [xkey for xkey in data.variables.keys()]
+                ltest = len(test_variables)
 
                 # Test to see that all data was retrieved
                 if ltest != ldata:
