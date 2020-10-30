@@ -279,7 +279,7 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
             if coord_len > 0:
                 data = xr.merge(fdata)
             else:
-                data = pds.merge(fdata)
+                data = pds.concat(fdata)
 
     return data, meta
 
