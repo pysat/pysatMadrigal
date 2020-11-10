@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Bug Fix
    - Updated madrigal methods to simplify compound data types and enable
      creation of netCDF4 files using `Instrument.to_netcdf4()`.
+   - Updated load for multiple files in pandas format
 
 ## [0.0.3] - 2020-06-15
 - pypi compatibility
