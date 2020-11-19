@@ -41,11 +41,9 @@ import functools
 import numpy as np
 
 from pysat.instruments.methods import general as ps_gen
+from pysat import logger
 
 from pysatMadrigal.instruments.methods import madrigal as mad_meth
-
-import logging
-logger = logging.getLogger(__name__)
 
 # ----------------------------------------------------------------------------
 # Instrument attributes

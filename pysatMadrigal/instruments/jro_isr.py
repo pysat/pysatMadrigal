@@ -36,15 +36,13 @@ Note
 
 import datetime as dt
 import functools
-import logging
 import numpy as np
 
 from pysat.instruments.methods import general as ps_gen
+from pysat import logger
 
 from pysatMadrigal.instruments.methods import madrigal as mad_meth
 from pysatMadrigal.utils import coords
-
-logger = logging.getLogger(__name__)
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
