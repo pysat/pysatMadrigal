@@ -60,15 +60,13 @@ update_DMSP_ephemeris
 
 import datetime as dt
 import functools
-import logging
 import numpy as np
 import pandas as pds
 
 from pysat.instruments.methods import general as ps_gen
+from pysat import logger
 
 from pysatMadrigal.instruments.methods import madrigal as mad_meth
-
-logger = logging.getLogger(__name__)
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
