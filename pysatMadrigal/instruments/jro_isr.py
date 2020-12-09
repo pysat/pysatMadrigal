@@ -407,21 +407,21 @@ def calc_measurement_loc(inst):
 
         # Add metadata for the new data values
         bm_label = "Beam {:d} ".format(dd)
-        inst.meta[lat_key] = {inst.meta.units_label: 'degrees',
-                              inst.meta.name_label: bm_label + 'latitude',
-                              inst.meta.desc_label: bm_label + 'latitude',
-                              inst.meta.plot_label: bm_label + 'Latitude',
-                              inst.meta.axis_label: bm_label + 'Latitude',
-                              inst.meta.scale_label: 'linear',
-                              inst.meta.min_label: -90.0,
-                              inst.meta.max_label: 90.0,
-                              inst.meta.fill_label: np.nan}
-        inst.meta[lon_key] = {inst.meta.units_label: 'degrees',
-                              inst.meta.name_label: bm_label + 'longitude',
-                              inst.meta.desc_label: bm_label + 'longitude',
-                              inst.meta.plot_label: bm_label + 'Longitude',
-                              inst.meta.axis_label: bm_label + 'Longitude',
-                              inst.meta.scale_label: 'linear',
-                              inst.meta.fill_label: np.nan}
+        inst.meta[lat_key] = {inst.meta.labels.units: 'degrees',
+                              inst.meta.labels.name: bm_label + 'latitude',
+                              inst.meta.labels.desc: bm_label + 'latitude',
+                              inst.meta.labels.plot: bm_label + 'Latitude',
+                              inst.meta.labels.axis: bm_label + 'Latitude',
+                              inst.meta.labels.scale: 'linear',
+                              inst.meta.labels.min_val: -90.0,
+                              inst.meta.labels.max_val: 90.0,
+                              inst.meta.labels.fill_val: np.nan}
+        inst.meta[lon_key] = {inst.meta.labels.units: 'degrees',
+                              inst.meta.labels.name: bm_label + 'longitude',
+                              inst.meta.labels.desc: bm_label + 'longitude',
+                              inst.meta.labels.plot: bm_label + 'Longitude',
+                              inst.meta.labels.axis: bm_label + 'Longitude',
+                              inst.meta.labels.scale: 'linear',
+                              inst.meta.labels.fill_val: np.nan}
 
     return
