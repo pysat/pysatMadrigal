@@ -338,17 +338,6 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
     if kindat is None:
         raise ValueError("Must supply Madrigal experiment code")
 
-    # currently passes things along if no user and password supplied
-    # need to do this for testing
-    # TODO, implement user and password values in test code
-    # specific to each instrument
-    if user is None:
-        logger.info('No user information supplied for download.')
-        user = 'pysat_testing'
-    if password is None:
-        logger.info('Please provide email address in password field.')
-        password = 'pysat_testing@not_real_email.org'
-
     # Initialize the connection to Madrigal
     web_data = madrigalWeb.MadrigalData(url)
 
@@ -436,17 +425,6 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
         kindat = []
     else:
         kindat = [int(kk) for kk in kindat.split(",")]
-
-    # currently passes things along if no user and password supplied
-    # need to do this for testing
-    # TODO, implement user and password values in test code
-    # specific to each instrument
-    if user is None:
-        logger.warning('No user information supplied for download.')
-        user = 'pysat_testing'
-    if password is None:
-        logger.warning('Please provide email address in password field.')
-        password = 'pysat_testing@not_real_email.org'
 
     # If date_array supplied, overwrite start and stop
     if date_array is not None:
@@ -592,17 +570,6 @@ def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
     """
     if inst_code is None:
         raise ValueError("Must supply Madrigal instrument code")
-
-    # currently passes things along if no user and password supplied
-    # need to do this for testing
-    # TODO, implement user and password values in test code
-    # specific to each instrument
-    if user is None:
-        logger.info('No user information supplied for download.')
-        user = 'pysat_testing'
-    if password is None:
-        logger.info('Please provide email address in password field.')
-        password = 'pysat_testing@not_real_email.org'
 
     # Test input
     try:
