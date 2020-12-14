@@ -650,7 +650,7 @@ def _check_madrigal_params(inst_code, user, password):
 
     inst_code : string
         Madrigal instrument code(s), cast as a string.  If multiple are used,
-        separate them with commas. (default=None)
+        separate them with commas.
     user : str
         The user's names should be provided in field user. Ruby Payne-Scott
         should be entered as Ruby+Payne-Scott
