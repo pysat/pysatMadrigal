@@ -332,8 +332,7 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
         raise ValueError("Unknown file format {:}, accepts {:}".format(
             file_type, file_types))
 
-    if inst_code is None:
-        raise ValueError("Must supply Madrigal instrument code")
+    _check_madrigal_params(inst_code=inst_code, user=user, password=password)
 
     if kindat is None:
         raise ValueError("Must supply Madrigal experiment code")
@@ -418,8 +417,7 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
 
     """
 
-    if inst_code is None:
-        raise ValueError("Must supply Madrigal instrument code")
+    _check_madrigal_params(inst_code=inst_code, user=user, password=password)
 
     if kindat is None:
         kindat = []
@@ -568,8 +566,8 @@ def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
                                               inst_code=madrigal_inst_code)
 
     """
-    if inst_code is None:
-        raise ValueError("Must supply Madrigal instrument code")
+
+    _check_madrigal_params(inst_code=inst_code, user=user, password=password)
 
     # Test input
     try:
@@ -644,3 +642,29 @@ def filter_data_single_date(inst):
         inst.data = inst[idx]
 
     return
+
+
+def _check_madrigal_params(inst_code, user, password):
+    """Checks that parameters requried by Madrigal database are passed through.
+    Default values of None will raise an error.
+
+    inst_code : string
+        Madrigal instrument code(s), cast as a string.  If multiple are used,
+        separate them with commas. (default=None)
+    user : str
+        The user's names should be provided in field user. Ruby Payne-Scott
+        should be entered as Ruby+Payne-Scott
+    password : str
+        The password field should be the user's email address. These parameters
+            are passed to Madrigal when downloading.
+    """
+
+    if inst_code is None:
+        raise ValueError("Must supply Madrigal instrument code")
+
+    if not (isinstance(user, str) and isinstance(password, str)):
+        raise ValueError(' '.join(("The madrigal database requries a username",
+                                   "and password.  Please input these as",
+                                   "user='firstname+lastname' and",
+                                   "password='myname@email.address' in this",
+                                   "function.")))
