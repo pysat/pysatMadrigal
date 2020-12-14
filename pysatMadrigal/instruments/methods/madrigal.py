@@ -648,7 +648,7 @@ def _check_madrigal_params(inst_code, user, password):
     """Checks that parameters requried by Madrigal database are passed through.
     Default values of None will raise an error.
 
-    inst_code : string
+    inst_code : str
         Madrigal instrument code(s), cast as a string.  If multiple are used,
         separate them with commas.
     user : str
