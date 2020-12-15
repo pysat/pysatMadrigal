@@ -170,9 +170,7 @@ list_remote_files = functools.partial(mad_meth.list_remote_files,
 
 
 def list_files(tag='', inst_id='', data_path=None, format_str=None,
-               supported_tags=supported_tags,
-               fake_daily_files_from_monthly=False,
-               delimiter=None, file_type='hdf5'):
+               supported_tags=supported_tags, delimiter=None, file_type='hdf5'):
     """Return a Pandas Series of every data file for this Instrument
 
     Parameters
@@ -192,11 +190,6 @@ def list_files(tag='', inst_id='', data_path=None, format_str=None,
     supported_tags : dict or NoneType
         keys are inst_id, each containing a dict keyed by tag
         where the values file format template strings. (default=None)
-    fake_daily_files_from_monthly : bool
-        Some CDAWeb instrument data files are stored by month, interfering
-        with pysat's functionality of loading by day. This flag, when true,
-        appends daily dates to monthly files internally. These dates are
-        used by load routine in this module to provide data by day.
     delimiter : string
         Delimiter string upon which files will be split (e.g., '.')
     file_type : string
@@ -214,11 +207,9 @@ def list_files(tag='', inst_id='', data_path=None, format_str=None,
         supported_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
             file_type=file_type)
 
-    out = ps_gen.list_files(
-        tag=tag, inst_id=inst_id, data_path=data_path, format_str=format_str,
-        supported_tags=supported_tags,
-        fake_daily_files_from_monthly=fake_daily_files_from_monthly,
-        delimiter=delimiter)
+    out = ps_gen.list_files(tag=tag, inst_id=inst_id, data_path=data_path,
+                            format_str=format_str,
+                            supported_tags=supported_tags, delimiter=delimiter)
 
     return out
 
