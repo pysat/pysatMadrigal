@@ -90,7 +90,7 @@ _test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
 # To ensure this function is always applied first, we set the filter
 # function as the default function for (JRO).
 # Default function is run first by the nanokernel on every load call.
-default = mad_meth.filter_data_single_date
+preprocess = mad_meth.filter_data_single_date
 
 
 def init(self):
