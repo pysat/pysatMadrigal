@@ -7,7 +7,23 @@ from pysat.tests.instrument_test_class import InstTestClass
 
 import pysatMadrigal
 
-instruments = generate_instrument_list(inst_loc=pysatMadrigal.instruments)
+# Optional code to pass through user and password info to test instruments
+# dict, keyed by pysat instrument, with a list of usernames and passwords
+# user_info = {'platform_name': {'user': 'pysat_user',
+#                                'password': 'None'}}
+user_info = {module: {'user': 'pysat+CI_tests',
+                      'password': 'pysat.developers@gmail.com'}
+             for module in pysatMadrigal.instruments.__all__}
+
+# Developers for instrument libraries should update the following line to
+# point to their own subpackage location
+# e.g.,
+# instruments = generate_instrument_list(inst_loc=mypackage.inst)
+# If user and password info supplied, use the following instead
+# instruments = generate_instrument_list(inst_loc=mypackage.inst,
+#                                        user_info=user_info)
+instruments = generate_instrument_list(inst_loc=pysatMadrigal.instruments,
+                                       user_info=user_info)
 method_list = [func for func in dir(InstTestClass)
                if callable(getattr(InstTestClass, func))]
 
