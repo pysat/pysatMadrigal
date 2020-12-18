@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.?.?] - 2020-07-03
 - Added coords from pysat.utils
+- Made changes to structure to comply with updates in pysat 3.0.0
 - Bug Fix
    - Updated madrigal methods to simplify compound data types and enable
      creation of netCDF4 files using `Instrument.to_netcdf4()`.

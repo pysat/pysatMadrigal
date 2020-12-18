@@ -289,7 +289,7 @@ def load(fnames, tag=None, inst_id=None, file_type='netCDF4'):
 
     # Fix the units for tec and dtec
     if tag == 'vtec':
-        meta['tec'] = {meta.units_label: 'TECU'}
-        meta['dtec'] = {meta.units_label: 'TECU'}
+        meta['tec'] = {meta.labels.units: 'TECU'}
+        meta['dtec'] = {meta.labels.units: 'TECU'}
 
     return data, meta

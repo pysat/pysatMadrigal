@@ -71,7 +71,7 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
     data : pds.DataFrame or xr.Dataset
         A pandas DataFrame or xarray Dataset holding the data from the HDF5
         file
-    metadata : pysat.Meta
+    meta : pysat.Meta
         Metadata from the HDF5 file, as well as default values from pysat
 
     Note
@@ -103,10 +103,11 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                 unit_string = file_data[item].attrs['units']
                 desc_string = file_data[item].attrs['description']
                 labels.append(name_string)
-                meta[name_string.lower()] = {'long_name': name_string,
-                                             'units': unit_string,
-                                             'desc': desc_string}
-                # remove any metadata from xarray
+                meta[name_string.lower()] = {meta.labels.name: name_string,
+                                             meta.labels.units: unit_string,
+                                             meta.labels.desc: desc_string}
+
+                # Remove any metadata from xarray
                 file_data[item].attrs = {}
 
         # Reset UNIX timestamp as datetime and set it as an index
@@ -136,9 +137,9 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                     unit_string = item[3].decode('UTF-8')
                     desc_string = item[1].decode('UTF-8')
                     labels.append(name_string)
-                    meta[name_string.lower()] = {'long_name': name_string,
-                                                 'units': unit_string,
-                                                 'desc': desc_string}
+                    meta[name_string.lower()] = {meta.labels.name: name_string,
+                                                 meta.labels.units: unit_string,
+                                                 meta.labels.desc: desc_string}
 
             # Add additional metadata notes. Custom attributes attached to meta
             # are attached to corresponding Instrument object when pysat
