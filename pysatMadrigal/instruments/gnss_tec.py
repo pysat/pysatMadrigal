@@ -143,8 +143,7 @@ list_remote_files = functools.partial(mad_meth.list_remote_files,
 
 
 def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
-               supported_tags=supported_tags,
-               fake_daily_files_from_monthly=False, two_digit_year_break=99,
+               supported_tags=supported_tags, two_digit_year_break=99,
                delimiter=None, file_type='netCDF4'):
     """Return a Pandas Series of every data file for this Instrument
 
@@ -165,11 +164,6 @@ def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
     supported_tags : dict or NoneType
         keys are inst_id, each containing a dict keyed by tag
         where the values file format template strings. (default=None)
-    fake_daily_files_from_monthly : bool
-        Some CDAWeb instrument data files are stored by month, interfering
-        with pysat's functionality of loading by day. This flag, when true,
-        appends daily dates to monthly files internally. These dates are
-        used by load routine in this module to provide data by day.
     two_digit_year_break : int
         If filenames only store two digits for the year, then
         '1900' will be added for years >= two_digit_year_break
@@ -191,11 +185,10 @@ def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
         supported_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
             file_type=file_type)
 
-    out = ps_gen.list_files(
-        tag=tag, inst_id=inst_id, data_path=data_path, format_str=format_str,
-        supported_tags=supported_tags,
-        fake_daily_files_from_monthly=fake_daily_files_from_monthly,
-        two_digit_year_break=two_digit_year_break, delimiter=delimiter)
+    out = ps_gen.list_files(tag=tag, inst_id=inst_id, data_path=data_path,
+                            format_str=format_str, delimiter=delimiter,
+                            supported_tags=supported_tags,
+                            two_digit_year_break=two_digit_year_break)
 
     return out
 
