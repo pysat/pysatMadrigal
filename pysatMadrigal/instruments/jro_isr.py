@@ -401,18 +401,12 @@ def calc_measurement_loc(inst):
         inst.meta[lat_key] = {inst.meta.labels.units: 'degrees',
                               inst.meta.labels.name: bm_label + 'latitude',
                               inst.meta.labels.desc: bm_label + 'latitude',
-                              inst.meta.labels.plot: bm_label + 'Latitude',
-                              inst.meta.labels.axis: bm_label + 'Latitude',
-                              inst.meta.labels.scale: 'linear',
                               inst.meta.labels.min_val: -90.0,
                               inst.meta.labels.max_val: 90.0,
                               inst.meta.labels.fill_val: np.nan}
         inst.meta[lon_key] = {inst.meta.labels.units: 'degrees',
                               inst.meta.labels.name: bm_label + 'longitude',
                               inst.meta.labels.desc: bm_label + 'longitude',
-                              inst.meta.labels.plot: bm_label + 'Longitude',
-                              inst.meta.labels.axis: bm_label + 'Longitude',
-                              inst.meta.labels.scale: 'linear',
                               inst.meta.labels.fill_val: np.nan}
 
     return
