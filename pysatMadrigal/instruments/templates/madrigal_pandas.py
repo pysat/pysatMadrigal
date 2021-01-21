@@ -10,15 +10,15 @@ Downloads data from the Madrigal Database.
 
 Warnings
 --------
-    All data downloaded under this general support is placed in the same
-    directory, pysat_data_dir/madrigal/pandas/. For technical reasons,
-    the file search algorithm for pysat's Madrigal support is set to permissive
-    defaults. Thus, all instrument files downloaded via this interface will be
-    picked up by the madrigal pandas pysat Instrument object unless the
-    file_format keyword is used at instantiation.
+All data downloaded under this general support is placed in the same directory,
+pysat_data_dir/madrigal/pandas/. For technical reasons, the file search
+algorithm for pysat's Madrigal support is set to permissive defaults. Thus, all
+instrument files downloaded via this interface will be picked up by the madrigal
+pandas pysat Instrument object unless the file_format keyword is used at
+instantiation.
 
-    Files can be safely downloaded without knowing the file_format keyword,
-    or equivalently, how Madrigal names the files. See `Examples` for more.
+Files can be safely downloaded without knowing the file_format keyword,
+or equivalently, how Madrigal names the files. See `Examples` for more.
 
 Properties
 ----------
@@ -27,7 +27,9 @@ platform
 name
     'pandas'
 tag
-    ''
+    madrigal instrument code as an integer
+inst_id
+    madrigal kindat as a string
 
 Examples
 --------
@@ -36,9 +38,8 @@ Examples
     # for isolated use of a madrigal data set
     import pysat
     # download DMSP data from Madrigal
-    dmsp = pysat.Instrument('madrigal', 'pandas',
-                            madrigal_code=8100,
-                            madrigal_tag=10241)
+    dmsp = pysat.Instrument('madrigal', 'pandas', inst_code=8100,
+                            kindat='10241')
     dmsp.download(dt.datetime(2017, 12, 30), dt.datetime(2017, 12, 31),
                   user='Firstname+Lastname', password='email@address.com')
     dmsp.load(2017, 363)
@@ -65,51 +66,53 @@ Examples
     # https://docs.python.org/2/library/string.html
 
     # the complete instantiation for this instrument is
-    dmsp = pysat.Instrument('madrigal', 'pandas',
-                            madrigal_code=8100,
-                            madrigal_tag=10241,
-                            file_format='dms_ut_{year:4d}{month:02d}{day:02d}_11.002.hdf5')
+    file_fmt = 'dms_ut_{year:4d}{month:02d}{day:02d}_11.002.hdf5'
+    dmsp = pysat.Instrument('madrigal', 'pandas', inst_code=8100,
+                            kindat='10241', file_format=file_fmt)
 
 Note
 ----
-    Please provide name and email when downloading data with this routine.
+Please provide name and email when downloading data with this routine.
 
 """
 
 import datetime as dt
 import functools
-import logging
 
-from pysat.instruments.methods import madrigal as mad_meth
-from pysat.instruments.methods import nasa_cdaweb as cdw
+from pysat.instruments.methods import general as ps_gen
+from pysat import logger
 
-logger = logging.getLogger(__name__)
+from pysatMadrigal.instruments.methods import madrigal as mad_meth
+
+# ----------------------------------------------------------------------------
+# Instrument attributes
 
 platform = 'madrigal'
 name = 'pandas'
-tags = {'': 'General Madrigal data access loaded into pysat via pandas.'}
-inst_ids = {'': list(tags.keys())}
-# need to sort out test day setting for unit testing
-_test_dates = {'': {'': dt.datetime(2010, 1, 19)}}
-
-# need a way to get the filename strings for a particular instrument
-# I've put in wildcards for now....
-#########
-jro_fname1 = '*{year:4d}{month:02d}{day:02d}'
-jro_fname2 = '.{version:03d}.hdf5'
-supported_tags = {ss: {'': '*'.join((jro_fname1, jro_fname2))}
-                  for ss in inst_ids.keys()}
-list_files = functools.partial(cdw.list_files,
-                               supported_tags=supported_tags)
+tags = {self.kwargs['kindat']: 'General pysat Madrigal data access.'}
+inst_ids = {self.kwargs['inst_code']: list(tags.keys())}
 
 pandas_format = True
 
-load = mad_meth.load
+# Local attributes
+#
+# Need a way to get the filename strings for a particular instrument unless
+# wildcards start working
+fname = '*{year:4d}{month:02d}{day:02d}*.{version:03d}.hdf5'
+supported_tags = {ss: {tt: fname for tt in inst_ids[ss]}
+                  for ss in inst_ids.keys()}
+remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
+                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 
-# support download routine
-# real download attached during init
-# however, pysat requires a method before we get there
-download = mad_meth.download
+# ----------------------------------------------------------------------------
+# Instrument test attributes
+
+# Need to sort out test day setting for unit testing, maybe through a remote
+# function
+# _test_dates = {'': {'': dt.datetime(2010, 1, 19)}}
+
+# ----------------------------------------------------------------------------
+# Instrument methods
 
 
 def init(self):
@@ -125,64 +128,13 @@ def init(self):
     """
 
     logger.info(mad_meth.cedar_rules())
+    self.acknowledgements = mad_meth.cedar_rules()
+    self.references = 'Please remember to cite the instrument articles.'
 
-    code = self.kwargs['madrigal_code']
-    tag = self.kwargs['madrigal_tag']
-    self._download_rtn = functools.partial(_general_download,
-                                           inst_code=str(code),
-                                           kindat=str(tag))
+    self.tag = self.kwargs['inst_code']
+    self.inst_id = self.kwargs['kindat']
+
     return
-
-
-def _general_download(date_array, tag='', inst_id='', data_path=None, user=None,
-                      password=None, inst_code=None, kindat=None):
-    """Downloads data from Madrigal.
-
-    Method will be partially set using functools.partial. Intended to
-    have the same call structure as normal instrument download routine.
-    Upon Instrument instantiation this routine will be set to
-    parameters specific to a Madrigal data set. It will then work like
-    a standard download call.
-
-    Parameters
-    ----------
-    date_array : array-like
-        list of datetimes to download data for. The sequence of dates need not
-        be contiguous.
-    tag : string
-        Tag identifier used for particular dataset. This input is provided by
-        pysat. (default='')
-    inst_id : string
-        Satellite ID string identifier used for particular dataset. This input
-        is provided by pysat. (default='')
-    data_path : string
-        Path to directory to download data to. (default=None)
-    user : string
-        User string input used for download. Provided by user and passed via
-        pysat. If an account is required for dowloads this routine here must
-        error if user not supplied. (default=None)
-    password : string
-        Password for data download. (default=None)
-    inst_code : int
-        Madrigal integer code used to identify platform (default=None)
-    kindat : int
-        Madrigal integer code used to identify data set (default=None)
-
-    Notes
-    -----
-    The user's names should be provided in field user. Ruby Payne-Scott should
-    be entered as Ruby+Payne-Scott
-
-    The password field should be the user's email address. These parameters
-    are passed to Madrigal when downloading.
-
-    The affiliation field is set to pysat to enable tracking of pysat
-    downloads.
-
-    """
-
-    mad_meth.download(date_array, inst_code=inst_code, kindat=kindat,
-                      data_path=data_path, user=user, password=password)
 
 
 def clean(self):
@@ -202,3 +154,27 @@ def clean(self):
         logger.warning('Generalized Madrigal data support has no cleaning.')
 
     return
+
+
+# ----------------------------------------------------------------------------
+# Instrument functions
+#
+# Use the default Madrigal and pysat methods
+
+# Set the list_remote_files routine
+list_remote_files = functools.partial(mad_meth.list_remote_files,
+                                      inst_code=self.kwargs['inst_code'],
+                                      kindats=self.kwargs['kindat'],
+                                      supported_tags=remote_tags)
+
+# Set the load routine
+load = mad_meth.load
+
+# Set the list routine
+list_files = functools.partial(ps_gen.list_files,
+                               supported_tags=supported_tags)
+
+# Set up the download routine
+download = functools.partial(mad_meth.download,
+                             inst_code=str(self.kwargs['inst_code']),
+                             kindat=self.kwargs['kindat'])

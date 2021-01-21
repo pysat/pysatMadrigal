@@ -61,10 +61,12 @@ vname = '.{{version:03d}}'
 supported_tags = {ss: {'vtec': ''.join(['gps', dname, 'g', vname,
                                         ".{file_type}"])}
                   for ss in inst_ids.keys()}
+remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
+                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 
 # madrigal tags
 madrigal_inst_code = 8000
-madrigal_tag = {'': {'vtec': 3500}}  # , 'los': 3505}}
+madrigal_tag = {'': {'vtec': '3500'}}  # , 'los': '3505'}}
 
 # ----------------------------------------------------------------------------
 # Instrument test attributes
@@ -138,8 +140,9 @@ def clean(self):
 
 # support listing files currently available on remote server (Madrigal)
 list_remote_files = functools.partial(mad_meth.list_remote_files,
-                                      supported_tags=supported_tags,
-                                      inst_code=madrigal_inst_code)
+                                      supported_tags=remote_tags,
+                                      inst_code=madrigal_inst_code,
+                                      kindats=madrigal_tag)
 
 
 def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
@@ -236,7 +239,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
 
     """
     mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
-                      kindat=str(madrigal_tag[inst_id][tag]),
+                      kindat=madrigal_tag[inst_id][tag],
                       data_path=data_path, user=user, password=password,
                       file_type=file_type, url=url)
 

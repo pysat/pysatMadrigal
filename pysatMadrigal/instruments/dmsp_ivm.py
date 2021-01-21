@@ -41,7 +41,7 @@ Example
 
 Note
 ----
-    Please provide name and email when downloading data with this routine.
+Please provide name and email when downloading data with this routine.
 
 Code development supported by NSF grant 1259508
 
@@ -87,26 +87,32 @@ dmsp_fname2 = {'utd': '.{{version:03d}}.{file_type}',
                '': 's?.{{version:03d}}.{file_type}'}
 supported_tags = {ss: {kk: dmsp_fname1[kk] + ss[1:] + dmsp_fname2[kk]
                        for kk in inst_ids[ss]} for ss in inst_ids.keys()}
+remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
+                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 
-# madrigal tags
+# Madrigal tags
 madrigal_inst_code = 8100
-madrigal_tag = {'f11': {'utd': 10241, '': 10111},
-                'f12': {'utd': 10242, '': 10112},
-                'f13': {'utd': 10243, '': 10113},
-                'f14': {'utd': 10244, '': 10114},
-                'f15': {'utd': 10245, '': 10115},
-                'f16': {'': 10116},
-                'f17': {'': 10117},
-                'f18': {'': 10118}, }
+madrigal_tag = {'f11': {'utd': '10241', '': '10111'},
+                'f12': {'utd': '10242', '': '10112'},
+                'f13': {'utd': '10243', '': '10113'},
+                'f14': {'utd': '10244', '': '10114'},
+                'f15': {'utd': '10245', '': '10115'},
+                'f16': {'': '10116'},
+                'f17': {'': '10117'},
+                'f18': {'': '10118'}, }
 
 # ----------------------------------------------------------------------------
 # Instrument test attributes
 
-_test_dates = {'f11': {'utd': dt.datetime(1998, 1, 2)},
-               'f12': {'utd': dt.datetime(1998, 1, 2)},
-               'f13': {'utd': dt.datetime(1998, 1, 2)},
-               'f14': {'utd': dt.datetime(1998, 1, 2)},
-               'f15': {'utd': dt.datetime(2017, 12, 30)}}
+_test_dates = {
+    'f11': {tag: dt.datetime(1998, 1, 2) for tag in inst_ids['f11']},
+    'f12': {tag: dt.datetime(1998, 1, 2) for tag in inst_ids['f12']},
+    'f13': {tag: dt.datetime(1998, 1, 2) for tag in inst_ids['f13']},
+    'f14': {tag: dt.datetime(1998, 1, 2) for tag in inst_ids['f14']},
+    'f15': {tag: dt.datetime(2017, 12, 30) for tag in inst_ids['f15']},
+    'f16': {tag: dt.datetime(2009, 1, 1) for tag in inst_ids['f16']},
+    'f17': {tag: dt.datetime(2009, 1, 1) for tag in inst_ids['f17']},
+    'f18': {tag: dt.datetime(2017, 12, 30) for tag in inst_ids['f18']}}
 
 # ----------------------------------------------------------------------------
 # Instrument methods
@@ -181,8 +187,9 @@ def clean(self):
 
 # Set the list_remote_files routine
 list_remote_files = functools.partial(mad_meth.list_remote_files,
-                                      supported_tags=supported_tags,
-                                      inst_code=madrigal_inst_code)
+                                      inst_code=madrigal_inst_code,
+                                      kindats=madrigal_tag,
+                                      supported_tags=remote_tags)
 
 # Set the load routine
 load = mad_meth.load
@@ -274,7 +281,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
 
     """
     mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
-                      kindat=str(madrigal_tag[inst_id][tag]),
+                      kindat=madrigal_tag[inst_id][tag],
                       data_path=data_path, user=user, password=password)
     return
 
