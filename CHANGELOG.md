@@ -2,13 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.?.?] - 2020-07-03
-- Added coords from pysat.utils
+## [0.0.4] - TBD
 - Made changes to structure to comply with updates in pysat 3.0.0
+- Enhancements
+  - Added coords from pysat.utils
+  - Added Vertical TEC Instrument
 - Bug Fix
-   - Updated madrigal methods to simplify compound data types and enable
-     creation of netCDF4 files using `Instrument.to_netcdf4()`.
-   - Updated load for multiple files in pandas format
+  - Updated madrigal methods to simplify compound data types and enable
+    creation of netCDF4 files using `Instrument.to_netcdf4()`.
+  - Updated load for multiple files in pandas format
+  - Fixed remote listing routine to return filenames instead of experiments
 
 ## [0.0.3] - 2020-06-15
 - pypi compatibility
