@@ -5,18 +5,18 @@ pysat, reducing the amount of user intervention.
  """
 
 import datetime as dt
-import logging
 import numpy as np
 import os
 import pandas as pds
 import xarray as xr
 
 import h5py
-from madrigalWeb import madrigalWeb
-
 import pysat
 
-logger = logging.getLogger(__name__)
+from madrigalWeb import madrigalWeb
+
+
+logger = pysat.logger
 file_types = ['hdf5', 'netCDF4', 'simple']
 
 
@@ -370,8 +370,7 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
                          url="http://cedar.openmadrigal.org",
                          start=dt.datetime(1900, 1, 1), stop=dt.datetime.now(),
                          date_array=None):
-    """Retrieve the remote filenames for a specified Madrigal instrument
-    (and experiment)
+    """Retrieve the remote filenames for a specified Madrigal experiment
 
     Parameters
     ----------
@@ -403,6 +402,11 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
         Array of datetimes to download data for. The sequence of dates need not
         be contiguous and will be used instead of start and stop if supplied.
         (default=None)
+
+    Returns
+    -------
+    files : madrigalWeb.madrigalWeb.MadrigalExperimentFile
+        Madrigal file object that contains remote experiment file data
 
     Note
     ----
@@ -505,7 +509,7 @@ def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
                       password=None, supported_tags=None,
                       url="http://cedar.openmadrigal.org",
                       two_digit_year_break=None, start=dt.datetime(1900, 1, 1),
-                      stop=dt.datetime.now()):
+                      stop=dt.datetime.utcnow()):
     """List files available from Madrigal.
 
     Parameters
@@ -545,6 +549,12 @@ def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
     stop : dt.datetime
         Ending time for the file list (defaults to time of run)
 
+    Returns
+    -------
+    pds.Series
+        A series of filenames, see `pysat._files.process_parsed_filenames`
+        for more information.
+
     Note
     ----
     The user's names should be provided in field user. Ruby Payne-Scott should
@@ -576,16 +586,18 @@ def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
     except KeyError:
         raise ValueError('Problem parsing supported_tags')
 
-    # Retrieve remote file list
+    # Retrieve remote file experiment list
     files = get_remote_filenames(inst_code=inst_code, kindat=kindat, user=user,
                                  password=password, url=url, start=start,
                                  stop=stop)
 
-    # parse these filenames to grab out the ones we want
-    logger.info("Parsing filenames")
-    stored = pysat._files.parse_fixed_width_filenames(files, format_str)
+    filenames = [file_exp.name for file_exp in files]
 
-    # process the parsed filenames and return a properly formatted Series
+    # Parse these filenames to grab out the ones we want
+    logger.info("Parsing filenames")
+    stored = pysat._files.parse_fixed_width_filenames(filenames, format_str)
+
+    # Process the parsed filenames and return a properly formatted Series
     logger.info("Processing filenames")
     return pysat._files.process_parsed_filenames(stored, two_digit_year_break)
 
@@ -613,7 +625,7 @@ def filter_data_single_date(inst):
     ::
 
         inst = pysat.Instrument()
-        inst.custom.attach(filter_data_single_date, 'modify')
+        inst.custom_attach(filter_data_single_date)
 
     This function will then be automatically applied to the
     Instrument object data on every load by the pysat nanokernel.
@@ -621,15 +633,13 @@ def filter_data_single_date(inst):
     Warnings
     --------
     For the best performance, this function should be added first in the queue.
-    This may be ensured by setting the default function in a
-    pysat instrument file to this one.
+    This may be ensured by setting the default function in a  pysat instrument
+    file to this one.
 
-    within platform_name.py set
+    To do this, within platform_name.py set `preprocess` at the top level.
     ::
 
-        default = pysat.instruments.methods.madrigal.filter_data_single_date
-
-    at the top level
+        preprocess = pysat.instruments.methods.madrigal.filter_data_single_date
 
     """
 
@@ -647,8 +657,9 @@ def filter_data_single_date(inst):
 
 def _check_madrigal_params(inst_code, user, password):
     """Checks that parameters requried by Madrigal database are passed through.
-    Default values of None will raise an error.
 
+    Parameters
+    ----------
     inst_code : str
         Madrigal instrument code(s), cast as a string.  If multiple are used,
         separate them with commas.
@@ -658,6 +669,12 @@ def _check_madrigal_params(inst_code, user, password):
     password : str
         The password field should be the user's email address. These parameters
             are passed to Madrigal when downloading.
+
+    Raises
+    ------
+    ValueError
+        Default values of None will raise an error.
+
     """
 
     if inst_code is None:
@@ -669,3 +686,5 @@ def _check_madrigal_params(inst_code, user, password):
                                    "user='firstname+lastname' and",
                                    "password='myname@email.address' in this",
                                    "function.")))
+
+    return
