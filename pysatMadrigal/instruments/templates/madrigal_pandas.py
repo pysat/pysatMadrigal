@@ -76,7 +76,6 @@ Please provide name and email when downloading data with this routine.
 
 """
 
-import datetime as dt
 import functools
 
 from pysat.instruments.methods import general as ps_gen
@@ -89,8 +88,8 @@ from pysatMadrigal.instruments.methods import madrigal as mad_meth
 
 platform = 'madrigal'
 name = 'pandas'
-tags = {self.kwargs['kindat']: 'General pysat Madrigal data access.'}
-inst_ids = {self.kwargs['inst_code']: list(tags.keys())}
+tags = {'': 'General pysat Madrigal data access.'}
+inst_ids = {'': list(tags.keys())}
 
 pandas_format = True
 
@@ -131,8 +130,8 @@ def init(self):
     self.acknowledgements = mad_meth.cedar_rules()
     self.references = 'Please remember to cite the instrument articles.'
 
-    self.tag = self.kwargs['inst_code']
-    self.inst_id = self.kwargs['kindat']
+    self.inst_code = self.kwargs['inst_code']
+    self.kindat = self.kwargs['kindat']
 
     return
 
@@ -162,10 +161,11 @@ def clean(self):
 # Use the default Madrigal and pysat methods
 
 # Set the list_remote_files routine
-list_remote_files = functools.partial(mad_meth.list_remote_files,
-                                      inst_code=self.kwargs['inst_code'],
-                                      kindats=self.kwargs['kindat'],
-                                      supported_tags=remote_tags)
+# Need to fix this
+# list_remote_files = functools.partial(mad_meth.list_remote_files,
+#                                       inst_code=self.kwargs['inst_code'],
+#                                       kindats=self.kwargs['kindat'],
+#                                       supported_tags=remote_tags)
 
 # Set the load routine
 load = mad_meth.load
@@ -175,6 +175,7 @@ list_files = functools.partial(ps_gen.list_files,
                                supported_tags=supported_tags)
 
 # Set up the download routine
-download = functools.partial(mad_meth.download,
-                             inst_code=str(self.kwargs['inst_code']),
-                             kindat=self.kwargs['kindat'])
+# Needs to be fixed
+# download = functools.partial(mad_meth.download,
+#                             inst_code=str(self.kwargs['inst_code']),
+#                             kindat=self.kwargs['kindat'])
