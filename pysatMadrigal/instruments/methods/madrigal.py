@@ -505,7 +505,7 @@ def good_exp(exp, date_array=None):
     return gflag
 
 
-def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
+def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
                       password=None, supported_tags=None,
                       url="http://cedar.openmadrigal.org",
                       two_digit_year_break=None, start=dt.datetime(1900, 1, 1),
@@ -523,10 +523,11 @@ def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
     inst_code : string
         Madrigal instrument code(s), cast as a string.  If multiple are used,
         separate them with commas. (default=None)
-    kindat : string
-        Madrigal experiment code(s), cast as a string.  If multiple are used,
-        separate them with commas.  If not supplied, all will be returned.
-        (default=None)
+    kindats : dict
+        Madrigal experiment codes, in a dict of dicts with inst_ids as top level
+        keys and tags as second level keys with Madrigal experiment code(s)
+        as values.  These should be strings, with multiple codes separated by
+        commas. (default=None)
     data_path : string
         Path to directory to download data to. (default=None)
     user : string
@@ -555,6 +556,13 @@ def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
         A series of filenames, see `pysat._files.process_parsed_filenames`
         for more information.
 
+    Raises
+    ------
+    ValueError
+        For missing kwarg input
+    KeyError
+        For dictionary input missing requested tag/inst_id
+
     Note
     ----
     The user's names should be provided in field user. Ruby Payne-Scott should
@@ -574,24 +582,27 @@ def list_remote_files(tag, inst_id, inst_code=None, kindat=None, user=None,
 
         list_remote_files = functools.partial(mad_meth.list_remote_files,
                                               supported_tags=supported_tags,
-                                              inst_code=madrigal_inst_code)
+                                              inst_code=madrigal_inst_code,
+                                              kindats=madrigal_tag)
 
     """
 
     _check_madrigal_params(inst_code=inst_code, user=user, password=password)
 
     # Test input
-    try:
-        format_str = supported_tags[inst_id][tag]
-    except KeyError:
-        raise ValueError('Problem parsing supported_tags')
+    if supported_tags is None or kindats is None:
+        raise ValueError('Must supply supported_tags and kindats dicts')
+
+    # Raise KeyError if input dictionaries don't match the input
+    format_str = supported_tags[inst_id][tag]
+    kindat = kindats[inst_id][tag]
 
     # Retrieve remote file experiment list
     files = get_remote_filenames(inst_code=inst_code, kindat=kindat, user=user,
                                  password=password, url=url, start=start,
                                  stop=stop)
 
-    filenames = [file_exp.name for file_exp in files]
+    filenames = [os.path.basename(file_exp.name) for file_exp in files]
 
     # Parse these filenames to grab out the ones we want
     logger.info("Parsing filenames")
