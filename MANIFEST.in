@@ -4,7 +4,6 @@ include *.c
 recursive-include pysatMadrigal *.py
 include *.md
 include *.txt
-include description.txt
 include LICENSE
 include pysatMadrigal/version.txt
 prune pysatMadrigal/tests
