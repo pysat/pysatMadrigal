@@ -34,14 +34,10 @@ install:
   # Create conda test environment
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
   - conda activate test-environment
-  # Once pysat 3.0 is released, remove the custom pysat install and change
-  # this to:
-  # - while read requirement; do conda install --yes $requirement; done < requirements.txt
-  - conda install --yes h5py numpy pandas xarray
-  - pip install madrigalWeb
-  # Get latest coveralls from pip, not conda
-  - pip install -r test_requirements.txt
-  # Custom pysat install
+  - while read requirement; do conda install --yes $requirement; done < conda_requirements.txt
+  # Conda does not provide (the correct versions of) all packages
+  - pip install -r pip_requirements.txt
+  # Custom pysat install, no longer needed after 3.0 release
   - cd ..
   - git clone --single-branch --branch develop-3 https://github.com/pysat/pysat.git
   - cd pysat
