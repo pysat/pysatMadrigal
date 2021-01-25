@@ -66,11 +66,14 @@ supported_tags = {ss: {'drifts': jro_fname1 + "drifts" + jro_fname2,
                        'oblique_rand': jro_fname1 + "?" + jro_fname2,
                        'oblique_long': jro_fname1 + "?" + jro_fname2}
                   for ss in inst_ids.keys()}
+remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
+                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 
 # Madrigal tags
 madrigal_inst_code = 10
-madrigal_tag = {'': {'drifts': 1910, 'drifts_ave': 1911, 'oblique_stan': 1800,
-                     'oblique_rand': 1801, 'oblique_long': 1802}, }
+madrigal_tag = {'': {'drifts': "1910", 'drifts_ave': "1911",
+                     'oblique_stan': "1800", 'oblique_rand': "1801",
+                     'oblique_long': "1802"}, }
 
 # ----------------------------------------------------------------------------
 # Instrument test attributes
@@ -165,8 +168,9 @@ def clean(self):
 
 # Set list_remote_files routine
 list_remote_files = functools.partial(mad_meth.list_remote_files,
-                                      supported_tags=supported_tags,
-                                      inst_code=madrigal_inst_code)
+                                      supported_tags=remote_tags,
+                                      inst_code=madrigal_inst_code,
+                                      kindats=madrigal_tag)
 
 
 def list_files(tag='', inst_id='', data_path=None, format_str=None,
@@ -254,7 +258,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
 
     """
     mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
-                      kindat=str(madrigal_tag[inst_id][tag]),
+                      kindat=madrigal_tag[inst_id][tag],
                       data_path=data_path, user=user, password=password,
                       file_type=file_type)
 
