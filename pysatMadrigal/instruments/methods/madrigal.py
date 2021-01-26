@@ -491,14 +491,12 @@ def good_exp(exp, date_array=None):
         if date_array is None:
             gflag = True
         else:
-            exp_start = dt.datetime(exp.startyear, exp.startmonth,
-                                    exp.startday, exp.starthour,
-                                    exp.startmin, exp.startsec)
-            exp_end = dt.datetime(exp.endyear, exp.endmonth, exp.endday,
-                                  exp.endhour, exp.endmin, exp.endsec)
+            exp_start = dt.date(exp.startyear, exp.startmonth,
+                                exp.startday)
+            exp_end = dt.date(exp.endyear, exp.endmonth, exp.endday)
 
             for date_val in date_array:
-                if date_val >= exp_start and date_val < exp_end:
+                if date_val.date() >= exp_start and date_val.date() < exp_end:
                     gflag = True
                     break
 
