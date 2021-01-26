@@ -551,7 +551,7 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
     Returns
     -------
     pds.Series
-        A series of filenames, see `pysat._files.process_parsed_filenames`
+        A series of filenames, see `pysat.utils.files.process_parsed_filenames`
         for more information.
 
     Raises
@@ -604,11 +604,13 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
 
     # Parse these filenames to grab out the ones we want
     logger.info("Parsing filenames")
-    stored = pysat._files.parse_fixed_width_filenames(filenames, format_str)
+    stored = pysat.utils.files.parse_fixed_width_filenames(filenames,
+                                                           format_str)
 
     # Process the parsed filenames and return a properly formatted Series
     logger.info("Processing filenames")
-    return pysat._files.process_parsed_filenames(stored, two_digit_year_break)
+    return pysat.utils.files.process_parsed_filenames(stored,
+                                                      two_digit_year_break)
 
 
 def filter_data_single_date(inst):
