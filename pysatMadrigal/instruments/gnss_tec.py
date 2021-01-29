@@ -32,7 +32,7 @@ Examples
 
 Note
 ----
-    Please provide name and email when downloading data with this routine.
+Please provide name and email when downloading data with this routine.
 
 """
 
@@ -43,7 +43,7 @@ import numpy as np
 from pysat.instruments.methods import general as ps_gen
 from pysat import logger
 
-from pysatMadrigal.instruments.methods import general
+from pysatMadrigal.instruments.methods import general, gnss
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
@@ -84,34 +84,12 @@ def init(self):
 
     """
 
-    ackn_str = ''.join(["GPS TEC data products and access through the ",
-                        "Madrigal distributed data system are provided to ",
-                        "the community by the Massachusetts Institute of ",
-                        "Technology under support from U.S. National Science",
-                        " Foundation grant AGS-1242204. Data for the TEC ",
-                        "processing is provided by the following ",
-                        "organizations: UNAVCO, Scripps Orbit and Permanent",
-                        " Array Center, Institut Geographique National, ",
-                        "France, International GNSS Service, The Crustal ",
-                        "Dynamics Data Information System (CDDIS), National ",
-                        "Geodetic Survey, Instituto Brasileiro de Geografia",
-                        "e Estatística, RAMSAC CORS of Instituto Geográfico",
-                        " Nacional del la República Agentina, Arecibo ",
-                        "Observatory, Low-Latitude Ionospheric Sensor ",
-                        "Network (LISN), Topcon Positioning Systems, Inc., ",
-                        "Canadian High Arctic Ionospheric Network, ",
-                        "Institute of Geology and Geophysics, Chinese ",
-                        "Academy of Sciences, China Meterorology ",
-                        "Administration, Centro di Ricerche Sismogiche, ",
-                        "Système d’Observation du Niveau des Eaux Littorales",
-                        " (SONEL), RENAG : REseau NAtional GPS permanent, ",
-                        "and GeoNet—the official source of geological ",
-                        "hazard information for New Zealand.\n",
-                        general.cedar_rules()])
+    ackn_str = '\n'.join([gnss.acknowledgements(self.name),
+                          general.cedar_rules()])
 
     logger.info(ackn_str)
     self.acknowledgements = ackn_str
-    self.references = "Rideout and Coster (2006) doi:10.1007/s10291-006-0029-5"
+    self.references = gnss.references(self.name, self.tag)
 
     return
 
