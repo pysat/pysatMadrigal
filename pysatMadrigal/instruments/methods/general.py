@@ -436,6 +436,7 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
                 date_array))
         start = date_array.min()
         stop = date_array.max()
+    # if start and stop are identical, increment 
     if start == stop:
         stop += dt.timedelta(days=1)
     # open connection to Madrigal
