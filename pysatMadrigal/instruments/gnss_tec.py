@@ -32,7 +32,7 @@ Examples
 
 Note
 ----
-    Please provide name and email when downloading data with this routine.
+Please provide name and email when downloading data with this routine.
 
 """
 
@@ -43,7 +43,7 @@ import numpy as np
 from pysat.instruments.methods import general as ps_gen
 from pysat import logger
 
-from pysatMadrigal.instruments.methods import madrigal as mad_meth
+from pysatMadrigal.instruments.methods import general, gnss
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
@@ -84,34 +84,12 @@ def init(self):
 
     """
 
-    ackn_str = ''.join(["GPS TEC data products and access through the ",
-                        "Madrigal distributed data system are provided to ",
-                        "the community by the Massachusetts Institute of ",
-                        "Technology under support from U.S. National Science",
-                        " Foundation grant AGS-1242204. Data for the TEC ",
-                        "processing is provided by the following ",
-                        "organizations: UNAVCO, Scripps Orbit and Permanent",
-                        " Array Center, Institut Geographique National, ",
-                        "France, International GNSS Service, The Crustal ",
-                        "Dynamics Data Information System (CDDIS), National ",
-                        "Geodetic Survey, Instituto Brasileiro de Geografia",
-                        "e Estatística, RAMSAC CORS of Instituto Geográfico",
-                        " Nacional del la República Agentina, Arecibo ",
-                        "Observatory, Low-Latitude Ionospheric Sensor ",
-                        "Network (LISN), Topcon Positioning Systems, Inc., ",
-                        "Canadian High Arctic Ionospheric Network, ",
-                        "Institute of Geology and Geophysics, Chinese ",
-                        "Academy of Sciences, China Meterorology ",
-                        "Administration, Centro di Ricerche Sismogiche, ",
-                        "Système d’Observation du Niveau des Eaux Littorales",
-                        " (SONEL), RENAG : REseau NAtional GPS permanent, ",
-                        "and GeoNet—the official source of geological ",
-                        "hazard information for New Zealand.\n",
-                        mad_meth.cedar_rules()])
+    ackn_str = '\n'.join([gnss.acknowledgements(self.name),
+                          general.cedar_rules()])
 
     logger.info(ackn_str)
     self.acknowledgements = ackn_str
-    self.references = "Rideout and Coster (2006) doi:10.1007/s10291-006-0029-5"
+    self.references = gnss.references(self.name, self.tag)
 
     return
 
@@ -139,7 +117,7 @@ def clean(self):
 # Use the default Madrigal methods
 
 # support listing files currently available on remote server (Madrigal)
-list_remote_files = functools.partial(mad_meth.list_remote_files,
+list_remote_files = functools.partial(general.list_remote_files,
                                       supported_tags=remote_tags,
                                       inst_code=madrigal_inst_code,
                                       kindats=madrigal_tag)
@@ -238,10 +216,9 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     downloads.
 
     """
-    mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
-                      kindat=madrigal_tag[inst_id][tag],
-                      data_path=data_path, user=user, password=password,
-                      file_type=file_type, url=url)
+    general.download(date_array, inst_code=str(madrigal_inst_code),
+                     kindat=madrigal_tag[inst_id][tag], data_path=data_path,
+                     user=user, password=password, file_type=file_type, url=url)
 
     return
 
@@ -280,9 +257,9 @@ def load(fnames, tag=None, inst_id=None, file_type='netCDF4'):
                                      'sec', 'ut1_unix', 'ut2_unix', 'recno']}}
 
     # Load the specified data
-    data, meta = mad_meth.load(fnames, tag, inst_id,
-                               xarray_coords=xcoords[tag],
-                               file_type=file_type)
+    data, meta = general.load(fnames, tag, inst_id,
+                              xarray_coords=xcoords[tag],
+                              file_type=file_type)
 
     # Squeeze the kindat and kinst 'coordinates', but keep them as floats
     squeeze_dims = np.array(['kindat', 'kinst'])

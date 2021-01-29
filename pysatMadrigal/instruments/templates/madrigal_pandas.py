@@ -81,7 +81,7 @@ import functools
 from pysat.instruments.methods import general as ps_gen
 from pysat import logger
 
-from pysatMadrigal.instruments.methods import madrigal as mad_meth
+from pysatMadrigal.instruments.methods import general
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
@@ -126,8 +126,8 @@ def init(self):
 
     """
 
-    logger.info(mad_meth.cedar_rules())
-    self.acknowledgements = mad_meth.cedar_rules()
+    logger.info(general.cedar_rules())
+    self.acknowledgements = general.cedar_rules()
     self.references = 'Please remember to cite the instrument articles.'
 
     self.inst_code = self.kwargs['inst_code']
@@ -162,13 +162,13 @@ def clean(self):
 
 # Set the list_remote_files routine
 # Need to fix this
-# list_remote_files = functools.partial(mad_meth.list_remote_files,
+# list_remote_files = functools.partial(general.list_remote_files,
 #                                       inst_code=self.kwargs['inst_code'],
 #                                       kindats=self.kwargs['kindat'],
 #                                       supported_tags=remote_tags)
 
 # Set the load routine
-load = mad_meth.load
+load = general.load
 
 # Set the list routine
 list_files = functools.partial(ps_gen.list_files,
@@ -176,6 +176,6 @@ list_files = functools.partial(ps_gen.list_files,
 
 # Set up the download routine
 # Needs to be fixed
-# download = functools.partial(mad_meth.download,
+# download = functools.partial(general.download,
 #                             inst_code=str(self.kwargs['inst_code']),
 #                             kindat=self.kwargs['kindat'])
