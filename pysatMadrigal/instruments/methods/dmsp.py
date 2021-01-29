@@ -7,23 +7,37 @@
 """Methods supporting the Defense Meteorological Satellite Program (DMSP)
 platform
 
-Functions
----------
-add_drift_unit_vectors
-    Add unit vectors for the satellite velocity
-add_drifts_polar_cap_x_y
-    Add polar cap drifts in cartesian coordinates
-smooth_ram_drifts
-    Smooth the ram drifts using a rolling mean
-update_DMSP_ephemeris
-    Updates DMSP instrument data with DMSP ephemeris
-
 """
 
 import numpy as np
 import pandas as pds
 
 from pysat import logger
+
+
+def references(name):
+    """Provides references for the DMSP instruments and experiments
+
+    Parameters
+    ----------
+    name : str
+        Instrument name
+
+    Returns
+    -------
+    refs : str
+        String providing reference guidenance for the DMSP data
+
+    """
+
+    refs = {'ivm': ' '.join(('F. J. Rich, Users Guide for the Topside',
+                             'Ionospheric Plasma Monitor (SSIES, SSIES-2 and',
+                             'SSIES-3) on Spacecraft of the Defense',
+                             'Meteorological Satellite Program (Air Force',
+                             'Phillips Laboratory, Hanscom AFB, MA, 1994),',
+                             'Vol. 1, p. 25.'))}
+
+    return refs[name]
 
 
 def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_vel_key='ion_v_sat_for'):

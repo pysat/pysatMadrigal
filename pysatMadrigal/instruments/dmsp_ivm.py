@@ -59,7 +59,7 @@ import numpy as np
 from pysat.instruments.methods import general as ps_gen
 from pysat import logger
 
-from pysatMadrigal.instruments.methods import general
+from pysatMadrigal.instruments.methods import general, dmsp
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
@@ -125,12 +125,7 @@ def init(self):
 
     logger.info(general.cedar_rules())
     self.acknowledgements = general.cedar_rules()
-    self.references = ' '.join(('F. J. Rich, Users Guide for the Topside',
-                                'Ionospheric Plasma Monitor (SSIES,',
-                                'SSIES-2 and SSIES-3) on Spacecraft of',
-                                'the Defense Meteorological Satellite',
-                                'Program (Air Force Phillips Laboratory,',
-                                'Hanscom AFB, MA, 1994), Vol. 1, p. 25.'))
+    self.references = dmsp.references(self.name)
     return
 
 
