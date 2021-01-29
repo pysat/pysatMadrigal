@@ -66,7 +66,7 @@ import pandas as pds
 from pysat.instruments.methods import general as ps_gen
 from pysat import logger
 
-from pysatMadrigal.instruments.methods import madrigal as mad_meth
+from pysatMadrigal.instruments.methods import general
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
@@ -130,8 +130,8 @@ def init(self):
 
     """
 
-    logger.info(mad_meth.cedar_rules())
-    self.acknowledgements = mad_meth.cedar_rules()
+    logger.info(general.cedar_rules())
+    self.acknowledgements = general.cedar_rules()
     self.references = ' '.join(('F. J. Rich, Users Guide for the Topside',
                                 'Ionospheric Plasma Monitor (SSIES,',
                                 'SSIES-2 and SSIES-3) on Spacecraft of',
@@ -186,13 +186,13 @@ def clean(self):
 # Use the default Madrigal and pysat methods
 
 # Set the list_remote_files routine
-list_remote_files = functools.partial(mad_meth.list_remote_files,
+list_remote_files = functools.partial(general.list_remote_files,
                                       inst_code=madrigal_inst_code,
                                       kindats=madrigal_tag,
                                       supported_tags=remote_tags)
 
 # Set the load routine
-load = mad_meth.load
+load = general.load
 
 
 def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
@@ -280,9 +280,9 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     downloads.
 
     """
-    mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
-                      kindat=madrigal_tag[inst_id][tag],
-                      data_path=data_path, user=user, password=password)
+    general.download(date_array, inst_code=str(madrigal_inst_code),
+                     kindat=madrigal_tag[inst_id][tag], data_path=data_path,
+                     user=user, password=password)
     return
 
 

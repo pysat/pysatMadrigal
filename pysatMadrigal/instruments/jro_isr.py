@@ -41,7 +41,7 @@ import numpy as np
 from pysat.instruments.methods import general as ps_gen
 from pysat import logger
 
-from pysatMadrigal.instruments.methods import madrigal as mad_meth
+from pysatMadrigal.instruments.methods import general
 from pysatMadrigal.utils import coords
 
 # ----------------------------------------------------------------------------
@@ -93,7 +93,7 @@ _test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
 # To ensure this function is always applied first, we set the filter
 # function as the default function for (JRO).
 # Default function is run first by the nanokernel on every load call.
-preprocess = mad_meth.filter_data_single_date
+preprocess = general.filter_data_single_date
 
 
 def init(self):
@@ -104,7 +104,7 @@ def init(self):
                          "the Instituto Geofisico del Peru operated",
                          "with support from the NSF AGS-1433968",
                          "through Cornell University.\n",
-                         mad_meth.cedar_rules()])
+                         general.cedar_rules()])
 
     logger.info(ackn_str)
     self.acknowledgements = ackn_str
@@ -167,7 +167,7 @@ def clean(self):
 # Use the default Madrigal and pysat methods
 
 # Set list_remote_files routine
-list_remote_files = functools.partial(mad_meth.list_remote_files,
+list_remote_files = functools.partial(general.list_remote_files,
                                       supported_tags=remote_tags,
                                       inst_code=madrigal_inst_code,
                                       kindats=madrigal_tag)
@@ -257,10 +257,9 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     downloads.
 
     """
-    mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
-                      kindat=madrigal_tag[inst_id][tag],
-                      data_path=data_path, user=user, password=password,
-                      file_type=file_type)
+    general.download(date_array, inst_code=str(madrigal_inst_code),
+                     kindat=madrigal_tag[inst_id][tag], data_path=data_path,
+                     user=user, password=password, file_type=file_type)
 
 
 def load(fnames, tag=None, inst_id=None, file_type='hdf5'):
@@ -333,9 +332,9 @@ def load(fnames, tag=None, inst_id=None, file_type='hdf5'):
                                              'ut1_unix', 'ut2_unix', 'recno']}}
 
     # Load the specified data
-    data, meta = mad_meth.load(fnames, tag, inst_id,
-                               xarray_coords=xcoords[tag],
-                               file_type=file_type)
+    data, meta = general.load(fnames, tag, inst_id,
+                              xarray_coords=xcoords[tag],
+                              file_type=file_type)
 
     # Squeeze the kindat and kinst 'coordinates', but keep them as floats
     data = data.squeeze(dim=['kindat', 'kinst', 'gdlatr', 'gdlonr'])
