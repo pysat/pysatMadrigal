@@ -1,5 +1,6 @@
 import pytest
-from pysatMadrigal.instruments.methods import madrigal as pm_meth
+
+from pysatMadrigal.instruments.methods import general
 
 
 class TestBasic():
@@ -21,7 +22,7 @@ class TestBasic():
         self.kwargs[del_val] = None
 
         with pytest.raises(ValueError):
-            pm_meth._check_madrigal_params(**self.kwargs)
+            general._check_madrigal_params(**self.kwargs)
 
     @pytest.mark.parametrize("del_val",
                              ['user', 'password'])
@@ -30,4 +31,4 @@ class TestBasic():
         self.kwargs[del_val] = 17
 
         with pytest.raises(ValueError):
-            pm_meth._check_madrigal_params(**self.kwargs)
+            general._check_madrigal_params(**self.kwargs)
