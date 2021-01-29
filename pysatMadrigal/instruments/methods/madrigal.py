@@ -436,14 +436,13 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
                 date_array))
         start = date_array.min()
         stop = date_array.max()
-        if start == stop:
-            stop += dt.timedelta(days=1)
-
+    if start == stop:
+        stop += dt.timedelta(days=1)
     # open connection to Madrigal
     if web_data is None:
         web_data = madrigalWeb.MadrigalData(url)
 
-    # get list of experiments for instrument from 1900 till now
+    # get list of experiments for instrument from in desired range
     exp_list = web_data.getExperiments(inst_code, start.year, start.month,
                                        start.day, start.hour, start.minute,
                                        start.second, stop.year, stop.month,
@@ -493,10 +492,11 @@ def good_exp(exp, date_array=None):
         else:
             exp_start = dt.date(exp.startyear, exp.startmonth,
                                 exp.startday)
-            exp_end = dt.date(exp.endyear, exp.endmonth, exp.endday)
+            exp_end = (dt.date(exp.endyear, exp.endmonth, exp.endday)
+                       + dt.timedelta(days=1))
 
             for date_val in date_array:
-                if date_val.date() >= exp_start and date_val.date() < exp_end:
+                if date_val.date() >= exp_start and date_val.date() <= exp_end:
                     gflag = True
                     break
 
