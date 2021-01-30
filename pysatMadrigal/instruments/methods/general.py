@@ -436,14 +436,14 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
                 date_array))
         start = date_array.min()
         stop = date_array.max()
-        if start == stop:
-            stop += dt.timedelta(days=1)
-
+    # if start and stop are identical, increment
+    if start == stop:
+        stop += dt.timedelta(days=1)
     # open connection to Madrigal
     if web_data is None:
         web_data = madrigalWeb.MadrigalData(url)
 
-    # get list of experiments for instrument from 1900 till now
+    # get list of experiments for instrument from in desired range
     exp_list = web_data.getExperiments(inst_code, start.year, start.month,
                                        start.day, start.hour, start.minute,
                                        start.second, stop.year, stop.month,
@@ -491,14 +491,13 @@ def good_exp(exp, date_array=None):
         if date_array is None:
             gflag = True
         else:
-            exp_start = dt.datetime(exp.startyear, exp.startmonth,
-                                    exp.startday, exp.starthour,
-                                    exp.startmin, exp.startsec)
-            exp_end = dt.datetime(exp.endyear, exp.endmonth, exp.endday,
-                                  exp.endhour, exp.endmin, exp.endsec)
+            exp_start = dt.date(exp.startyear, exp.startmonth,
+                                exp.startday)
+            exp_end = (dt.date(exp.endyear, exp.endmonth, exp.endday)
+                       + dt.timedelta(days=1))
 
             for date_val in date_array:
-                if date_val >= exp_start and date_val < exp_end:
+                if date_val.date() >= exp_start and date_val.date() <= exp_end:
                     gflag = True
                     break
 
@@ -553,7 +552,7 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
     Returns
     -------
     pds.Series
-        A series of filenames, see `pysat._files.process_parsed_filenames`
+        A series of filenames, see `pysat.utils.files.process_parsed_filenames`
         for more information.
 
     Raises
@@ -606,11 +605,13 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
 
     # Parse these filenames to grab out the ones we want
     logger.info("Parsing filenames")
-    stored = pysat._files.parse_fixed_width_filenames(filenames, format_str)
+    stored = pysat.utils.files.parse_fixed_width_filenames(filenames,
+                                                           format_str)
 
     # Process the parsed filenames and return a properly formatted Series
     logger.info("Processing filenames")
-    return pysat._files.process_parsed_filenames(stored, two_digit_year_break)
+    return pysat.utils.files.process_parsed_filenames(stored,
+                                                      two_digit_year_break)
 
 
 def filter_data_single_date(inst):
