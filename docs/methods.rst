@@ -12,7 +12,7 @@ Supports the Defense Meteorological Satellite Program instruments by providing
 common custom routines alongside reference and acknowledgement information.
 
 
-.. automodule:: pysatSpaceWeather.instruments.methods.dmsp
+.. automodule:: pysatMadrigal.instruments.methods.dmsp
    :members:
 
 GNSS
@@ -22,7 +22,7 @@ Supports the Global Navigation Satellite System instruments by providing
 reference and acknowledgement information.
 
 
-.. automodule:: pysatSpaceWeather.instruments.methods.gnss
+.. automodule:: pysatMadrigal.instruments.methods.gnss
    :members:
 
 JRO
@@ -32,7 +32,7 @@ Supports the Jicamarca Radio Observatory instrumnets by providing common custom
 routines alongside reference and acknowledgement information.
 
 
-.. automodule:: pysatSpaceWeather.instruments.methods.jro
+.. automodule:: pysatMadrigal.instruments.methods.jro
    :members:
 
 General
@@ -40,5 +40,5 @@ General
 Supports the Madrigal data access.
 
 
-.. automodule:: pysatSpaceWeather.instruments.methods.general
+.. automodule:: pysatMadrigal.instruments.methods.general
    :members:
