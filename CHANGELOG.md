@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Enhancements
   - Added coords from pysat.utils
   - Added Vertical TEC Instrument
+  - Added documentation
 - Bug Fix
   - Updated madrigal methods to simplify compound data types and enable
     creation of netCDF4 files using `Instrument.to_netcdf4()`.
