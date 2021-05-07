@@ -2,5 +2,5 @@ h5py
 madrigalWeb
 numpy
 pandas
-pysat
+pysat>=3.0
 xarray
