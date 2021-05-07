@@ -1,0 +1,6 @@
+h5py
+madrigalWeb
+numpy
+pandas
+pysat
+xarray
