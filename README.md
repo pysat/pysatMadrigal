@@ -5,7 +5,7 @@
 
 # pysatMadrigal
 [![Documentation Status](https://readthedocs.org/projects/pysatMadrigal/badge/?version=latest)](http://pysatMadrigal.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://travis-ci.org/pysat/pysatMadrigal.svg?branch=main)](https://travis-ci.com/pysat/pysatMadrigal)
+[![Build Status](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/pysat/pysatMadrigal/badge.svg?branch=main)](https://coveralls.io/github/pysat/pysatMadrigal?branch=main)
 [![DOI](https://zenodo.org/badge/258384773.svg)](https://zenodo.org/badge/latestdoi/258384773)
 [![PyPI version](https://badge.fury.io/py/pysatMadrigal.svg)](https://badge.fury.io/py/pysatMadrigal)
@@ -35,20 +35,7 @@ python setup.py install
 
 Note: pre-0.1.0 version
 -----------------------
-pysatMadrigal is currently provided as an alpha pre-release.  Much of the API is
-being built off of the upcoming pysat 3.0.0 software in order to streamline the
-usage and test coverage.  This version of pysat is planned for release later
-this year.  Currently, you can access the develop version of this through
-github:
-
-```
-git clone https://github.com/pysat/pysat.git
-cd pysat
-git checkout develop-3
-python setup.py install
-```
-
-It should be noted that this is a working branch and is subject to change.
+pysatMadrigal is currently provided as an alpha pre-release.  
 
 # Using with pysat
 
