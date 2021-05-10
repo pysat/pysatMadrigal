@@ -54,7 +54,7 @@ jobs:
       run: flake8 . --count --exit-zero --max-complexity=10 --statistics
 
     - name: Test with pytest
-      run: pytest --cov=pysatMadigal/
+      run: pytest --cov=pysatMadrigal/
 
     - name: Publish results to coveralls
       env:
