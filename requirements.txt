@@ -3,4 +3,4 @@ madrigalWeb
 numpy
 pandas
 pysat>=3.0
-xarray
+xarray<0.18
