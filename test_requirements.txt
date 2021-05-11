@@ -1,6 +1,5 @@
 coveralls
 m2r2
-madrigalWeb
 numpydoc
 pytest-cov
 pytest-ordering
