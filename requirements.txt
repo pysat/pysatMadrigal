@@ -1,4 +1,5 @@
 h5py
+madrigalWeb
 numpy
 pandas
 pysat>=3.0
