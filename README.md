@@ -1,6 +1,6 @@
 <div align="left">
         <img height="0" width="0px">
-        <img width="20%" src="https://raw.githubusercontent.com/pysat/pysatSpaceWeather/main/docs/figures/pysatMadrigal.png" alt="pysatMadrigal" title="pysatMadrigal"</img>
+        <img width="20%" src="https://raw.githubusercontent.com/pysat/pysatMadrigal/main/docs/figures/pysatMadrigal.png" alt="pysatMadrigal" title="pysatMadrigal"</img>
 </div>
 
 # pysatMadrigal
