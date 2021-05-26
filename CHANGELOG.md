@@ -7,10 +7,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Deprecations
   - Restructed Instrument methods, moving `madrigal` to `general` and extracting
     local methods from the instrument modules to platform-specific method files
+  - Cycled testing support to cover Python 3.7-3.9
 - Enhancements
   - Added coords from pysat.utils
   - Added Vertical TEC Instrument
   - Added documentation
+  - Updated documentation configuration to improve maintainability
+  - Updated documentation style, displaying logo on sidebar in html format
+  - Changed zenodo author name format for better BibTeX compliance
+  - Updated README information
 - Bug Fix
   - Updated Madrigal methods to simplify compound data types and enable
     creation of netCDF4 files using `Instrument.to_netcdf4()`
