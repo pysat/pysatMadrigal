@@ -39,6 +39,7 @@ Please provide name and email when downloading data with this routine.
 import datetime as dt
 import functools
 import numpy as np
+import pandas as pds
 
 from pysat.instruments.methods import general as ps_gen
 from pysat import logger
