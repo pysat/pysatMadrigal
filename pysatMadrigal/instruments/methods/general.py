@@ -5,6 +5,7 @@ pysat, reducing the amount of user intervention.
  """
 
 import datetime as dt
+import gzip
 import numpy as np
 import os
 import pandas as pds
@@ -17,7 +18,7 @@ from madrigalWeb import madrigalWeb
 
 
 logger = pysat.logger
-file_types = ['hdf5', 'netCDF4', 'simple']
+file_types = {'hdf5': 'hdf5', 'netCDF4':'netCDF4' , 'simple': 'simple.gz'}
 
 
 def cedar_rules():
@@ -34,7 +35,7 @@ def cedar_rules():
     return ackn
 
 
-def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
+def load(fnames, tag=None, inst_id=None, xarray_coords=None):
     """Loads data from Madrigal into Pandas or XArray
 
     This routine is called as needed by pysat. It is not intended
@@ -53,18 +54,15 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
     inst_id : string
         Satellite ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default='')
-    xarray_coords : list
+    xarray_coords : list or NoneType
         List of keywords to use as coordinates if xarray output is desired
         instead of a Pandas DataFrame.  Can build an xarray Dataset
         that have different coordinate dimensions by providing a dict
         inside the list instead of coordinate variable name strings. Each dict
         will have a tuple of coordinates as the key and a list of variable
-        strings as the value.  For example,
+        strings as the value.  Empty list if None. For example,
         xarray_coords=[{('time',): ['year', 'doy'],
-                        ('time', 'gdalt'): ['data1', 'data2']}]. (default=[])
-    file_type : string
-        File format for Madrigal data.  Currently only accept 'netCDF4' and
-        'hdf5'. (default='hdf5')
+        ('time', 'gdalt'): ['data1', 'data2']}]. (default=None)
 
     Returns
     -------
@@ -79,23 +77,33 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
     Currently HDF5 reading breaks if a different file type was used previously
 
     """
-    # Test the file format
-    if file_type not in ['netCDF4', 'hdf5']:
-        raise ValueError('unknown file format {:s}'.format(file_type))
+    # Test the file formats
+    load_file_types = {ftype: [] for ftype in file_types.keys()}
+    for fname in fnames:
+        for ftype in file_types.keys():
+            if fname.find(ftype) > 0:
+                load_file_types[ftype].append(fname)
+                break
+
+    # Initialize xarray coordinates, if needed
+    if xarray_coords is None:
+        xarray_coords = []
 
     # Initialize the output
     meta = pysat.Meta()
     labels = []
+    data = None
 
-    # Load the file data
-    if file_type == "netCDF4":
+    # Load the file data for netCDF4 files
+    if len(load_file_types["netCDF4"]) == 1:
         # Xarray natively opens netCDF data into a Dataset
-        if len(fnames) == 1:
-            file_data = xr.open_dataset(fnames[0], engine="netcdf4")
-        else:
-            file_data = xr.open_mfdataset(fnames, combine='by_coords',
-                                          engine="netcdf4")
+        file_data = xr.open_dataset(load_file_types["netCDF4"][0],
+                                    engine="netcdf4")
+    elif len(load_file_types["netCDF4"]) > 1:
+        file_data = xr.open_mfdataset(load_file_types["netCDF4"],
+                                      combine='by_coords', engine="netcdf4")
 
+    if len(load_file_types["netCDF4"]) > 0:
         # Currently not saving file header data, as all metadata is at
         # the data variable level
         if len(labels) == 0:
@@ -116,7 +124,8 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
         time_data = pds.to_datetime(file_data['time'].values, unit='s')
         data = file_data.assign_coords({'time': ('time', time_data)})
 
-    elif file_type == "hdf5":
+    # Load the file data for HDF5 files
+    if len(load_file_types["hdf5"]) > 0 or len(load_file_types["simple"]) > 0:
         # Ensure we don't try to create an xarray object with only time as
         # the coordinate
         coord_len = len(xarray_coords)
@@ -125,50 +134,78 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
 
         # Cycle through all the filenames
         fdata = []
+        fnames = list(load_file_types["hdf5"])
+        fnames.extend(load_file_types["simple"])
         for fname in fnames:
-            # Open the specified file and get the data and metadata
-            filed = h5py.File(fname, 'r')
-            file_data = filed['Data']['Table Layout']
-            file_meta = filed['Metadata']['Data Parameters']
+            # Open the specified file
+            if fname in load_file_types["simple"]:
+                # Get the gzipped text data
+                with gzip.open(fname, 'rb') as fin:
+                    file_data = fin.readlines()
 
-            # load up what is offered into pysat.Meta if this is the first file
-            if len(labels) == 0:
-                for item in file_meta:
-                    name_string = item[0].decode('UTF-8')
-                    unit_string = item[3].decode('UTF-8')
-                    desc_string = item[1].decode('UTF-8')
-                    labels.append(name_string)
-                    meta[name_string.lower()] = {meta.labels.name: name_string,
-                                                 meta.labels.units: unit_string,
-                                                 meta.labels.desc: desc_string}
+                # Load available info into pysat.Meta if this is the first file
+                header = [item.decode('UTF-8')
+                          for item in file_data.pop(0).split()]
+                if len(labels) == 0:
+                    for item in header:
+                        labels.append(item)
+                        meta[item.lower()] = {meta.labels.name: item}
 
-            # Add additional metadata notes. Custom attributes attached to meta
-            # are attached to corresponding Instrument object when pysat
-            # receives data and meta from this routine
-            for key in filed['Metadata']:
-                if key != 'Data Parameters':
-                    setattr(meta, key.replace(' ', '_'),
-                            filed['Metadata'][key][:])
+                # Construct a dict of the output
+                file_dict = {item.lower(): list() for item in header}
+                for line in file_data:
+                    for i, val in enumerate(line.split()):
+                        file_dict[header[i].lower()].append(float(val))
 
-            # data into frame, with labels from metadata
-            data = pds.DataFrame.from_records(file_data, columns=labels)
+                # Load data into frame, with labels from metadata
+                ldata = pds.DataFrame.from_dict(file_dict)
+            else:
+                # Open the specified file and get the data and metadata
+                filed = h5py.File(fname, 'r')
+                file_data = filed['Data']['Table Layout']
+                file_meta = filed['Metadata']['Data Parameters']
 
-            # lowercase variable names
-            data.columns = [item.lower() for item in data.columns]
+                # Load available info into pysat.Meta if this is the first file
+                if len(labels) == 0:
+                    for item in file_meta:
+                        name_string = item[0].decode('UTF-8')
+                        unit_string = item[3].decode('UTF-8')
+                        desc_string = item[1].decode('UTF-8')
+                        labels.append(name_string)
+                        meta[name_string.lower()] = {
+                            meta.labels.name: name_string,
+                            meta.labels.units: unit_string,
+                            meta.labels.desc: desc_string}
 
-            # datetime index from times
+                # Add additional metadata notes. Custom attributes attached to
+                # meta are attached to corresponding Instrument object when
+                # pysat receives data and meta from this routine
+                for key in filed['Metadata']:
+                    if key != 'Data Parameters':
+                        setattr(meta, key.replace(' ', '_'),
+                                filed['Metadata'][key][:])
+
+                # Load data into frame, with labels from metadata
+                ldata = pds.DataFrame.from_records(file_data, columns=labels)
+
+                # Enforce lowercase variable names
+                ldata.columns = [item.lower() for item in ldata.columns]
+
+            # Extended processing is the same for simple and HDF5 files
+            #
+            # Construct datetime index from times
             time_keys = np.array(['year', 'month', 'day', 'hour', 'min', 'sec'])
-            if not np.all([key in data.columns for key in time_keys]):
+            if not np.all([key in ldata.columns for key in time_keys]):
                 time_keys = [key for key in time_keys
-                             if key not in data.columns]
+                             if key not in ldata.columns]
                 raise ValueError(' '.join(["unable to construct time index, ",
                                            "missing {:}".format(time_keys)]))
 
-            uts = 3600.0 * data.loc[:, 'hour'] + 60.0 * data.loc[:, 'min'] \
-                + data.loc[:, 'sec']
+            uts = 3600.0 * ldata.loc[:, 'hour'] + 60.0 * ldata.loc[:, 'min'] \
+                + ldata.loc[:, 'sec']
             time = pysat.utils.time.create_datetime_index(
-                year=data.loc[:, 'year'], month=data.loc[:, 'month'],
-                day=data.loc[:, 'day'], uts=uts)
+                year=ldata.loc[:, 'year'], month=ldata.loc[:, 'month'],
+                day=ldata.loc[:, 'day'], uts=uts)
 
             # Declare index or recast as xarray
             if coord_len > 0:
@@ -176,7 +213,7 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                 # columns
                 if not isinstance(xarray_coords, dict):
                     xarray_coords = {tuple(xarray_coords):
-                                     [col for col in data.columns
+                                     [col for col in ldata.columns
                                       if col not in xarray_coords]}
 
                 # Determine the order in which the keys should be processed:
@@ -187,43 +224,38 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                     [lkey for lkey in len_dict.keys()], reverse=True)]
 
                 # Append time to the data frame
-                data = data.assign(time=pds.Series(time, index=data.index))
+                ldata = ldata.assign(time=pds.Series(time, index=ldata.index))
 
                 # Cycle through each of the coordinate dimensions
                 xdatasets = list()
                 for xcoords in coord_order:
-                    if not np.all([xkey.lower() in data.columns
+                    if not np.all([xkey.lower() in ldata.columns
                                    for xkey in xcoords]):
-                        raise ValueError(''.join(['unknown coordinate key in ',
-                                                  '[{:}], use'.format(xcoords),
-                                                  ' only: {:}'.format(
-                                                      data.columns)]))
-                    if not np.all([xkey.lower() in data.columns
+                        raise ValueError(''.join(['unknown coordinate key ',
+                                                  'in [{:}'.format(xcoords),
+                                                  '], use only: {:}'.format(
+                                                      ldata.columns)]))
+                    if not np.all([xkey.lower() in ldata.columns
                                    for xkey in xarray_coords[xcoords]]):
-                        data_mask = [xkey.lower() in data.columns
+                        data_mask = [xkey.lower() in ldata.columns
                                      for xkey in xarray_coords[xcoords]]
                         if np.all(~np.array(data_mask)):
-                            raise ValueError(''.join(['all provided data ',
-                                                      'variables [',
-                                                      '{:}] are '.format(
-                                                          xarray_coords[
-                                                              xcoords]),
-                                                      'unknown, use only: ',
-                                                      '{:}'.format(
-                                                          data.columns)]))
+                            raise ValueError(''.join([
+                                'all provided data variables [',
+                                '{:}] are unk'.format(xarray_coords[xcoords]),
+                                'nown, use only: {:}'.format(ldata.columns)]))
                         else:
-                            logger.warning(''.join(['unknown data variable in',
-                                                    ' [{:}], use only'.format(
-                                                        xarray_coords[xcoords]),
-                                                    ': {:}'.format(
-                                                        data.columns)]))
+                            logger.warning(''.join([
+                                'unknown data variable in [',
+                                '{:}], use'.format(xarray_coords[xcoords]),
+                                ' only: {:}'.format(ldata.columns)]))
 
                             # Remove the coordinates that aren't present
                             temp = np.array(xarray_coords[xcoords])[data_mask]
                             xarray_coords[xcoords] = list(temp)
 
                     # Select the desired data values
-                    sel_data = data[list(xcoords) + xarray_coords[xcoords]]
+                    sel_data = ldata[list(xcoords) + xarray_coords[xcoords]]
 
                     # Remove duplicates before indexing, to ensure data with
                     # the same values at different locations are kept
@@ -236,17 +268,17 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                     xdatasets.append(sel_data.to_xarray())
 
                 # Get the necessary information to test the data
-                lcols = data.columns
-                ldata = len(lcols)
+                lcols = ldata.columns
+                len_data = len(lcols)
 
                 # Merge all of the datasets
-                data = xr.merge(xdatasets)
-                test_variables = [xkey for xkey in data.variables.keys()]
+                ldata = xr.merge(xdatasets)
+                test_variables = [xkey for xkey in ldata.variables.keys()]
                 ltest = len(test_variables)
 
                 # Test to see that all data was retrieved
-                if ltest != ldata:
-                    if ltest < ldata:
+                if ltest != len_data:
+                    if ltest < len_data:
                         estr = 'missing: {:}'.format(
                             ' '.join([dvar for dvar in lcols
                                       if dvar not in test_variables]))
@@ -254,34 +286,44 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
                         estr = 'have extra: {:}'.format(
                             ' '.join([tvar for tvar in test_variables
                                       if tvar not in lcols]))
-                        raise ValueError(''.join(['coordinates not supplied ',
-                                                  'for all data columns: ',
-                                                  '{:d} != '.format(ltest),
-                                                  '{:d}; '.format(ldata),
-                                                  estr]))
+                        raise ValueError(''.join([
+                            'coordinates not supplied for all data columns',
+                            ': {:d} != {:d}; '.format(ltest, len_data), estr]))
             else:
                 # Set the index to time
-                data.index = time
+                ldata.index = time
 
                 # Raise a logging warning if there are duplicate times. This
                 # means the data should be stored as an xarray Dataset
                 if np.any(time.duplicated()):
-                    logger.warning(''.join(["duplicated time indices, consider",
-                                            " specifing additional coordinates",
-                                            " and storing the data as an ",
-                                            "xarray Dataset"]))
+                    logger.warning(''.join(["duplicated time indices, ",
+                                            "consider specifing additional",
+                                            " coordinates and storing the ",
+                                            "data as an xarray Dataset"]))
 
             # Compile a list of the data objects
-            fdata.append(data)
+            fdata.append(ldata)
 
-        # If multiple files were loaded, merge the data together
-        if len(fdata) == 1:
+        # Merge the data together, accounting for potential netCDF output
+        if data is None and len(fdata) == 1:
             data = fdata[0]
         else:
             if coord_len > 0:
-                data = xr.merge(fdata)
+                if data is None:
+                    data = xr.merge(fdata)
+                else:
+                    data = xr.combine_by_coords([data, xr.merge(fdata)])
             else:
-                data = pds.concat(fdata)
+                if data is None:
+                    data = pds.concat(fdata)
+                else:
+                    ldata = pds.concat(fdata).to_xarray()
+                    ldata = ldata.rename({'index': 'time'})
+                    data = xr.combine_by_coords([data, ldata])
+
+    # Ensure that data is at least an empty Dataset
+    if data is None:
+        data = xr.Dataset()
 
     return data, meta
 
@@ -330,9 +372,9 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
 
     """
 
-    if file_type not in file_types:
+    if file_type not in file_types.keys():
         raise ValueError("Unknown file format {:}, accepts {:}".format(
-            file_type, file_types))
+            file_type, file_types.keys()))
 
     _check_madrigal_params(inst_code=inst_code, user=user, password=password)
 
