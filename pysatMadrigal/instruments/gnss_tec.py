@@ -175,6 +175,7 @@ def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
         out_series.append(
             ps_gen.list_files(tag=tag, inst_id=inst_id, data_path=data_path,
                               format_str=format_str, delimiter=delimiter,
+                              two_digit_year_break=two_digit_year_break,
                               supported_tags=sup_tags))
 
     if len(out_series) == 0:
