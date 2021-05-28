@@ -18,7 +18,7 @@ from madrigalWeb import madrigalWeb
 
 
 logger = pysat.logger
-file_types = {'hdf5': 'hdf5', 'netCDF4':'netCDF4' , 'simple': 'simple.gz'}
+file_types = {'hdf5': 'hdf5', 'netCDF4': 'netCDF4', 'simple': 'simple.gz'}
 
 
 def cedar_rules():
