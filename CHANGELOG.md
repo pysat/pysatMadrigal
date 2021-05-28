@@ -11,12 +11,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   - Added coords from pysat.utils
   - Added Vertical TEC Instrument
   - Added documentation
+  - Added load routine for simple formatted data
 - Bug Fix
   - Updated Madrigal methods to simplify compound data types and enable
     creation of netCDF4 files using `Instrument.to_netcdf4()`
   - Updated load for multiple files in pandas format
   - Fixed remote listing routine to return filenames instead of experiments
   - Fixed bug introduced by change in xarray requiring engine kwarg
+  - Fixed bug that would not list multiple types of files
 
 ## [0.0.3] - 2020-06-15
 - pypi compatibility
