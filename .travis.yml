@@ -5,7 +5,7 @@ jobs:
     - name: '3.7 with flake8'
       python: '3.7'
       script:
-          - flake8
+          - flake8 . --count --select=E,F,W
           - pytest --cov=pysatMadrigal/
     - python: '3.8'
       script: pytest --cov=pysatMadrigal/
