@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   - Added Vertical TEC Instrument
   - Added documentation
   - Added load routine for simple formatted data
+  - Expanded feedback during data downloads
 - Bug Fix
   - Updated Madrigal methods to simplify compound data types and enable
     creation of netCDF4 files using `Instrument.to_netcdf4()`
