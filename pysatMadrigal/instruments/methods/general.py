@@ -669,7 +669,7 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
 
 def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
                supported_tags=None, file_cadence=dt.timedelta(days=1),
-               two_digit_year_break=None, delimiter=None, file_types=None):
+               two_digit_year_break=None, delimiter=None, file_type=None):
     """Return a Pandas Series of every file for chosen Instrument data.
 
     Parameters
@@ -719,10 +719,10 @@ def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
     out_series = list()
 
     # Cycle through each requested file type, loading the requested files
-    for file_type in list_file_types:
+    for ftype in list_file_types:
         if supported_tags[inst_id][tag].find('{file_type}') > 0:
             sup_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
-                file_type=file_types[file_type])
+                file_type=file_types[ftype])
 
         out_series.append(pysat.instruments.methods.geneneral.list_files(
             tag=tag, inst_id=inst_id, data_path=data_path,
