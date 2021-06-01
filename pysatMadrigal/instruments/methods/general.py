@@ -667,6 +667,80 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
                                                       two_digit_year_break)
 
 
+def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
+               supported_tags=None, file_cadence=dt.timedelta(days=1),
+               two_digit_year_break=None, delimiter=None, file_types=None):
+    """Return a Pandas Series of every file for chosen Instrument data.
+
+    Parameters
+    ----------
+    tag : string or NoneType
+        Denotes type of file to load.  Accepted types are <tag strings>.
+        (default=None)
+    inst_id : string or NoneType
+        Specifies the satellite ID for a constellation.  Not used.
+        (default=None)
+    data_path : string or NoneType
+        Path to data directory.  If None is specified, the value previously
+        set in Instrument.files.data_path is used.  (default=None)
+    format_str : string or NoneType
+        User specified file format.  If None is specified, the default
+        formats associated with the supplied tags are used. (default=None)
+    supported_tags : dict or NoneType
+        keys are inst_id, each containing a dict keyed by tag
+        where the values file format template strings. (default=None)
+    file_cadence : dt.timedelta or pds.DateOffset
+        pysat assumes a daily file cadence, but some instrument data file
+        contain longer periods of time.  This parameter allows the specification
+        of regular file cadences greater than or equal to a day (e.g., weekly,
+        monthly, or yearly). (default=dt.timedelta(days=1))
+    two_digit_year_break : int or NoneType
+        If filenames only store two digits for the year, then '1900' will be
+        added for years >= two_digit_year_break and '2000' will be added for
+        years < two_digit_year_break. If None, then four-digit years are
+        assumed. (default=None)
+    delimiter : string or NoneType
+        Delimiter string upon which files will be split (e.g., '.'). If None,
+        filenames will be parsed presuming a fixed width format. (default=None)
+    file_type : str or NoneType
+        File format for Madrigal data.  Load routines currently accepts 'hdf5',
+        'simple', and 'netCDF4', but any of the Madrigal options may be used
+        here. If None, will look for all known file types. (default=None)
+
+    Returns
+    -------
+    out : pds.Series
+        A pandas Series containing the verified available files
+
+    """
+    # Initialize the transitional variables
+    list_file_types = file_types.keys() if file_type is None else [file_type]
+    sup_tags = {inst_id: {tag: supported_tags[inst_id][tag]}}
+    out_series = list()
+
+    # Cycle through each requested file type, loading the requested files
+    for file_type in list_file_types:
+        if supported_tags[inst_id][tag].find('{file_type}') > 0:
+            sup_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
+                file_type=file_types[file_type])
+
+        out_series.append(pysat.instruments.methods.geneneral.list_files(
+            tag=tag, inst_id=inst_id, data_path=data_path,
+            format_str=format_str, supported_tags=sup_tags,
+            file_cadence=file_cadence,
+            two_digit_year_break=two_digit_year_break, delimiter=delimiter))
+
+    # Combine the file lists, ensuring the files are correctly ordered
+    if len(out_series) == 0:
+        out = pds.Series(dtype=str)
+    elif len(out_series) == 1:
+        out = out_series[0]
+    else:
+        out = pds.concat(out_series).sort_index()
+
+    return out
+
+
 def filter_data_single_date(inst):
     """Filters data to a single date.
 
