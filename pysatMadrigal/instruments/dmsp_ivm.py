@@ -55,9 +55,7 @@ Code development supported by NSF grant 1259508
 import datetime as dt
 import functools
 import numpy as np
-import pandas as pds
 
-from pysat.instruments.methods import general as ps_gen
 from pysat import logger
 
 from pysatMadrigal.instruments.methods import general, dmsp
@@ -174,6 +172,10 @@ def clean(self):
 #
 # Use the default Madrigal and pysat methods
 
+# Support listing the local files
+list_files = functools.partial(general.list_files,
+                               supported_tags=supported_tags)
+
 # Set the list_remote_files routine
 list_remote_files = functools.partial(general.list_remote_files,
                                       inst_code=madrigal_inst_code,
@@ -182,64 +184,6 @@ list_remote_files = functools.partial(general.list_remote_files,
 
 # Set the load routine
 load = general.load
-
-
-def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
-               supported_tags=supported_tags, delimiter=None, file_type=None):
-    """Return a Pandas Series of every data file for this Instrument
-
-    Parameters
-    ----------
-    tag : str or NoneType
-        Denotes type of file to load.  Accepted types are <tag strings>.
-        (default=None)
-    inst_id : str or NoneType
-        Specifies the satellite ID for a constellation.  Not used.
-        (default=None)
-    data_path : str or NoneType
-        Path to data directory.  If None is specified, the value previously
-        set in Instrument.files.data_path is used.  (default=None)
-    format_str : str or NoneType
-        User specified file format.  If None is specified, the default
-        formats associated with the supplied tags are used. (default=None)
-    supported_tags : dict or NoneType
-        keys are inst_id, each containing a dict keyed by tag
-        where the values file format template strings. (default=None)
-    delimiter : str
-        Delimiter string upon which files will be split (e.g., '.')
-    file_type : str or NoneType
-        File format for Madrigal data.  Load routines currently accepts 'hdf5',
-        'simple', and 'netCDF4', but any of the Madrigal options may be used
-        here. If None, will look for all known file types. (default=None)
-
-    Returns
-    -------
-    out : pds.Series
-        A pandas Series containing the verified available files
-
-    """
-    file_types = general.file_types.keys() if file_type is None else [file_type]
-    sup_tags = {inst_id: {tag: supported_tags[inst_id][tag]}}
-    out_series = list()
-
-    for file_type in file_types:
-        if supported_tags[inst_id][tag].find('{file_type}') > 0:
-            sup_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
-                file_type=general.file_types[file_type])
-
-        out_series.append(
-            ps_gen.list_files(tag=tag, inst_id=inst_id, data_path=data_path,
-                              format_str=format_str, delimiter=delimiter,
-                              supported_tags=sup_tags))
-
-    if len(out_series) == 0:
-        out = pds.Series(dtype=str)
-    elif len(out_series) == 1:
-        out = out_series[0]
-    else:
-        out = pds.concat(out_series).sort_index()
-
-    return out
 
 
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
@@ -266,9 +210,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     password : string
         Password for data download. (default=None)
     file_type : string
-        File format for Madrigal data.  Load routines currently only accepts
-        'hdf5' and 'netCDF4', but any of the Madrigal options may be used
-        here. (default='hdf5')
+        File format for Madrigal data. (default='hdf5')
 
     Note
     ----
