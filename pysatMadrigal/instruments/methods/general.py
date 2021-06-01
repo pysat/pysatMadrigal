@@ -724,7 +724,7 @@ def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
             sup_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
                 file_type=file_types[ftype])
 
-        out_series.append(pysat.instruments.methods.geneneral.list_files(
+        out_series.append(pysat.instruments.methods.general.list_files(
             tag=tag, inst_id=inst_id, data_path=data_path,
             format_str=format_str, supported_tags=sup_tags,
             file_cadence=file_cadence,
