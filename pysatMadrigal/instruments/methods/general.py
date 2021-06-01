@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-.
-"""Provides default routines for integrating CEDAR Madrigal instruments into
-pysat, reducing the amount of user intervention.
+"""General routines for integrating CEDAR Madrigal instruments into pysat.
 
- """
+"""
 
 import datetime as dt
 import numpy as np
@@ -21,36 +20,33 @@ file_types = ['hdf5', 'netCDF4', 'simple']
 
 
 def cedar_rules():
-    """ General acknowledgement statement for Madrigal data.
+    """General acknowledgement statement for Madrigal data.
 
     Returns
     -------
-    ackn : string
+    ackn : str
         String with general acknowledgement for all CEDAR Madrigal data
 
     """
-    ackn = "Contact the PI when using this data, in accordance with the CEDAR"
-    ackn += " 'Rules of the Road'"
+    ackn = "".join(["Contact the PI when using this data, in accordance ",
+                    "with the CEDAR 'Rules of the Road'"])
     return ackn
 
 
 def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
     """Loads data from Madrigal into Pandas or XArray
 
-    This routine is called as needed by pysat. It is not intended
-    for direct user interaction.
-
     Parameters
     ----------
     fnames : array-like
         iterable of filename strings, full path, to data files to be loaded.
         This input is nominally provided by pysat itself.
-    tag : string
+    tag : str
         tag name used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. While
         tag defaults to None here, pysat provides '' as the default
         tag unless specified by user at Instrument instantiation. (default='')
-    inst_id : string
+    inst_id : str
         Satellite ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default='')
     xarray_coords : list
@@ -61,22 +57,24 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=[], file_type='hdf5'):
         will have a tuple of coordinates as the key and a list of variable
         strings as the value.  For example,
         xarray_coords=[{('time',): ['year', 'doy'],
-                        ('time', 'gdalt'): ['data1', 'data2']}]. (default=[])
-    file_type : string
+        ('time', 'gdalt'): ['data1', 'data2']}]. (default=[])
+    file_type : strö
         File format for Madrigal data.  Currently only accept 'netCDF4' and
         'hdf5'. (default='hdf5')
 
     Returns
     -------
     data : pds.DataFrame or xr.Dataset
-        A pandas DataFrame or xarray Dataset holding the data from the HDF5
-        file
+        A pandas DataFrame or xarray Dataset holding the data from the file
     meta : pysat.Meta
-        Metadata from the HDF5 file, as well as default values from pysat
+        Metadata from the file, as well as default values from pysat
 
     Note
     ----
     Currently HDF5 reading breaks if a different file type was used previously
+
+    This routine is called as needed by pysat. It is not intended
+    for direct user interaction.
 
     """
     # Test the file format
