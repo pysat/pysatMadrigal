@@ -381,29 +381,39 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
     if kindat is None:
         raise ValueError("Must supply Madrigal experiment code")
 
-    # Initialize the connection to Madrigal
-    web_data = madrigalWeb.MadrigalData(url)
-
     # Get the list of desired remote files
     start = date_array.min()
     stop = date_array.max()
     if start == stop:
         stop += dt.timedelta(days=1)
-    files = get_remote_filenames(inst_code=inst_code, kindat=kindat, user=user,
-                                 password=password, web_data=web_data, url=url,
+
+    # Initialize the connection to Madrigal
+    logger.info('Connecting to Madrigal')
+    web_data = madrigalWeb.MadrigalData(url)
+    logger.info('Connection established.')
+
+    files = get_remote_filenames(inst_code=inst_code, kindat=kindat,
+                                 user=user, password=password,
+                                 web_data=web_data, url=url,
                                  start=start, stop=stop)
 
     for mad_file in files:
         # Build the local filename
-        local_file = os.path.join(data_path, os.path.basename(mad_file.name))
+        local_file = os.path.join(data_path,
+                                  os.path.basename(mad_file.name))
         if local_file.find(file_type) <= 0:
             split_file = local_file.split(".")
             split_file[-1] = file_type
             local_file = ".".join(split_file)
 
         if not os.path.isfile(local_file):
+            fstr = ''.join(('Downloading data for ', local_file))
+            logger.info(fstr)
             web_data.downloadFile(mad_file.name, local_file, user, password,
                                   "pysat", format=file_type)
+        else:
+            estr = ''.join((local_file, ' already exists. Skipping.'))
+            logger.info(estr)
 
     return
 
