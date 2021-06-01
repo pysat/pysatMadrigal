@@ -2,12 +2,14 @@ language: python
 dist: xenial
 jobs:
   include:
-    - python: '3.6'
-      script: pytest --cov=pysatMadrigal/
     - name: '3.7 with flake8'
       python: '3.7'
-      script: pytest --flake8 --cov=pysatMadrigal/
+      script:
+          - flake8 . --count --select=E,F,W
+          - pytest --cov=pysatMadrigal/
     - python: '3.8'
+      script: pytest --cov=pysatMadrigal/
+    - python: '3.9'
       script: pytest --cov=pysatMadrigal/
 
 services: xvfb

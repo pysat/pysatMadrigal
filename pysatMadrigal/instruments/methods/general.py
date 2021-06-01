@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-.
-"""Provides default routines for integrating CEDAR Madrigal instruments into
-pysat, reducing the amount of user intervention.
+"""General routines for integrating CEDAR Madrigal instruments into pysat.
 
- """
+"""
 
 import datetime as dt
 import gzip
@@ -22,36 +21,33 @@ file_types = {'hdf5': 'hdf5', 'netCDF4': 'netCDF4', 'simple': 'simple.gz'}
 
 
 def cedar_rules():
-    """ General acknowledgement statement for Madrigal data.
+    """General acknowledgement statement for Madrigal data.
 
     Returns
     -------
-    ackn : string
+    ackn : str
         String with general acknowledgement for all CEDAR Madrigal data
 
     """
-    ackn = "Contact the PI when using this data, in accordance with the CEDAR"
-    ackn += " 'Rules of the Road'"
+    ackn = "".join(["Contact the PI when using this data, in accordance ",
+                    "with the CEDAR 'Rules of the Road'"])
     return ackn
 
 
 def load(fnames, tag=None, inst_id=None, xarray_coords=None):
     """Loads data from Madrigal into Pandas or XArray
 
-    This routine is called as needed by pysat. It is not intended
-    for direct user interaction.
-
     Parameters
     ----------
     fnames : array-like
         iterable of filename strings, full path, to data files to be loaded.
         This input is nominally provided by pysat itself.
-    tag : string
+    tag : str
         tag name used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. While
         tag defaults to None here, pysat provides '' as the default
         tag unless specified by user at Instrument instantiation. (default='')
-    inst_id : string
+    inst_id : str
         Satellite ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default='')
     xarray_coords : list or NoneType
@@ -67,14 +63,16 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
     Returns
     -------
     data : pds.DataFrame or xr.Dataset
-        A pandas DataFrame or xarray Dataset holding the data from the HDF5
-        file
+        A pandas DataFrame or xarray Dataset holding the data from the file
     meta : pysat.Meta
-        Metadata from the HDF5 file, as well as default values from pysat
+        Metadata from the file, as well as default values from pysat
 
     Note
     ----
     Currently HDF5 reading breaks if a different file type was used previously
+
+    This routine is called as needed by pysat. It is not intended
+    for direct user interaction.
 
     """
     # Test the file formats
