@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   - Added coords from pysat.utils
   - Added Vertical TEC Instrument
   - Added documentation
+  - Added load routine for simple formatted data
+  - Expanded feedback during data downloads
   - Updated documentation configuration to improve maintainability
   - Updated documentation style, displaying logo on sidebar in html format
   - Changed zenodo author name format for better BibTeX compliance
@@ -22,6 +24,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   - Updated load for multiple files in pandas format
   - Fixed remote listing routine to return filenames instead of experiments
   - Fixed bug introduced by change in xarray requiring engine kwarg
+  - Fixed bug that would not list multiple types of files
 
 ## [0.0.3] - 2020-06-15
 - pypi compatibility

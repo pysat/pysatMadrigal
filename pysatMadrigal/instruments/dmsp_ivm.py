@@ -56,7 +56,6 @@ import datetime as dt
 import functools
 import numpy as np
 
-from pysat.instruments.methods import general as ps_gen
 from pysat import logger
 
 from pysatMadrigal.instruments.methods import general, dmsp
@@ -173,6 +172,10 @@ def clean(self):
 #
 # Use the default Madrigal and pysat methods
 
+# Support listing the local files
+list_files = functools.partial(general.list_files,
+                               supported_tags=supported_tags)
+
 # Set the list_remote_files routine
 list_remote_files = functools.partial(general.list_remote_files,
                                       inst_code=madrigal_inst_code,
@@ -181,51 +184,6 @@ list_remote_files = functools.partial(general.list_remote_files,
 
 # Set the load routine
 load = general.load
-
-
-def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
-               supported_tags=supported_tags, delimiter=None, file_type='hdf5'):
-    """Return a Pandas Series of every data file for this Instrument
-
-    Parameters
-    ----------
-    tag : string or NoneType
-        Denotes type of file to load.  Accepted types are <tag strings>.
-        (default=None)
-    inst_id : string or NoneType
-        Specifies the satellite ID for a constellation.  Not used.
-        (default=None)
-    data_path : string or NoneType
-        Path to data directory.  If None is specified, the value previously
-        set in Instrument.files.data_path is used.  (default=None)
-    format_str : string or NoneType
-        User specified file format.  If None is specified, the default
-        formats associated with the supplied tags are used. (default=None)
-    supported_tags : dict or NoneType
-        keys are inst_id, each containing a dict keyed by tag
-        where the values file format template strings. (default=None)
-    delimiter : string
-        Delimiter string upon which files will be split (e.g., '.')
-    file_type : string
-        File format for Madrigal data.  Load routines currently only accepts
-        'hdf5' and 'netCDF4', but any of the Madrigal options may be used
-        here. (default='netCDF4')
-
-    Returns
-    -------
-    out : pysat.Files.from_os : pysat._files.Files
-        A class containing the verified available files
-
-    """
-    if supported_tags[inst_id][tag].find('{file_type}') > 0:
-        supported_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
-            file_type=file_type)
-
-    out = ps_gen.list_files(tag=tag, inst_id=inst_id, data_path=data_path,
-                            format_str=format_str, delimiter=delimiter,
-                            supported_tags=supported_tags)
-
-    return out
 
 
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
@@ -252,9 +210,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     password : string
         Password for data download. (default=None)
     file_type : string
-        File format for Madrigal data.  Load routines currently only accepts
-        'hdf5' and 'netCDF4', but any of the Madrigal options may be used
-        here. (default='hdf5')
+        File format for Madrigal data. (default='hdf5')
 
     Note
     ----
@@ -270,5 +226,5 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     """
     general.download(date_array, inst_code=str(madrigal_inst_code),
                      kindat=madrigal_tag[inst_id][tag], data_path=data_path,
-                     user=user, password=password)
+                     user=user, password=password, file_type=file_type)
     return
