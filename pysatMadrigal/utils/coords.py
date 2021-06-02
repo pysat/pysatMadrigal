@@ -29,7 +29,7 @@ def geodetic_to_geocentric(lat_in, lon_in=None, inverse=False):
     rad_earth : float
         Earth radius [km] (geocentric/detic if inverse=False/True)
 
-    Notes
+    Note
     -----
     Uses WGS-84 values
 
