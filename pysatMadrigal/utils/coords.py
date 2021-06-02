@@ -1,9 +1,6 @@
 """
-pysatMadrigal.coords - coordinate transformations for radar instruments
-=========================================
+Coordinate transformation functions
 
-pysat.coords contains a number of coordinate-transformation
-functions used throughout the pysat package.
 """
 
 import numpy as np

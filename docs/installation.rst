@@ -12,7 +12,7 @@ Prerequisites
     :alt: powered by pysat Logo, blue planet with orbiting python
 
 
-pysatSpaceWeather uses common Python modules, as well as modules developed by
+pysatMadrigal uses common Python modules, as well as modules developed by
 and for the Space Physics community.  This module officially supports
 Python 3.6+.
 

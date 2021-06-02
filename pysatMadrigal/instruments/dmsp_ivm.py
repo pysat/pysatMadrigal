@@ -30,7 +30,7 @@ platform
 name
     'ivm'
 tag
-    'utd', None
+    'utd', ''
 inst_id
     ['f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18']
 
