@@ -9,38 +9,49 @@ Short version
 -------------
 
 * Submit bug reports, feature requests, and questions at
-`GitHub <https://github.com/pysat/pysatMadrigal/issues>`_
+`GitHub Issues <https://github.com/pysat/pysatMadrigal/issues>`_
 * Make pull requests to the ``develop`` branch
 
-Bug reports
------------
+More about Issues
+-----------------
 
-When `reporting a bug <https://github.com/pysat/pysatMadrigal/issues>`_
-please include:
+Bug reports, questions, and feature requests should all be made as GitHub
+Issues.  Templates are provided for each type of issue, to help you include
+all the necessary information.
+
+Questions
+^^^^^^^^^
+
+Not sure how something works?  Ask away!  The more information you provide, the
+easier the question will be to answer.  You can also interact with the pysat
+developers on our `slack channel <https://pysat.slack.com>`_.  
+
+Bug reports
+^^^^^^^^^^^
+
+When reporting a bug please include:
 
 * Your operating system name and version
 * Any details about your local setup that might be helpful in troubleshooting
 * Detailed steps to reproduce the bug
 
-Feature requests and feedback
------------------------------
+Feature requests
+^^^^^^^^^^^^^^^^
 
-The best way to send feedback is to file an issue at
-`GitHub <https://github.com/pysat/pysatMadrigal/issues>`_.
-
-If you are proposing a feature:
+If you are proposing a new feature or a change in something that alread exists:
 
 * Explain in detail how it would work.
 * Keep the scope as narrow as possible, to make it easier to implement.
 * Remember that this is a volunteer-driven project, and that code contributions
   are welcome :)
 
-Development
------------
+More about Development
+----------------------
 
 To set up `pysatMadrigal` for local development:
 
-1. `Fork pysatMadrigal on GitHub <https://github.com/pysat/pysatMadrigal/fork>`_.
+1. Fork pysatMadrigal on
+   `GitHub <https://github.com/pysat/pysatMadrigal/fork>`_.
 2. Clone your fork locally::
 
     git clone git@github.com:your_name_here/pysatMadrigal.git
@@ -49,36 +60,37 @@ To set up `pysatMadrigal` for local development:
 
     git checkout -b name-of-your-bugfix-or-feature
 
-   Now you can make your changes locally. Tests for new instruments are
-   performed automatically.  Tests for custom functions should be added to the
+4. Make your changes locally. Tests for new instruments are performed
+   automatically.  Tests for custom functions should be added to the
    appropriately named file in ``pysatMadrigal/tests``.  For example,
-   space weather methods should be named
-   ``pysatMadrigal/tests/test_methods_sw.py``.  If no test file exists,
-   then you should create one.  This testing uses pytest, which will run tests
-   on any python file in the test directory that starts with ``test``.  Classes
-   must begin with ``Test``, and test methods must also begin with ``test``.
+   Jicamarca methods containined in ``pysatMadrigal/instruments/methods/jro.py``
+   should be named ``pysatMadrigal/tests/test_methods_jro.py``.  If no test
+   file exists, then you should create one.  This testing uses pytest, which
+   will run tests on any python file in the test directory that starts with
+   ``test``.  Test classes must begin with ``Test``, and test methods must also
+   begin with ``test``.
 
-4. When you're done making changes, run all the checks to ensure that nothing
+5. When you're done making changes, run all the checks to ensure that nothing
    is broken on your local system::
 
     pytest -vs pysatMadrigal
 
-5. Update/add documentation (in ``docs``).  Even if you don't think it's
+6. Update/add documentation (in ``docs``).  Even if you don't think it's
    relevant, check to see if any existing examples have changed.
 
-6. Add your name to the .zenodo.json file as an author
+7. Add your name to the .zenodo.json file as an author
 
-7. Commit your changes and push your branch to GitHub::
+8. Commit your changes and push your branch to GitHub::
 
     git add .
     git commit -m "Brief description of your changes"
     git push origin name-of-your-bugfix-or-feature
 
-8. Submit a pull request through the GitHub website. Pull requests should be
+9. Submit a pull request through the GitHub website. Pull requests should be
    made to the ``develop`` branch.
 
 Pull Request Guidelines
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 If you need some code review or feedback while you're developing the code, just
 make a pull request. Pull requests should be made to the ``develop`` branch.
@@ -97,7 +109,7 @@ For merging, you should:
        that the code passes all tests on your local system first.
 
 Project Style Guidelines
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 In general, pysat follows PEP8 and numpydoc guidelines.  Pytest runs the unit
 and integration tests, flake8 checks for style, and sphinx-build performs
