@@ -35,16 +35,16 @@ Examples
 --------
 ::
 
-    # for isolated use of a madrigal data set
+    # For isolated use of a madrigal data set
     import pysat
-    # download DMSP data from Madrigal
+    # Download DMSP data from Madrigal
     dmsp = pysat.Instrument('madrigal', 'pandas', inst_code=8100,
                             kindat='10241')
     dmsp.download(dt.datetime(2017, 12, 30), dt.datetime(2017, 12, 31),
                   user='Firstname+Lastname', password='email@address.com')
     dmsp.load(2017, 363)
 
-    # for users that plan on using multiple Madrigal datasets
+    # For users that plan on using multiple Madrigal datasets
     # using this general interface then an additional parameter
     # should be supplied upon instrument instantiation (file_format)
 
@@ -65,7 +65,7 @@ Examples
     # python standards for string templates/Formatters
     # https://docs.python.org/2/library/string.html
 
-    # the complete instantiation for this instrument is
+    # The complete instantiation for this instrument is
     file_fmt = 'dms_ut_{year:4d}{month:02d}{day:02d}_11.002.hdf5'
     dmsp = pysat.Instrument('madrigal', 'pandas', inst_code=8100,
                             kindat='10241', file_format=file_fmt)
