@@ -16,7 +16,7 @@ pysat ([pysat documentation](http://pysat.readthedocs.io/en/latest/)).
 
 # Installation
 
-The following instructions provide a guide for installing pysatSpaceWeather and
+The following instructions provide a guide for installing pysatMadrigal and
 give some examples on how to use the routines.
 
 ## Prerequisites

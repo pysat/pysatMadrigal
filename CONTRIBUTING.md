@@ -38,7 +38,7 @@ When reporting a bug please include:
 Feature requests
 ^^^^^^^^^^^^^^^^
 
-If you are proposing a new feature or a change in something that alread exists:
+If you are proposing a new feature or a change in something that already exists:
 
 * Explain in detail how it would work.
 * Keep the scope as narrow as possible, to make it easier to implement.

@@ -1,4 +1,4 @@
-.. pysatSpaceWeather documentation main file.  Remember that it should at least
+.. pysatMadrigal documentation main file.  Remember that it should at least
    contain the root `toctree` directive.
 
 Welcome to the pysatMadrigal documentation
