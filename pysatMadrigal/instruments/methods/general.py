@@ -313,9 +313,9 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
                     data = xr.combine_by_coords([data, xr.merge(fdata)])
             else:
                 if data is None:
-                    data = pds.concat(fdata)
+                    data = pds.concat(fdata, sort=True)
                 else:
-                    ldata = pds.concat(fdata).to_xarray()
+                    ldata = pds.concat(fdata, sort=True).to_xarray()
                     ldata = ldata.rename({'index': 'time'})
                     data = xr.combine_by_coords([data, ldata])
 
