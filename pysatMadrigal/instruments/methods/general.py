@@ -487,21 +487,21 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
                 date_array))
         start = date_array.min()
         stop = date_array.max()
-    # if start and stop are identical, increment
+    # If start and stop are identical, increment
     if start == stop:
         stop += dt.timedelta(days=1)
-    # open connection to Madrigal
+    # Open connection to Madrigal
     if web_data is None:
         web_data = madrigalWeb.MadrigalData(url)
 
-    # get list of experiments for instrument from in desired range
+    # Get list of experiments for instrument from in desired range
     exp_list = web_data.getExperiments(inst_code, start.year, start.month,
                                        start.day, start.hour, start.minute,
                                        start.second, stop.year, stop.month,
                                        stop.day, stop.hour, stop.minute,
                                        stop.second)
 
-    # iterate over experiments to grab files for each one
+    # Iterate over experiments to grab files for each one
     files = list()
     logger.info("Found {:d} Madrigal experiments".format(len(exp_list)))
     for exp in exp_list:
@@ -780,13 +780,13 @@ def filter_data_single_date(inst):
 
     """
 
-    # only do this if loading by date!
+    # Only do this if loading by date!
     if inst._load_by_date and inst.pad is None:
-        # identify times for the loaded date
+        # Identify times for the loaded date
         idx, = np.where((inst.index >= inst.date)
                         & (inst.index < (inst.date + pds.DateOffset(days=1))))
 
-        # downselect from all data
+        # Downselect from all data
         inst.data = inst[idx]
 
     return

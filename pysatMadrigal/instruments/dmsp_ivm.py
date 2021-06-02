@@ -161,7 +161,7 @@ def clean(self):
             logger.warning('this level 1 data has no quality flags')
         idx = slice(0, self.index.shape[0])
 
-    # downselect data based upon cleaning conditions above
+    # Downselect data based upon cleaning conditions above
     self.data = self[idx]
 
     return
