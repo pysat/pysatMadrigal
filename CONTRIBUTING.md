@@ -140,4 +140,5 @@ These include:
 * Block and inline comments should use proper English grammar and punctuation
   with the exception of single sentences in a block, which may then omit the
   final period
-* When casting is necessary, use `np.int64` and `np.float64` to ensure operating system agnosticism
+* When casting is necessary, use `np.int64` and `np.float64` to ensure operating 
+   system agnosticism
