@@ -45,7 +45,7 @@ def acknowledgements(name):
                             "Niveau des Eaux Littorales Ricerche Sismogiche, ",
                             "Système d’Observation du  (SONEL), RENAG : ",
                             "REseau NAtional GPS permanent, and GeoNet—the ",
-                            "official source of geological hazard information",
+                            "official source of geological hazard information ",
                             "for New Zealand."])}
 
     return ackn[name]

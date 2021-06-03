@@ -65,7 +65,7 @@ remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
 
 # Madrigal tags
 madrigal_inst_code = 8000
-madrigal_tag = {'': {'vtec': '3500'}}  # , 'los': '3505'}}
+madrigal_tag = {'': {'vtec': '3500'}}  # , 'los': '3505'}} <- Issue #12
 
 # ----------------------------------------------------------------------------
 # Instrument test attributes
