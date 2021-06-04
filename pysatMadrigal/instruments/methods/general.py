@@ -104,18 +104,16 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
     if len(load_file_types["netCDF4"]) > 0:
         # Currently not saving file header data, as all metadata is at
         # the data variable level
-        if len(labels) == 0:
-            for item in file_data.data_vars.keys():
-                name_string = item
-                unit_string = file_data[item].attrs['units']
-                desc_string = file_data[item].attrs['description']
-                labels.append(name_string)
-                meta[name_string.lower()] = {meta.labels.name: name_string,
-                                             meta.labels.units: unit_string,
-                                             meta.labels.desc: desc_string}
+        for item in file_data.data_vars.keys():
+            name_string = item
+            unit_string = file_data[item].attrs['units']
+            desc_string = file_data[item].attrs['description']
+            meta[name_string.lower()] = {meta.labels.name: name_string,
+                                         meta.labels.units: unit_string,
+                                         meta.labels.desc: desc_string}
 
-                # Remove any metadata from xarray
-                file_data[item].attrs = {}
+            # Remove any metadata from xarray
+            file_data[item].attrs = {}
 
         # Reset UNIX timestamp as datetime and set it as an index
         file_data = file_data.rename({'timestamps': 'time'})
@@ -147,7 +145,10 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
                 if len(labels) == 0:
                     for item in header:
                         labels.append(item)
-                        meta[item.lower()] = {meta.labels.name: item}
+
+                        # Only update metadata if necessary
+                        if item.lower() not in meta:
+                            meta[item.lower()] = {meta.labels.name: item}
 
                 # Construct a dict of the output
                 file_dict = {item.lower(): list() for item in header}
@@ -170,10 +171,13 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
                         unit_string = item[3].decode('UTF-8')
                         desc_string = item[1].decode('UTF-8')
                         labels.append(name_string)
-                        meta[name_string.lower()] = {
-                            meta.labels.name: name_string,
-                            meta.labels.units: unit_string,
-                            meta.labels.desc: desc_string}
+
+                        # Only update metadata if necessary
+                        if name_string.lower() not in meta:
+                            meta[name_string.lower()] = {
+                                meta.labels.name: name_string,
+                                meta.labels.units: unit_string,
+                                meta.labels.desc: desc_string}
 
                 # Add additional metadata notes. Custom attributes attached to
                 # meta are attached to corresponding Instrument object when
@@ -318,11 +322,14 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
                 else:
                     ldata = pds.concat(fdata).sort_index().to_xarray()
                     ldata = ldata.rename({'index': 'time'})
-                    data = xr.combine_by_coords([data, ldata])
+                    data = xr.combine_by_coords([data, ldata]).to_pandas()
 
     # Ensure that data is at least an empty Dataset
     if data is None:
-        data = xr.Dataset()
+        if len(xarray_coords) > 0:
+            data = xr.Dataset()
+        else:
+            data = pds.DataFrame(dtype=np.float64)
 
     return data, meta
 
