@@ -20,7 +20,7 @@ Examples
 --------
 ::
 
-    import datetime
+    import datetime as dt
     import pysat
     import pysatMadrigal as pymad
 
