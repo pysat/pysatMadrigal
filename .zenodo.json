@@ -1,0 +1,37 @@
+{
+    "keywords": [
+      "satellite", 
+      "radar", 
+      "Madrigal", 
+      "DMSP", 
+      "pysat", 
+      "JRO", 
+      "Jicamarca Radio Observatory", 
+      "TEC", 
+      "Total Electron Content", 
+      "Ionosphere",
+      "Space Physics", 
+      "Heliophysics"
+    ], 
+    "creators": [
+      {
+        "affiliation": "U.S. Naval Research Laboratory", 
+        "name": "Burrell, Angeline G.",
+        "orcid": "0000-0001-8875-9326"
+      }, 
+      {
+        "affiliation": "Goddard Space Flight Center",
+        "name": "Klenzing, Jeff",
+        "orcid": "0000-0001-8321-6074"
+      }, 
+      {
+        "affiliation": "The University of Texas at Dallas", 
+        "name": "Stoneback, Russell",
+        "orcid": "0000-0001-7216-4336"  
+      }, 
+      {
+        "affiliation": "Predictive Science", 
+        "name": "Pembroke, Asher"
+      }
+    ]
+}

@@ -8,22 +8,25 @@ experiments.
 
 Downloads data from the JRO Madrigal Database.
 
-Parameters
+Properties
 ----------
-platform : string
+platform
     'jro'
-name : string
+name
     'isr'
-tag : string
+tag
     'drifts', 'drifts_ave', 'oblique_stan', 'oblique_rand', 'oblique_long'
 
-Example
--------
+Examples
+--------
+::
+
     import pysat
-    dmsp = pysat.Instrument('jro', 'isr', 'drifts', clean_level='clean')
-    dmsp.download(dt.datetime(2017, 12, 30), dt.datetime(2017, 12, 31),
-                  user='Firstname+Lastname', password='email@address.com')
-    dmsp.load(2017,363)
+    jro = pysat.Instrument('jro', 'isr', 'drifts', clean_level='clean')
+    jro.download(pysat.datetime(2017, 12, 30), pysat.datetime(2017, 12, 31),
+                 user='Firstname+Lastname', password='email@address.com')
+    jro.load(2017, 363)
+
 
 Note
 ----
@@ -31,19 +34,16 @@ Note
 
 """
 
-from __future__ import print_function
-from __future__ import absolute_import
 import datetime as dt
 import functools
 import numpy as np
 
-from pysatMadrigal.instruments.methods import madrigal as mad_meth
-from pysat.instruments.methods import general as mm_gen
-from pysat.utils import coords
+from pysat import logger
 
-import logging
-logger = logging.getLogger(__name__)
+from pysatMadrigal.instruments.methods import general, jro
 
+# ----------------------------------------------------------------------------
+# Instrument attributes
 
 platform = 'jro'
 name = 'isr'
@@ -51,39 +51,39 @@ tags = {'drifts': 'Drifts and wind', 'drifts_ave': 'Averaged drifts',
         'oblique_stan': 'Standard Faraday rotation double-pulse',
         'oblique_rand': 'Randomized Faraday rotation double-pulse',
         'oblique_long': 'Long pulse Faraday rotation'}
-sat_ids = {'': list(tags.keys())}
-_test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
-                    'drifts_ave': dt.datetime(2010, 1, 19),
-                    'oblique_stan': dt.datetime(2010, 4, 19),
-                    'oblique_rand': dt.datetime(2000, 11, 9),
-                    'oblique_long': dt.datetime(2010, 4, 12)}}
+inst_ids = {'': list(tags.keys())}
+
 pandas_format = False
 
-# support list files routine
-# use the default CDAWeb method
-jro_fname1 = 'jro{year:4d}{month:02d}{day:02d}'
-jro_fname2 = '.{version:03d}.hdf5'
+# Local attributes
+jro_fname1 = 'jro{{year:4d}}{{month:02d}}{{day:02d}}'
+jro_fname2 = '.{{version:03d}}.{file_type}'
 supported_tags = {ss: {'drifts': jro_fname1 + "drifts" + jro_fname2,
                        'drifts_ave': jro_fname1 + "drifts_avg" + jro_fname2,
                        'oblique_stan': jro_fname1 + jro_fname2,
                        'oblique_rand': jro_fname1 + "?" + jro_fname2,
                        'oblique_long': jro_fname1 + "?" + jro_fname2}
-                  for ss in sat_ids.keys()}
-list_files = functools.partial(mm_gen.list_files,
-                               supported_tags=supported_tags)
+                  for ss in inst_ids.keys()}
+remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
+                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 
-# madrigal tags
+# Madrigal tags
 madrigal_inst_code = 10
-madrigal_tag = {'': {'drifts': 1910, 'drifts_ave': 1911, 'oblique_stan': 1800,
-                     'oblique_rand': 1801, 'oblique_long': 1802}, }
+madrigal_tag = {'': {'drifts': "1910", 'drifts_ave': "1911",
+                     'oblique_stan': "1800", 'oblique_rand': "1801",
+                     'oblique_long': "1802"}, }
 
-# support listing files currently available on remote server (Madrigal)
-list_remote_files = functools.partial(mad_meth.list_remote_files,
-                                      supported_tags=supported_tags,
-                                      inst_code=madrigal_inst_code)
+# ----------------------------------------------------------------------------
+# Instrument test attributes
 
-# support load routine
-load = functools.partial(mad_meth.load, xarray_coords=['gdalt'])
+_test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
+                    'drifts_ave': dt.datetime(2010, 1, 19),
+                    'oblique_stan': dt.datetime(2010, 4, 19),
+                    'oblique_rand': dt.datetime(2000, 11, 9),
+                    'oblique_long': dt.datetime(2010, 4, 12)}}
+
+# ----------------------------------------------------------------------------
+# Instrument methods
 
 # Madrigal will sometimes include multiple days within a file
 # labeled with a single date.
@@ -91,96 +91,31 @@ load = functools.partial(mad_meth.load, xarray_coords=['gdalt'])
 # To ensure this function is always applied first, we set the filter
 # function as the default function for (JRO).
 # Default function is run first by the nanokernel on every load call.
-default = mad_meth.filter_data_single_date
+preprocess = general.filter_data_single_date
 
 
 def init(self):
     """Initializes the Instrument object with values specific to JRO ISR
-
-    Runs once upon instantiation.
-
-    Parameters
-    ----------
-    self : pysat.Instrument
-        This object
-
-    Returns
-    --------
-    Void : (NoneType)
-        Object modified in place.
-
-
     """
 
-    logger.info(' '.join(["The Jicamarca Radio Observatory is operated by",
-                          "the Instituto Geofisico del Peru, Ministry of",
-                          "Education, with support from the National Science",
-                          "Foundation as contracted through Cornell",
-                          "University. ", mad_meth.cedar_rules()]))
+    ackn_str = '\n'.join([jro.acknowledgements(), general.cedar_rules()])
+
+    logger.info(ackn_str)
+    self.acknowledgements = ackn_str
+    self.references = jro.references()
+
     return
-
-
-def download(date_array, tag='', sat_id='', data_path=None, user=None,
-             password=None):
-    """Downloads data from Madrigal.
-
-    Parameters
-    ----------
-    date_array : array-like
-        list of datetimes to download data for. The sequence of dates need not
-        be contiguous.
-    tag : string ('')
-        Tag identifier used for particular dataset. This input is provided by
-        pysat.
-    sat_id : string  ('')
-        Satellite ID string identifier used for particular dataset. This input
-        is provided by pysat.
-    data_path : string (None)
-        Path to directory to download data to.
-    user : string (None)
-        User string input used for download. Provided by user and passed via
-        pysat. If an account
-        is required for dowloads this routine here must error if user not
-        supplied.
-    password : string (None)
-        Password for data download.
-
-    Returns
-    --------
-    Void : (NoneType)
-        Downloads data to disk.
-
-    Notes
-    -----
-    The user's names should be provided in field user. Ruby Payne-Scott should
-    be entered as Ruby+Payne-Scott
-
-    The password field should be the user's email address. These parameters
-    are passed to Madrigal when downloading.
-
-    The affiliation field is set to pysat to enable tracking of pysat
-    downloads.
-
-    """
-    mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
-                      kindat=str(madrigal_tag[sat_id][tag]),
-                      data_path=data_path, user=user, password=password)
 
 
 def clean(self):
     """Routine to return JRO ISR data cleaned to the specified level
 
-    Returns
-    --------
-    Void : (NoneType)
-        data in inst is modified in-place.
-
-    Notes
-    --------
-    Supports 'clean', 'dusty', 'dirty'
-    'Clean' is unknown for oblique modes, over 200 km for drifts
-    'Dusty' is unknown for oblique modes, over 200 km for drifts
-    'Dirty' is unknown for oblique modes, over 200 km for drifts
+    Note
+    ----
+    Supports 'clean'
+    'clean' is unknown for oblique modes, over 200 km for drifts
+    'dusty' is the same as clean
+    'Dirty' is the same as clean
     'None' None
 
     Routine is called by pysat, and not by the end user directly.
@@ -220,71 +155,135 @@ def clean(self):
     return
 
 
-def calc_measurement_loc(self):
-    """ Calculate the instrument measurement location in geographic coordinates
+# ----------------------------------------------------------------------------
+# Instrument functions
+#
+# Use the default Madrigal and pysat methods
 
-    Returns
-    -------
-    Void : adds 'gdlat#', 'gdlon#' to the instrument, for all directions that
-    have azimuth and elevation keys that match the format 'eldir#' and 'azdir#'
+# Support listing the local files
+list_files = functools.partial(general.list_files,
+                               supported_tags=supported_tags)
+
+# Set list_remote_files routine
+list_remote_files = functools.partial(general.list_remote_files,
+                                      supported_tags=remote_tags,
+                                      inst_code=madrigal_inst_code,
+                                      kindats=madrigal_tag)
+
+
+def download(date_array, tag='', inst_id='', data_path=None, user=None,
+             password=None, file_type='hdf5'):
+    """Downloads data from Madrigal.
+
+    Parameters
+    ----------
+    date_array : array-like
+        list of datetimes to download data for. The sequence of dates need not
+        be contiguous.
+    tag : str
+        Tag identifier used for particular dataset. This input is provided by
+        pysat. (default='')
+    inst_id : str
+        Satellite ID string identifier used for particular dataset. This input
+        is provided by pysat. (default='')
+    data_path : str
+        Path to directory to download data to. (default=None)
+    user : str
+        User string input used for download. Provided by user and passed via
+        pysat. If an account is required for dowloads this routine here must
+        error if user not supplied. (default=None)
+    password : str
+        Password for data download. (default=None)
+    file_type : str
+        File format for Madrigal data. (default='hdf5')
+
+    Notes
+    -----
+    The user's names should be provided in field user. Ruby Payne-Scott should
+    be entered as Ruby+Payne-Scott
+
+    The password field should be the user's email address. These parameters
+    are passed to Madrigal when downloading.
+
+    The affiliation field is set to pysat to enable tracking of pysat
+    downloads.
 
     """
+    general.download(date_array, inst_code=str(madrigal_inst_code),
+                     kindat=madrigal_tag[inst_id][tag], data_path=data_path,
+                     user=user, password=password, file_type=file_type)
 
-    az_keys = [kk[5:] for kk in list(self.data.keys())
-               if kk.find('azdir') == 0]
-    el_keys = [kk[5:] for kk in list(self.data.keys())
-               if kk.find('eldir') == 0]
-    good_dir = list()
 
-    for i, kk in enumerate(az_keys):
-        if kk in el_keys:
-            try:
-                good_dir.append(int(kk))
-            except ValueError:
-                logger.warning("unknown direction number [{:}]".format(kk))
+def load(fnames, tag=None, inst_id=None):
+    """ Routine to load the JRO ISR data
 
-    # Calculate the geodetic latitude and longitude for each direction
-    if len(good_dir) == 0:
-        raise ValueError("No matching azimuth and elevation data included")
+    Parameters
+    -----------
+    fnames : list
+        List of filenames
+    tag : str or NoneType
+        tag name used to identify particular data set to be loaded.
+        This input is nominally provided by pysat itself. (default=None)
+    inst_id : str or NoneType
+        Instrument ID used to identify particular data set to be loaded.
+        This input is nominally provided by pysat itself. (default=None)
 
-    for dd in good_dir:
-        # Format the direction location keys
-        az_key = 'azdir{:d}'.format(dd)
-        el_key = 'eldir{:d}'.format(dd)
-        lat_key = 'gdlat{:d}'.format(dd)
-        lon_key = 'gdlon{:d}'.format(dd)
-        # JRO is located 520 m above sea level (jro.igp.gob.pe./english/)
-        # Also, altitude has already been calculated
-        gdaltr = np.ones(shape=self['gdlonr'].shape) * 0.52
-        gdlat, gdlon, _ = coords.local_horizontal_to_global_geo(self[az_key],
-                                                                self[el_key],
-                                                                self['range'],
-                                                                self['gdlatr'],
-                                                                self['gdlonr'],
-                                                                gdaltr,
-                                                                geodetic=True)
+    Returns
+    --------
+    data : xarray.Dataset
+        Object containing satellite data
+    meta : pysat.Meta
+        Object containing metadata such as column names and units
 
-        # Assigning as data, to ensure that the number of coordinates match
-        # the number of data dimensions
-        self.data = self.data.assign({lat_key: gdlat, lon_key: gdlon})
+    """
+    # Define the xarray coordinate dimensions (apart from time)
+    xcoords = {'drifts': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
+                           'kinst'): ['nwlos', 'range', 'vipn2', 'dvipn2',
+                                      'vipe1', 'dvipe1', 'vi72', 'dvi72',
+                                      'vi82', 'dvi82', 'paiwl', 'pacwl',
+                                      'pbiwl', 'pbcwl', 'pciel', 'pccel',
+                                      'pdiel', 'pdcel', 'jro10', 'jro11'],
+                          ('time', ): ['year', 'month', 'day', 'hour', 'min',
+                                       'sec', 'spcst', 'pl', 'cbadn', 'inttms',
+                                       'azdir7', 'eldir7', 'azdir8', 'eldir8',
+                                       'jro14', 'jro15', 'jro16', 'ut1_unix',
+                                       'ut2_unix', 'recno']},
+               'drifts_ave': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
+                               'kinst'): ['altav', 'range', 'vipn2', 'dvipn2',
+                                          'vipe1', 'dvipe1'],
+                              ('time', ): ['year', 'month', 'day', 'hour',
+                                           'min', 'sec', 'spcst', 'pl',
+                                           'cbadn', 'inttms', 'ut1_unix',
+                                           'ut2_unix', 'recno']},
+               'oblique_stan': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
+                                 'kinst'): ['rgate', 'ne', 'dne', 'te', 'dte',
+                                            'ti', 'dti', 'ph+', 'dph+', 'phe+',
+                                            'dphe+'],
+                                ('time', ): ['year', 'month', 'day', 'hour',
+                                             'min', 'sec', 'azm', 'elm',
+                                             'pl', 'inttms', 'tfreq',
+                                             'ut1_unix', 'ut2_unix', 'recno']},
+               'oblique_rand': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
+                                 'kinst'): ['rgate', 'pop', 'dpop', 'te', 'dte',
+                                            'ti', 'dti', 'ph+', 'dph+', 'phe+',
+                                            'dphe+'],
+                                ('time', ): ['year', 'month', 'day', 'hour',
+                                             'min', 'sec', 'azm', 'elm',
+                                             'pl', 'inttms', 'tfreq',
+                                             'ut1_unix', 'ut2_unix', 'recno']},
+               'oblique_long': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
+                                 'kinst'): ['rgate', 'pop', 'dpop', 'te', 'dte',
+                                            'ti', 'dti', 'ph+', 'dph+', 'phe+',
+                                            'dphe+'],
+                                ('time', ): ['year', 'month', 'day', 'hour',
+                                             'min', 'sec', 'azm', 'elm',
+                                             'pl', 'inttms', 'tfreq',
+                                             'ut1_unix', 'ut2_unix', 'recno']}}
 
-        # Add metadata for the new data values
-        bm_label = "Beam {:d} ".format(dd)
-        self.meta[lat_key] = {self.meta.units_label: 'degrees',
-                              self.meta.name_label: bm_label + 'latitude',
-                              self.meta.desc_label: bm_label + 'latitude',
-                              self.meta.plot_label: bm_label + 'Latitude',
-                              self.meta.axis_label: bm_label + 'Latitude',
-                              self.meta.scale_label: 'linear',
-                              self.meta.min_label: -90.0,
-                              self.meta.max_label: 90.0,
-                              self.meta.fill_label: np.nan}
-        self.meta[lon_key] = {self.meta.units_label: 'degrees',
-                              self.meta.name_label: bm_label + 'longitude',
-                              self.meta.desc_label: bm_label + 'longitude',
-                              self.meta.plot_label: bm_label + 'Longitude',
-                              self.meta.axis_label: bm_label + 'Longitude',
-                              self.meta.scale_label: 'linear',
-                              self.meta.fill_label: np.nan}
+    # Load the specified data
+    data, meta = general.load(fnames, tag, inst_id, xarray_coords=xcoords[tag])
 
-    return
+    # Squeeze the kindat and kinst 'coordinates', but keep them as floats
+    data = data.squeeze(dim=['kindat', 'kinst', 'gdlatr', 'gdlonr'])
+
+    return data, meta

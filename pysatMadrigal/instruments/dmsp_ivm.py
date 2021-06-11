@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# Full license can be found in License.md
+# Full author list can be found in .zenodo.json file
+# DOI:10.5281/zenodo.3824979
+# ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-
 """Supports the Ion Velocity Meter (IVM)
 onboard the Defense Meteorological Satellite Program (DMSP).
@@ -9,95 +14,100 @@ to a theoretical description of plasma the number density, plasma
 composition, plasma temperature, and plasma motion may be determined.
 The DM directly measures the arrival angle of plasma. Using the reported
 motion of the satellite the angle is converted into ion motion along
-two orthogonal directions, perpendicular to the satellite track.
+two orthogonal directions, perpendicular to the satellite track. The IVM is
+part of the Special Sensor for Ions, Electrons, and Scintillations (SSIES)
+instrument suite on DMSP.
 
 Downloads data from the National Science Foundation Madrigal Database.
 The routine is configured to utilize data files with instrument
 performance flags generated at the Center for Space Sciences at the
 University of Texas at Dallas.
 
-Parameters
+Properties
 ----------
-platform : string
+platform
     'dmsp'
-name : string
+name
     'ivm'
-tag : string
-    'utd', None
-sat_id : string
+tag
+    'utd', ''
+inst_id
     ['f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18']
 
 Example
 -------
+::
+
     import pysat
     dmsp = pysat.Instrument('dmsp', 'ivm', 'utd', 'f15', clean_level='clean')
     dmsp.download(dt.datetime(2017, 12, 30), dt.datetime(2017, 12, 31),
                   user='Firstname+Lastname', password='email@address.com')
-    dmsp.load(2017,363)
+    dmsp.load(2017, 363)
 
 Note
 ----
-    Please provide name and email when downloading data with this routine.
+Please provide name and email when downloading data with this routine.
 
 Code development supported by NSF grant 1259508
 
 """
 
-from __future__ import print_function
-from __future__ import absolute_import
-
 import datetime as dt
 import functools
 import numpy as np
-import pandas as pds
 
-from pysatMadrigal.instruments.methods import madrigal as mad_meth
-from pysat.instruments.methods import general as mm_gen
+from pysat import logger
 
-import logging
-logger = logging.getLogger(__name__)
+from pysatMadrigal.instruments.methods import general, dmsp
+
+# ----------------------------------------------------------------------------
+# Instrument attributes
 
 platform = 'dmsp'
 name = 'ivm'
 tags = {'utd': 'UTDallas DMSP data processing', '': 'Level 2 data processing'}
-sat_ids = {'f11': ['utd', ''], 'f12': ['utd', ''], 'f13': ['utd', ''],
-           'f14': ['utd', ''], 'f15': ['utd', ''], 'f16': [''], 'f17': [''],
-           'f18': ['']}
-_test_dates = {'f11': {'utd': dt.datetime(1998, 1, 2)},
-               'f12': {'utd': dt.datetime(1998, 1, 2)},
-               'f13': {'utd': dt.datetime(1998, 1, 2)},
-               'f14': {'utd': dt.datetime(1998, 1, 2)},
-               'f15': {'utd': dt.datetime(2017, 12, 30)}}
+inst_ids = {'f11': ['utd', ''], 'f12': ['utd', ''], 'f13': ['utd', ''],
+            'f14': ['utd', ''], 'f15': ['utd', ''], 'f16': [''], 'f17': [''],
+            'f18': ['']}
+
 pandas_format = True
 
-# support list files routine
-# use the default CDAWeb method
-dmsp_fname1 = {'utd': 'dms_ut_{year:4d}{month:02d}{day:02d}_',
-               '': 'dms_{year:4d}{month:02d}{day:02d}_'}
-dmsp_fname2 = {'utd': '.{version:03d}.hdf5', '': 's?.{version:03d}.hdf5'}
+# Local attributes
+dmsp_fname1 = {'utd': 'dms_ut_{{year:4d}}{{month:02d}}{{day:02d}}_',
+               '': 'dms_{{year:4d}}{{month:02d}}{{day:02d}}_'}
+dmsp_fname2 = {'utd': '.{{version:03d}}.{file_type}',
+               '': 's?.{{version:03d}}.{file_type}'}
 supported_tags = {ss: {kk: dmsp_fname1[kk] + ss[1:] + dmsp_fname2[kk]
-                       for kk in sat_ids[ss]} for ss in sat_ids.keys()}
-list_files = functools.partial(mm_gen.list_files,
-                               supported_tags=supported_tags)
+                       for kk in inst_ids[ss]} for ss in inst_ids.keys()}
+remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
+                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 
-# madrigal tags
+# Madrigal tags
 madrigal_inst_code = 8100
-madrigal_tag = {'f11': {'utd': 10241, '': 10111},
-                'f12': {'utd': 10242, '': 10112},
-                'f13': {'utd': 10243, '': 10113},
-                'f14': {'utd': 10244, '': 10114},
-                'f15': {'utd': 10245, '': 10115},
-                'f16': {'': 10116},
-                'f17': {'': 10117},
-                'f18': {'': 10118}, }
+madrigal_tag = {'f11': {'utd': '10241', '': '10111'},
+                'f12': {'utd': '10242', '': '10112'},
+                'f13': {'utd': '10243', '': '10113'},
+                'f14': {'utd': '10244', '': '10114'},
+                'f15': {'utd': '10245', '': '10115'},
+                'f16': {'': '10116'},
+                'f17': {'': '10117'},
+                'f18': {'': '10118'}, }
 
-# support listing files currently available on remote server (Madrigal)
-list_remote_files = functools.partial(mad_meth.list_remote_files,
-                                      supported_tags=supported_tags,
-                                      inst_code=madrigal_inst_code)
+# ----------------------------------------------------------------------------
+# Instrument test attributes
 
-# support load routine
-load = mad_meth.load
+_test_dates = {
+    'f11': {tag: dt.datetime(1998, 1, 2) for tag in inst_ids['f11']},
+    'f12': {tag: dt.datetime(1998, 1, 2) for tag in inst_ids['f12']},
+    'f13': {tag: dt.datetime(1998, 1, 2) for tag in inst_ids['f13']},
+    'f14': {tag: dt.datetime(1998, 1, 2) for tag in inst_ids['f14']},
+    'f15': {tag: dt.datetime(2017, 12, 30) for tag in inst_ids['f15']},
+    'f16': {tag: dt.datetime(2009, 1, 1) for tag in inst_ids['f16']},
+    'f17': {tag: dt.datetime(2009, 1, 1) for tag in inst_ids['f17']},
+    'f18': {tag: dt.datetime(2017, 12, 30) for tag in inst_ids['f18']}}
+
+# ----------------------------------------------------------------------------
+# Instrument methods
 
 
 def init(self):
@@ -110,20 +120,74 @@ def init(self):
     self : pysat.Instrument
         This object
 
-    Returns
-    --------
-    Void : (NoneType)
-        Object modified in place.
-
-
     """
 
-    logger.info(mad_meth.cedar_rules())
+    logger.info(general.cedar_rules())
+    self.acknowledgements = general.cedar_rules()
+    self.references = dmsp.references(self.name)
     return
 
 
-def download(date_array, tag='', sat_id='', data_path=None, user=None,
-             password=None):
+def clean(self):
+    """Routine to return DMSP IVM data cleaned to the specified level
+
+    Note
+    ----
+    Supports 'clean', 'dusty', 'dirty'
+
+    'clean' enforces that both RPA and DM flags are <= 1
+    'dusty' <= 2
+    'dirty' <= 3
+    'none' Causes pysat to skip this routine
+
+    Routine is called by pysat, and not by the end user directly.
+
+    """
+
+    if self.tag == 'utd':
+        if self.clean_level == 'clean':
+            idx, = np.where((self['rpa_flag_ut'] <= 1)
+                            & (self['idm_flag_ut'] <= 1))
+        elif self.clean_level == 'dusty':
+            idx, = np.where((self['rpa_flag_ut'] <= 2)
+                            & (self['idm_flag_ut'] <= 2))
+        elif self.clean_level == 'dirty':
+            idx, = np.where((self['rpa_flag_ut'] <= 3)
+                            & (self['idm_flag_ut'] <= 3))
+        else:
+            idx = slice(0, self.index.shape[0])
+    else:
+        if self.clean_level in ['clean', 'dusty', 'dirty']:
+            logger.warning('this level 1 data has no quality flags')
+        idx = slice(0, self.index.shape[0])
+
+    # Downselect data based upon cleaning conditions above
+    self.data = self[idx]
+
+    return
+
+
+# ----------------------------------------------------------------------------
+# Instrument functions
+#
+# Use the default Madrigal and pysat methods
+
+# Support listing the local files
+list_files = functools.partial(general.list_files,
+                               supported_tags=supported_tags)
+
+# Set the list_remote_files routine
+list_remote_files = functools.partial(general.list_remote_files,
+                                      inst_code=madrigal_inst_code,
+                                      kindats=madrigal_tag,
+                                      supported_tags=remote_tags)
+
+# Set the load routine
+load = general.load
+
+
+def download(date_array, tag='', inst_id='', data_path=None, user=None,
+             password=None, file_type='hdf5'):
     """Downloads data from Madrigal.
 
     Parameters
@@ -131,29 +195,25 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
     date_array : array-like
         list of datetimes to download data for. The sequence of dates need not
         be contiguous.
-    tag : string ('')
+    tag : string
         Tag identifier used for particular dataset. This input is provided by
-        pysat.
-    sat_id : string  ('')
+        pysat. (default='')
+    inst_id : string
         Satellite ID string identifier used for particular dataset. This input
-        is provided by pysat.
-    data_path : string (None)
-        Path to directory to download data to.
-    user : string (None)
+        is provided by pysat. (default='')
+    data_path : string
+        Path to directory to download data to. (default=None)
+    user : string
         User string input used for download. Provided by user and passed via
-        pysat. If an account
-        is required for dowloads this routine here must error if user not
-        supplied.
-    password : string (None)
-        Password for data download.
+        pysat. If an account is required for dowloads this routine here must
+        error if user not supplied. (default=None)
+    password : string
+        Password for data download. (default=None)
+    file_type : string
+        File format for Madrigal data. (default='hdf5')
 
-    Returns
-    --------
-    Void : (NoneType)
-        Downloads data to disk.
-
-    Notes
-    -----
+    Note
+    ----
     The user's names should be provided in field user. Ritu Karidhal should
     be entered as Ritu+Karidhal
 
@@ -164,231 +224,7 @@ def download(date_array, tag='', sat_id='', data_path=None, user=None,
     downloads.
 
     """
-    mad_meth.download(date_array, inst_code=str(madrigal_inst_code),
-                      kindat=str(madrigal_tag[sat_id][tag]),
-                      data_path=data_path, user=user, password=password)
-
-
-def default(inst):
-    pass
-
-
-def clean(inst):
-    """Routine to return DMSP IVM data cleaned to the specified level
-
-    'Clean' enforces that both RPA and DM flags are <= 1
-    'Dusty' <= 2
-    'Dirty' <= 3
-    'None' None
-
-    Routine is called by pysat, and not by the end user directly.
-
-    Parameters
-    -----------
-    inst : (pysat.Instrument)
-        Instrument class object, whose attribute clean_level is used to return
-        the desired level of data selectivity.
-
-    Returns
-    --------
-    Void : (NoneType)
-        data in inst is modified in-place.
-
-    Notes
-    --------
-    Supports 'clean', 'dusty', 'dirty'
-
-    """
-
-    if inst.tag == 'utd':
-        if inst.clean_level == 'clean':
-            idx, = np.where((inst['rpa_flag_ut'] <= 1)
-                            & (inst['idm_flag_ut'] <= 1))
-        elif inst.clean_level == 'dusty':
-            idx, = np.where((inst['rpa_flag_ut'] <= 2)
-                            & (inst['idm_flag_ut'] <= 2))
-        elif inst.clean_level == 'dirty':
-            idx, = np.where((inst['rpa_flag_ut'] <= 3)
-                            & (inst['idm_flag_ut'] <= 3))
-        else:
-            idx = slice(0, inst.index.shape[0])
-    else:
-        if inst.clean_level in ['clean', 'dusty', 'dirty']:
-            logger.warning('this level 1 data has no quality flags')
-        idx = slice(0, inst.index.shape[0])
-
-    # downselect data based upon cleaning conditions above
-    inst.data = inst[idx]
-
-    return
-
-
-def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_vel_key='ion_v_sat_for'):
-    """ Smooth the ram drifts using a rolling mean
-
-    Parameters
-    -----------
-    rpa_flag_key : string or NoneType
-        RPA flag key, if None will not select any data. The UTD RPA flag key
-        is 'rpa_flag_ut' (default=None)
-    rpa_vel_key : string
-        RPA velocity data key (default='ion_v_sat_for')
-
-    Returns
-    ---------
-     RPA data in instrument object
-
-    """
-
-    if rpa_flag_key in list(inst.data.keys()):
-        rpa_idx, = np.where(inst[rpa_flag_key] == 1)
-    else:
-        rpa_idx = list()
-
-    inst[rpa_idx, rpa_vel_key] = \
-        inst[rpa_idx, rpa_vel_key].rolling(15, 5).mean()
-    return
-
-
-def update_DMSP_ephemeris(inst, ephem=None):
-    """Updates DMSP instrument data with DMSP ephemeris
-
-    Parameters
-    ----------
-    ephem : pysat.Instrument or NoneType
-        dmsp_ivm_ephem instrument object
-
-    Returns
-    ---------
-    Updates 'mlt' and 'mlat'
-
-    """
-
-    # Ensure the right ephemera is loaded
-    if ephem is None:
-        logger.info('No ephemera provided for {:}'.format(inst.date))
-        inst.data = pds.DataFrame(None)
-        return
-
-    if ephem.sat_id != inst.sat_id:
-        raise ValueError('ephemera provided for the wrong satellite')
-
-    if ephem.date != inst.date:
-        ephem.load(date=inst.date, verifyPad=True)
-
-        if ephem.data.empty:
-            logger.info('unable to load ephemera for {:}'.format(inst.date))
-            inst.data = pds.DataFrame(None)
-            return
-
-    # Reindex the ephemeris data
-    ephem.data = ephem.data.reindex(index=inst.data.index, method='pad')
-    ephem.data = ephem.data.interpolate('time')
-
-    # Update the DMSP instrument
-    inst['mlt'] = ephem['SC_AACGM_LTIME']
-    inst['mlat'] = ephem['SC_AACGM_LAT']
-
-    return
-
-
-def add_drift_unit_vectors(inst):
-    """ Add unit vectors for the satellite velocity
-
-    Returns
-    ---------
-    Adds unit vectors in cartesian and polar coordinates for RAM and
-    cross-track directions
-        - 'unit_ram_x', 'unit_ram_y', 'unit_ram_r', 'unit_ram_theta'
-        - 'unit_cross_x', 'unit_cross_y', 'unit_cross_r', 'unit_cross_theta'
-
-    Notes
-    ---------
-    Assumes that the RAM vector is pointed perfectly forward
-
-    """
-    # Calculate theta and R in radians from MLT and MLat, respectively
-    theta = inst['mlt'] * (np.pi / 12.0) - np.pi * 0.5
-    r = np.radians(90.0 - inst['mlat'].abs())
-
-    # Determine the positions in cartesian coordinates
-    pos_x = r * np.cos(theta)
-    pos_y = r * np.sin(theta)
-    diff_x = pos_x.diff()
-    diff_y = pos_y.diff()
-    norm = np.sqrt(diff_x**2 + diff_y**2)
-
-    # Calculate the RAM and cross-track unit vectors in cartesian and polar
-    # coordinates.
-    # x points along MLT = 6, y points along MLT = 12
-    inst['unit_ram_x'] = diff_x / norm
-    inst['unit_ram_y'] = diff_y / norm
-    inst['unit_cross_x'] = -diff_y / norm
-    inst['unit_cross_y'] = diff_x / norm
-    idx, = np.where(inst['mlat'] < 0)
-    inst.data.loc[inst.index[idx], 'unit_cross_x'] *= -1.0
-    inst.data.loc[inst.index[idx], 'unit_cross_y'] *= -1.0
-
-    inst['unit_ram_r'] = inst['unit_ram_x'] * np.cos(theta) + \
-        inst['unit_ram_y'] * np.sin(theta)
-    inst['unit_ram_theta'] = -inst['unit_ram_x'] * np.sin(theta) + \
-        inst['unit_ram_y'] * np.cos(theta)
-
-    inst['unit_cross_r'] = inst['unit_cross_x'] * np.cos(theta) + \
-        inst['unit_cross_y'] * np.sin(theta)
-    inst['unit_cross_theta'] = -inst['unit_cross_x'] * np.sin(theta) + \
-        inst['unit_cross_y'] * np.cos(theta)
-    return
-
-
-def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
-                             rpa_vel_key='ion_v_sat_for',
-                             cross_vel_key='ion_v_sat_left'):
-    """ Add polar cap drifts in cartesian coordinates
-
-    Parameters
-    ------------
-    rpa_flag_key : string or NoneType
-        RPA flag key, if None will not select any data. The UTD RPA flag key
-        is 'rpa_flag_ut' (default=None)
-    rpa_vel_key : string
-        RPA velocity data key (default='ion_v_sat_for')
-    cross_vel_key : string
-        Cross-track velocity data key (default='ion_v_sat_left')
-
-    Returns
-    ----------
-    Adds 'ion_vel_pc_x', 'ion_vel_pc_y', and 'partial'.  The last data key
-    indicates whether RPA data was available (False) or not (True).
-
-    Notes
-    -------
-    Polar cap drifts assume there is no vertical component to the X-Y
-    velocities
-    """
-
-    # Get the good RPA data, if available
-    if rpa_flag_key in list(inst.data.keys()):
-        rpa_idx, = np.where(inst[rpa_flag_key] != 1)
-    else:
-        rpa_idx = list()
-
-    # Use the cartesian unit vectors to calculate the desired velocities
-    iv_x = inst[rpa_vel_key].copy()
-    iv_x[rpa_idx] = 0.0
-
-    # Check to see if unit vectors have been created
-    if 'unit_ram_y' not in list(inst.data.keys()):
-        add_drift_unit_vectors(inst)
-
-    # Calculate the velocities
-    inst['ion_vel_pc_x'] = iv_x * inst['unit_ram_x'] + \
-        inst[cross_vel_key] * inst['unit_cross_x']
-    inst['ion_vel_pc_y'] = iv_x * inst['unit_ram_y'] + \
-        inst[cross_vel_key] * inst['unit_cross_y']
-
-    # Flag the velocities as full (False) or partial (True)
-    inst['partial'] = False
-    inst[rpa_idx, 'partial'] = True
-
+    general.download(date_array, inst_code=str(madrigal_inst_code),
+                     kindat=madrigal_tag[inst_id][tag], data_path=data_path,
+                     user=user, password=password, file_type=file_type)
     return

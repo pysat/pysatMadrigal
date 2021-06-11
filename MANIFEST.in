@@ -1,0 +1,13 @@
+include *.py
+include *.f
+include *.c
+recursive-include pysatMadrigal *.py
+include *.md
+include *.txt
+include LICENSE
+include pysatMadrigal/version.txt
+prune pysatMadrigal/tests
+prune docs
+prune demo
+exclude *.pdf
+exclude *.png
