@@ -1,9 +1,6 @@
 """
-pysatMadrigal.coords - coordinate transformations for radar instruments
-=========================================
+Coordinate transformation functions
 
-pysat.coords contains a number of coordinate-transformation
-functions used throughout the pysat package.
 """
 
 import numpy as np
@@ -32,7 +29,7 @@ def geodetic_to_geocentric(lat_in, lon_in=None, inverse=False):
     rad_earth : float
         Earth radius [km] (geocentric/detic if inverse=False/True)
 
-    Notes
+    Note
     -----
     Uses WGS-84 values
 
@@ -162,8 +159,8 @@ def spherical_to_cartesian(az_in, el_in, r_in, inverse=False):
     z_out : float
         cartesian z in km or distance from origin in km (inverse=False/True)
 
-    Notes
-    ------
+    Note
+    -----
     This transform is the same for local or global spherical/cartesian
     transformations.
 
@@ -224,8 +221,8 @@ def global_to_local_cartesian(x_in, y_in, z_in, lat_cent, lon_cent, rad_cent,
     z_out : float
         local or global cartesian z in km (inverse=False/True)
 
-    Notes
-    -------
+    Note
+    -----
     The global cartesian coordinate system has its origin at the center of the
     Earth, while the local system has its origin specified by the input
     latitude, longitude, and radius.  The global system has x intersecting

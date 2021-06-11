@@ -1,8 +1,8 @@
 # Change Log
 All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
+This project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.0.4] - TBD
+## [0.0.4] - 2021-06-11
 - Made changes to structure to comply with updates in pysat 3.0.0
 - Deprecations
   - Restructed Instrument methods, moving `madrigal` to `general` and extracting
@@ -17,7 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   - Updated documentation configuration to improve maintainability
   - Updated documentation style, displaying logo on sidebar in html format
   - Changed zenodo author name format for better BibTeX compliance
-  - Updated README information
+  - Updated CONTRIBUTING and README information
 - Bug Fix
   - Updated Madrigal methods to simplify compound data types and enable
     creation of netCDF4 files using `Instrument.to_netcdf4()`

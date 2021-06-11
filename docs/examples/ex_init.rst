@@ -25,8 +25,7 @@ Satellite Program (DMSP) Ion Velocity Meter (IVM) data is used as an example.
 
 The output includes a day of data with UTDallas quality flags from the F15
 spacecraft (as implied by the `tag` and `inst_id`), for the specified date.
-At the time of publication this produces the output shown below (the index
-header has been added here for clarity).
+At the time of publication this produces the output shown below.
 
 ::
 
@@ -68,6 +67,5 @@ header has been added here for clarity).
    Tracking 7 metadata values
    Metadata for 30 standard variables
    Metadata for 0 ND variables
-
 
 

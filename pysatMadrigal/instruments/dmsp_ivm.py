@@ -30,7 +30,7 @@ platform
 name
     'ivm'
 tag
-    'utd', None
+    'utd', ''
 inst_id
     ['f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18']
 
@@ -161,7 +161,7 @@ def clean(self):
             logger.warning('this level 1 data has no quality flags')
         idx = slice(0, self.index.shape[0])
 
-    # downselect data based upon cleaning conditions above
+    # Downselect data based upon cleaning conditions above
     self.data = self[idx]
 
     return

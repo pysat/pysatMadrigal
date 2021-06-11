@@ -4,7 +4,7 @@
 </div>
 
 # pysatMadrigal
-[![Documentation Status](https://readthedocs.org/projects/pysatMadrigal/badge/?version=latest)](http://pysatMadrigal.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pysatmadrigal/badge/?version=latest)](https://pysatmadrigal.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/pysat/pysatMadrigal.svg?branch=main)](https://travis-ci.com/pysat/pysatMadrigal)
 [![Coverage Status](https://coveralls.io/repos/github/pysat/pysatMadrigal/badge.svg?branch=main)](https://coveralls.io/github/pysat/pysatMadrigal?branch=main)
 [![DOI](https://zenodo.org/badge/258384773.svg)](https://zenodo.org/badge/latestdoi/258384773)
@@ -16,7 +16,7 @@ pysat ([pysat documentation](http://pysat.readthedocs.io/en/latest/)).
 
 # Installation
 
-The following instructions provide a guide for installing pysatSpaceWeather and
+The following instructions provide a guide for installing pysatMadrigal and
 give some examples on how to use the routines.
 
 ## Prerequisites
