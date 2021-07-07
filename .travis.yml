@@ -26,6 +26,8 @@ before_install:
   # Get the program and testing requirements
   - pip install -r test_requirements.txt
   - pip install -r requirements.txt
+  - pip install -i https://test.pypi.org/simple/ pysat==3.0.1rc1
+
   # set up data directory
   - mkdir /home/travis/build/pysatData
   - python -c "import pysat; pysat.params['data_dirs'] = '/home/travis/build/pysatData'"
