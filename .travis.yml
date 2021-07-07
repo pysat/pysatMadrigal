@@ -23,6 +23,7 @@ addons:
 
 before_install:
   - python -m pip install --upgrade pip
+
   # Get the program and testing requirements
   - pip install -r test_requirements.txt
   - pip install -r requirements.txt
