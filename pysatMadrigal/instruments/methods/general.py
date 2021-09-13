@@ -239,9 +239,9 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
                                                       ldata.columns)]))
                     if not np.all([xkey.lower() in ldata.columns
                                    for xkey in xarray_coords[xcoords]]):
-                        good_ind = [i for i, xkey in enumerate(
-                            xarray_coords[xcoords])
-                                    if xkey.lower() in ldata.columns]
+                        good_ind = [
+                            i for i, xkey in enumerate(xarray_coords[xcoords])
+                            if xkey.lower() in ldata.columns]
 
                         if len(good_ind) == 0:
                             raise ValueError(''.join([
