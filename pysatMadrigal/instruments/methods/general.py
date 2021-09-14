@@ -239,21 +239,29 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
                                                       ldata.columns)]))
                     if not np.all([xkey.lower() in ldata.columns
                                    for xkey in xarray_coords[xcoords]]):
-                        data_mask = [xkey.lower() in ldata.columns
-                                     for xkey in xarray_coords[xcoords]]
-                        if np.all(~np.array(data_mask)):
-                            raise ValueError(''.join([
-                                'all provided data variables [',
-                                '{:}] are unk'.format(xarray_coords[xcoords]),
-                                'nown, use only: {:}'.format(ldata.columns)]))
-                        else:
-                            logger.warning(''.join([
-                                'unknown data variable in [',
-                                '{:}], use'.format(xarray_coords[xcoords]),
-                                ' only: {:}'.format(ldata.columns)]))
+                        good_ind = [
+                            i for i, xkey in enumerate(xarray_coords[xcoords])
+                            if xkey.lower() in ldata.columns]
 
-                            # Remove the coordinates that aren't present
-                            temp = np.array(xarray_coords[xcoords])[data_mask]
+                        if len(good_ind) == 0:
+                            raise ValueError(''.join([
+                                'All data variables {:} are unknown.'.format(
+                                    xarray_coords[xcoords])]))
+                        elif len(good_ind) < len(xarray_coords[xcoords]):
+                            # Remove the coordinates that aren't present.
+                            temp = np.array(xarray_coords[xcoords])[good_ind]
+
+                            # Warn user, some of this may be due to a file
+                            # format update or change.
+                            bad_ind = [i for i in
+                                       range(len(xarray_coords[xcoords]))
+                                       if i not in good_ind]
+                            logger.warning(''.join([
+                                'unknown data variable(s) {:}, '.format(
+                                    np.array(xarray_coords[xcoords])[bad_ind]),
+                                'using only: {:}'.format(temp)]))
+
+                            # Assign good data as a list.
                             xarray_coords[xcoords] = list(temp)
 
                     # Select the desired data values

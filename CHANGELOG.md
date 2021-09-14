@@ -25,6 +25,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
   - Fixed remote listing routine to return filenames instead of experiments
   - Fixed bug introduced by change in xarray requiring engine kwarg
   - Fixed bug that would not list multiple types of files
+  - Updated JRO ISR drift variable names
 
 ## [0.0.3] - 2020-06-15
 - pypi compatibility

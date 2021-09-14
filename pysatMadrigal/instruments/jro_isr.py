@@ -238,10 +238,12 @@ def load(fnames, tag=None, inst_id=None):
     """
     # Define the xarray coordinate dimensions (apart from time)
     xcoords = {'drifts': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
-                           'kinst'): ['nwlos', 'range', 'vipn2', 'dvipn2',
+                           'kinst'): ['nwlos', 'range', 'vipn', 'dvipn', 'vipe',
+                                      'dvipe', 'vipn2', 'dvipn2',
                                       'vipe1', 'dvipe1', 'vi72', 'dvi72',
-                                      'vi82', 'dvi82', 'paiwl', 'pacwl',
-                                      'pbiwl', 'pbcwl', 'pciel', 'pccel',
+                                      'vi82', 'dvi82', 'vi7', 'dvi7', 'vi8',
+                                      'dvi8', 'paiwl', 'pacwl', 'pbiwl',
+                                      'pbcwl', 'pciel', 'pccel',
                                       'pdiel', 'pdcel', 'jro10', 'jro11'],
                           ('time', ): ['year', 'month', 'day', 'hour', 'min',
                                        'sec', 'spcst', 'pl', 'cbadn', 'inttms',
