@@ -245,14 +245,14 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
 
                         if len(good_ind) == 0:
                             raise ValueError(''.join([
-                                'all data variables {:} are unknown'.format(
+                                'All data variables {:} are unknown.'.format(
                                     xarray_coords[xcoords])]))
                         elif len(good_ind) < len(xarray_coords[xcoords]):
-                            # Remove the coordinates that aren't present
+                            # Remove the coordinates that aren't present.
                             temp = np.array(xarray_coords[xcoords])[good_ind]
 
                             # Warn user, some of this may be due to a file
-                            # format update or change
+                            # format update or change.
                             bad_ind = [i for i in
                                        range(len(xarray_coords[xcoords]))
                                        if i not in good_ind]
@@ -261,7 +261,7 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
                                     np.array(xarray_coords[xcoords])[bad_ind]),
                                 'using only: {:}'.format(temp)]))
 
-                            # Assign good data as a list
+                            # Assign good data as a list.
                             xarray_coords[xcoords] = list(temp)
 
                     # Select the desired data values
