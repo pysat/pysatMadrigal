@@ -10,16 +10,18 @@ import pytest
 from pysatMadrigal.instruments.methods import gnss
 
 
-class TestGNSSRefs():
+class TestGNSSRefs(object):
     """Test the acknowledgements and references for the JRO instruments."""
 
     def setup(self):
         """Run before every method to create a clean testing setup."""
         self.out = None
+        return
 
     def teardown(self):
         """Run after every method to clean up previous testing."""
         del self.out
+        return
 
     @pytest.mark.parametrize("func, comp_str, in_args", [
         ('acknowledgements', 'GPS TEC data products', ['tec']),
