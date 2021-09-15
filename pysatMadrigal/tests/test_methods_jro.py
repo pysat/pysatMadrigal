@@ -14,16 +14,18 @@ import pysat
 from pysatMadrigal.instruments.methods import jro
 
 
-class TestJRORefs():
+class TestJRORefs(object):
     """Test the acknowledgements and references for the JRO instruments."""
 
     def setup(self):
         """Run before every method to create a clean testing setup."""
         self.out = None
+        return
 
     def teardown(self):
         """Run after every method to clean up previous testing."""
         del self.out
+        return
 
     @pytest.mark.parametrize("func, comp_str", [
         ('acknowledgements', 'Jicamarca Radio Observatory'),
@@ -35,7 +37,7 @@ class TestJRORefs():
         return
 
 
-class TestJROCalcLoc():
+class TestJROCalcLoc(object):
     """Test the JRO support function `calc_measurement_loc`."""
 
     def setup(self):
@@ -51,11 +53,13 @@ class TestJROCalcLoc():
         self.lon_min = -76.8249
         self.lon_max = -76.3531
         self.tol = 1.0e-4
+        return
 
     def teardown(self):
         """Run after every method to clean up previous testing."""
         del self.inst, self.stime, self.az, self.el
         del self.lat_min, self.lat_max, self.lon_min, self.lon_max, self.tol
+        return
 
     def transform_testing_to_jro(self, azel_type=''):
         """Alter `testing_xarray` to mirror the JRO-ISR data."""
