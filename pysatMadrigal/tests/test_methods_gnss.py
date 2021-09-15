@@ -5,11 +5,7 @@
 # ----------------------------------------------------------------------------
 """Test methods for `pysatMadrigal.instruments.methods.gnss`."""
 
-import logging
-import numpy as np
 import pytest
-
-import pysat
 
 from pysatMadrigal.instruments.methods import gnss
 

@@ -217,16 +217,15 @@ def load(fnames, tag=None, inst_id=None):
         meta['tec'] = {meta.labels.units: 'TECU', meta.labels.min_val: 0.0,
                        meta.labels.max_val: np.nan}
         meta['dtec'] = {meta.labels.units: 'TECU', meta.labels.min_val: 0.0,
-                       meta.labels.max_val: np.nan}
+                        meta.labels.max_val: np.nan}
 
     # Get the maximum and minimum values for time, latitude, longitude,
     # and altitude
-    ttype = data['time'].values.dtype
     meta['time'] = {meta.labels.notes: data['time'].values.dtype.__doc__,
                     meta.labels.min_val: np.nan, meta.labels.max_val: np.nan}
     meta['gdalt'] = {meta.labels.min_val: 0.0, meta.labels.max_val: np.nan}
     meta['gdlat'] = {meta.labels.min_val: -90.0, meta.labels.max_val: 90.0}
-    min_lon =  0.0 if data['glon'].values.min() >= 0.0 else -180.0
+    min_lon = 0.0 if data['glon'].values.min() >= 0.0 else -180.0
     meta['glon'] = {meta.labels.min_val: min_lon,
                     meta.labels.max_val: min_lon + 360.0}
 
