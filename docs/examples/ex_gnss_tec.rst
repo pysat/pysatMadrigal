@@ -76,7 +76,7 @@ a regular grid with VTEC value indicated by color.
        vtec.platform.upper(), vtec.tag.upper(),
        vtec.index[itime].strftime('%d %b %Y %H:%M:%S UT'), fontsize='medium'))
 
-   
+   plt.show()
 .. image:: ../figures/ex_gnss_vtec.png
     :width: 800px
     :align: center
