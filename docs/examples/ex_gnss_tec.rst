@@ -28,7 +28,7 @@ and loading it.
    ftime = dt.datetime(2013, 1, 1)
 
    if not ftime in vtec.files.files.index:
-       vtec.download(start=ftime)
+       vtec.download(start=ftime, user='firstname+lastname', password='myname@email.address')
 
    vtec.load(date=ftime)
    print(vtec.variables)
