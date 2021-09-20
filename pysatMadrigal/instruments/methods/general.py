@@ -104,13 +104,20 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
     if len(load_file_types["netCDF4"]) > 0:
         # Currently not saving file header data, as all metadata is at
         # the data variable level
+        if 'catalog_text' in file_data.attrs:
+            notes = file_data.attrs['catalog_text']
+        else:
+            notes = "No catalog text"
+
         for item in file_data.data_vars.keys():
             name_string = item
             unit_string = file_data[item].attrs['units']
             desc_string = file_data[item].attrs['description']
             meta[name_string.lower()] = {meta.labels.name: name_string,
+                                         meta.labels.notes: notes,
                                          meta.labels.units: unit_string,
-                                         meta.labels.desc: desc_string}
+                                         meta.labels.desc: desc_string,
+                                         meta.labels.fill_val: np.nan}
 
             # Remove any metadata from xarray
             file_data[item].attrs = {}

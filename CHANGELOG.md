@@ -3,10 +3,12 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.1.0] - 2021-XX-XX
+- Enhancements
+   - Improved definitions of general and GNSS meta data
 - Documentation
-   - Added examples for JRO methods
+   - Added examples for JRO and GNSS data
 - Testing
-   - Added unit tests for JRO methods
+   - Added unit tests for JRO and GNSS methods
 
 ## [0.0.4] - 2021-06-11
 - Made changes to structure to comply with updates in pysat 3.0.0
