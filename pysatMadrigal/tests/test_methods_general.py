@@ -30,8 +30,8 @@ class TestLocal(object):
         return
 
 
-class TestRemote(object):
-    """Unit tests for general methods that work with the Madrigal Database."""
+class TestErrors(object):
+    """Tests for errors raised by the general methods."""
 
     def setup(self):
         """Create a clean testing setup."""
@@ -113,3 +113,6 @@ class TestRemote(object):
 
         assert str(kerr).find('not_tag') >= 0
         return
+
+    def test_load_no_time(self):
+        """Test raises ValueError if time data is missing from file."""
