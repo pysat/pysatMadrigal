@@ -67,6 +67,12 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
     meta : pysat.Meta
         Metadata from the file, as well as default values from pysat
 
+    Raises
+    ------
+    ValueError
+       If data columns expected to create the time index are missing or if
+       coordinates are not supplied for all data columns.
+
     Note
     ----
     Currently HDF5 reading breaks if a different file type was used previously
