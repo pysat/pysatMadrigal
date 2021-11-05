@@ -386,6 +386,11 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
         'hdf5' and 'netCDF4', but any of the Madrigal options may be used
         here. (default='hdf5')
 
+    Raises
+    ------
+    ValueError
+        If the specified input type or Madrigal experiment codes are unknown
+
     Note
     ----
     The user's names should be provided in field user. Ruby Payne-Scott should
@@ -487,6 +492,11 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
     -------
     files : madrigalWeb.madrigalWeb.MadrigalExperimentFile
         Madrigal file object that contains remote experiment file data
+
+    Raises
+    ------
+    ValueError
+        If unexpected date_array input is supplied
 
     Note
     ----
