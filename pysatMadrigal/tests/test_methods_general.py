@@ -160,8 +160,8 @@ class TestErrors(object):
         return
 
 
-@pytest.skipif((pysat_version_bug > 1 or pysat_version_major < 3),
-               "Test requires pysat 3.0.2+")
+@pytest.mark.skipif((pysat_version_bug > 1 or pysat_version_major < 3),
+                    "Test requires pysat 3.0.2+")
 class TestSimpleFiles(object):
     """Tests for general methods with simple files."""
 
