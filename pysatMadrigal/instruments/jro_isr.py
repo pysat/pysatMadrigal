@@ -38,7 +38,6 @@ import datetime as dt
 import functools
 import numpy as np
 
-from pysat.instruments.methods import general as ps_gen
 from pysat import logger
 
 from pysatMadrigal.instruments.methods import general, jro
@@ -161,56 +160,15 @@ def clean(self):
 #
 # Use the default Madrigal and pysat methods
 
+# Support listing the local files
+list_files = functools.partial(general.list_files,
+                               supported_tags=supported_tags)
+
 # Set list_remote_files routine
 list_remote_files = functools.partial(general.list_remote_files,
                                       supported_tags=remote_tags,
                                       inst_code=madrigal_inst_code,
                                       kindats=madrigal_tag)
-
-
-def list_files(tag='', inst_id='', data_path=None, format_str=None,
-               supported_tags=supported_tags, delimiter=None, file_type='hdf5'):
-    """Return a Pandas Series of every data file for this Instrument
-
-    Parameters
-    ----------
-    tag : string
-        Denotes type of file to load.  Accepted types are <tag strings>.
-        (default='')
-    inst_id : string
-        Specifies the satellite ID for a constellation.  Not used.
-        (default='')
-    data_path : string or NoneType
-        Path to data directory.  If None is specified, the value previously
-        set in Instrument.files.data_path is used.  (default=None)
-    format_str : string or NoneType
-        User specified file format.  If None is specified, the default
-        formats associated with the supplied tags are used. (default=None)
-    supported_tags : dict or NoneType
-        keys are inst_id, each containing a dict keyed by tag
-        where the values file format template strings. (default=None)
-    delimiter : string
-        Delimiter string upon which files will be split (e.g., '.')
-    file_type : string
-        File format for Madrigal data.  Load routines currently only accepts
-        'hdf5' and 'netCDF4', but any of the Madrigal options may be used
-        here. (default='netCDF4')
-
-    Returns
-    -------
-    out : pysat.Files.from_os : pysat._files.Files
-        A class containing the verified available files
-
-    """
-    if supported_tags[inst_id][tag].find('{file_type}') > 0:
-        supported_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
-            file_type=file_type)
-
-    out = ps_gen.list_files(tag=tag, inst_id=inst_id, data_path=data_path,
-                            format_str=format_str,
-                            supported_tags=supported_tags, delimiter=delimiter)
-
-    return out
 
 
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
@@ -222,23 +180,22 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     date_array : array-like
         list of datetimes to download data for. The sequence of dates need not
         be contiguous.
-    tag : string
+    tag : str
         Tag identifier used for particular dataset. This input is provided by
         pysat. (default='')
-    inst_id : string
+    inst_id : str
         Satellite ID string identifier used for particular dataset. This input
         is provided by pysat. (default='')
-    data_path : string
+    data_path : str
         Path to directory to download data to. (default=None)
-    user : string
+    user : str
         User string input used for download. Provided by user and passed via
         pysat. If an account is required for dowloads this routine here must
         error if user not supplied. (default=None)
-    password : string
+    password : str
         Password for data download. (default=None)
-    file_type : string
-        File format for Madrigal data.  Currently only accept 'netcdf4' and
-        'hdf5'. (default='hdf5')
+    file_type : str
+        File format for Madrigal data. (default='hdf5')
 
     Notes
     -----
@@ -257,22 +214,19 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
                      user=user, password=password, file_type=file_type)
 
 
-def load(fnames, tag=None, inst_id=None, file_type='hdf5'):
+def load(fnames, tag=None, inst_id=None):
     """ Routine to load the JRO ISR data
 
     Parameters
     -----------
     fnames : list
         List of filenames
-    tag : string or NoneType
+    tag : str or NoneType
         tag name used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
-    inst_id : string or NoneType
+    inst_id : str or NoneType
         Instrument ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
-    file_type : string
-        File format for Madrigal data.  Currently only accept 'netcdf4' and
-        'hdf5'. (default='hdf5')
 
     Returns
     --------
@@ -284,10 +238,12 @@ def load(fnames, tag=None, inst_id=None, file_type='hdf5'):
     """
     # Define the xarray coordinate dimensions (apart from time)
     xcoords = {'drifts': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
-                           'kinst'): ['nwlos', 'range', 'vipn2', 'dvipn2',
+                           'kinst'): ['nwlos', 'range', 'vipn', 'dvipn', 'vipe',
+                                      'dvipe', 'vipn2', 'dvipn2',
                                       'vipe1', 'dvipe1', 'vi72', 'dvi72',
-                                      'vi82', 'dvi82', 'paiwl', 'pacwl',
-                                      'pbiwl', 'pbcwl', 'pciel', 'pccel',
+                                      'vi82', 'dvi82', 'vi7', 'dvi7', 'vi8',
+                                      'dvi8', 'paiwl', 'pacwl', 'pbiwl',
+                                      'pbcwl', 'pciel', 'pccel',
                                       'pdiel', 'pdcel', 'jro10', 'jro11'],
                           ('time', ): ['year', 'month', 'day', 'hour', 'min',
                                        'sec', 'spcst', 'pl', 'cbadn', 'inttms',
@@ -327,9 +283,7 @@ def load(fnames, tag=None, inst_id=None, file_type='hdf5'):
                                              'ut1_unix', 'ut2_unix', 'recno']}}
 
     # Load the specified data
-    data, meta = general.load(fnames, tag, inst_id,
-                              xarray_coords=xcoords[tag],
-                              file_type=file_type)
+    data, meta = general.load(fnames, tag, inst_id, xarray_coords=xcoords[tag])
 
     # Squeeze the kindat and kinst 'coordinates', but keep them as floats
     data = data.squeeze(dim=['kindat', 'kinst', 'gdlatr', 'gdlonr'])

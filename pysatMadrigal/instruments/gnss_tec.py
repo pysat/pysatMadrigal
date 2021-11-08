@@ -20,7 +20,7 @@ Examples
 --------
 ::
 
-    import datetime
+    import datetime as dt
     import pysat
     import pysatMadrigal as pymad
 
@@ -40,7 +40,6 @@ import datetime as dt
 import functools
 import numpy as np
 
-from pysat.instruments.methods import general as ps_gen
 from pysat import logger
 
 from pysatMadrigal.instruments.methods import general, gnss
@@ -64,9 +63,9 @@ supported_tags = {ss: {'vtec': ''.join(['gps', dname, 'g', vname,
 remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
                     for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 
-# madrigal tags
+# Madrigal tags
 madrigal_inst_code = 8000
-madrigal_tag = {'': {'vtec': '3500'}}  # , 'los': '3505'}}
+madrigal_tag = {'': {'vtec': '3500'}}  # , 'los': '3505'}} <- Issue #12
 
 # ----------------------------------------------------------------------------
 # Instrument test attributes
@@ -116,62 +115,16 @@ def clean(self):
 #
 # Use the default Madrigal methods
 
-# support listing files currently available on remote server (Madrigal)
+# Support listing the local files
+list_files = functools.partial(general.list_files,
+                               supported_tags=supported_tags,
+                               two_digit_year_break=99)
+
+# Support listing files currently available on remote server (Madrigal)
 list_remote_files = functools.partial(general.list_remote_files,
                                       supported_tags=remote_tags,
                                       inst_code=madrigal_inst_code,
                                       kindats=madrigal_tag)
-
-
-def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
-               supported_tags=supported_tags, two_digit_year_break=99,
-               delimiter=None, file_type='netCDF4'):
-    """Return a Pandas Series of every data file for this Instrument
-
-    Parameters
-    -----------
-    tag : string or NoneType
-        Denotes type of file to load.  Accepted types are <tag strings>.
-        (default=None)
-    inst_id : string or NoneType
-        Specifies the satellite ID for a constellation.  Not used.
-        (default=None)
-    data_path : string or NoneType
-        Path to data directory.  If None is specified, the value previously
-        set in Instrument.files.data_path is used.  (default=None)
-    format_str : string or NoneType
-        User specified file format.  If None is specified, the default
-        formats associated with the supplied tags are used. (default=None)
-    supported_tags : dict or NoneType
-        keys are inst_id, each containing a dict keyed by tag
-        where the values file format template strings. (default=None)
-    two_digit_year_break : int
-        If filenames only store two digits for the year, then
-        '1900' will be added for years >= two_digit_year_break
-        and '2000' will be added for years < two_digit_year_break.
-    delimiter : string
-        Delimiter string upon which files will be split (e.g., '.')
-    file_type : string
-        File format for Madrigal data.  Load routines currently only accepts
-        'hdf5' and 'netCDF4', but any of the Madrigal options may be used
-        here. (default='netCDF4')
-
-    Returns
-    -------
-    out : pysat.Files.from_os : pysat._files.Files
-        A class containing the verified available files
-
-    """
-    if supported_tags[inst_id][tag].find('{file_type}') > 0:
-        supported_tags[inst_id][tag] = supported_tags[inst_id][tag].format(
-            file_type=file_type)
-
-    out = ps_gen.list_files(tag=tag, inst_id=inst_id, data_path=data_path,
-                            format_str=format_str, delimiter=delimiter,
-                            supported_tags=supported_tags,
-                            two_digit_year_break=two_digit_year_break)
-
-    return out
 
 
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
@@ -184,25 +137,23 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     date_array : array-like
         list of datetimes to download data for. The sequence of dates need not
         be contiguous.
-    tag : string
+    tag : str
         Tag identifier used for particular dataset. This input is provided by
         pysat. (default='')
-    inst_id : string
+    inst_id : str
         Instrument ID string identifier used for particular dataset. This input
         is provided by pysat. (default='')
-    data_path : string
+    data_path : str
         Path to directory to download data to. (default=None)
-    user : string
+    user : str
         User string input used for download. Provided by user and passed via
         pysat. (default=None)
-    password : string
+    password : str
         Password for data download. (default=None)
-    url : string
+    url : str
         URL for Madrigal site (default='http://cedar.openmadrigal.org')
-    file_type : string
-        File format for Madrigal data.  Load routines currently only accepts
-        'hdf5' and 'netCDF4', but any of the Madrigal options may be used
-        here. (default='netCDF4')
+    file_type : str
+        File format for Madrigal data. (default='netCDF4')
 
     Note
     ----
@@ -223,26 +174,22 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     return
 
 
-def load(fnames, tag=None, inst_id=None, file_type='netCDF4'):
+def load(fnames, tag=None, inst_id=None):
     """ Routine to load the GNSS TEC data
 
     Parameters
-    -----------
+    ----------
     fnames : list
         List of filenames
-    tag : string or NoneType
+    tag : str or NoneType
         tag name used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
-    inst_id : string or NoneType
+    inst_id : str or NoneType
         Instrument ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default=None)
-    file_type : string
-        File format for Madrigal data. Currently only accepts 'hdf5' and
-        'netCDF4', but any of the supported Madrigal options may be used here.
-        (default='netCDF4')
 
     Returns
-    --------
+    -------
     data : xarray.Dataset
         Object containing satellite data
     meta : pysat.Meta
@@ -257,9 +204,7 @@ def load(fnames, tag=None, inst_id=None, file_type='netCDF4'):
                                      'sec', 'ut1_unix', 'ut2_unix', 'recno']}}
 
     # Load the specified data
-    data, meta = general.load(fnames, tag, inst_id,
-                              xarray_coords=xcoords[tag],
-                              file_type=file_type)
+    data, meta = general.load(fnames, tag, inst_id, xarray_coords=xcoords[tag])
 
     # Squeeze the kindat and kinst 'coordinates', but keep them as floats
     squeeze_dims = np.array(['kindat', 'kinst'])
@@ -269,7 +214,19 @@ def load(fnames, tag=None, inst_id=None, file_type='netCDF4'):
 
     # Fix the units for tec and dtec
     if tag == 'vtec':
-        meta['tec'] = {meta.labels.units: 'TECU'}
-        meta['dtec'] = {meta.labels.units: 'TECU'}
+        meta['tec'] = {meta.labels.units: 'TECU', meta.labels.min_val: 0.0,
+                       meta.labels.max_val: np.nan}
+        meta['dtec'] = {meta.labels.units: 'TECU', meta.labels.min_val: 0.0,
+                        meta.labels.max_val: np.nan}
+
+    # Get the maximum and minimum values for time, latitude, longitude,
+    # and altitude
+    meta['time'] = {meta.labels.notes: data['time'].values.dtype.__doc__,
+                    meta.labels.min_val: np.nan, meta.labels.max_val: np.nan}
+    meta['gdalt'] = {meta.labels.min_val: 0.0, meta.labels.max_val: np.nan}
+    meta['gdlat'] = {meta.labels.min_val: -90.0, meta.labels.max_val: 90.0}
+    min_lon = 0.0 if data['glon'].values.min() >= 0.0 else -180.0
+    meta['glon'] = {meta.labels.min_val: min_lon,
+                    meta.labels.max_val: min_lon + 360.0}
 
     return data, meta

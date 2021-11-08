@@ -1,0 +1,7 @@
+h5py
+madrigalWeb
+m2r2
+numpydoc
+pandas
+xarray
+pysat
