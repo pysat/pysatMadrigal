@@ -15,7 +15,8 @@ import pytest
 from pysatMadrigal.instruments.methods import general
 
 pysat_version_major = int(pysat_version.split(".")[0])
-pysat_version_bug = int(pysat_version.split(".")[-1])
+pysat_version_minor = int(pysat_version.split(".")[1])
+pysat_version_bug = int(pysat_version.split(".")[2])
 
 
 class TestLocal(object):
@@ -160,7 +161,8 @@ class TestErrors(object):
         return
 
 
-@pytest.mark.skipif((pysat_version_bug > 1 or pysat_version_major < 3),
+@pytest.mark.skipif(((pysat_version_minor <= 0) & (pysat_version_bug <= 1))
+                    | (pysat_version_major < 3),
                     reason="Test requires pysat 3.0.2+")
 class TestSimpleFiles(object):
     """Tests for general methods with simple files."""
