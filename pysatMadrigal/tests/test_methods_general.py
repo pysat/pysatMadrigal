@@ -8,15 +8,9 @@
 import gzip
 import tempfile
 import os
-from pysat import __version__ as pysat_version
-from pysat.utils import testing
 import pytest
 
 from pysatMadrigal.instruments.methods import general
-
-pysat_version_major = int(pysat_version.split(".")[0])
-pysat_version_minor = int(pysat_version.split(".")[1])
-pysat_version_bug = int(pysat_version.split(".")[2])
 
 
 class TestLocal(object):
@@ -161,9 +155,6 @@ class TestErrors(object):
         return
 
 
-@pytest.mark.skipif(((pysat_version_minor <= 0) & (pysat_version_bug <= 1))
-                    | (pysat_version_major < 3),
-                    reason="Test requires pysat 3.0.2+")
 class TestSimpleFiles(object):
     """Tests for general methods with simple files."""
 
@@ -172,7 +163,6 @@ class TestSimpleFiles(object):
 
         # Create testing directory
         self.data_path = tempfile.TemporaryDirectory()
-        testing.prep_dir(self.data_path.name)
 
         # Initialize a test file name
         self.temp_file = os.path.join(self.data_path.name, "temp.simple")
