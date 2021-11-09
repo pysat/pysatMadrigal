@@ -143,7 +143,7 @@ class TestErrors(object):
         return
 
     def test_get_remote_filenames_bad_date_array(self):
-        """Tesst raises ValueError for unexpected date_array input."""
+        """Test raises ValueError for unexpected date_array input."""
 
         del self.kwargs['supported_tags'], self.kwargs['kindats']
         self.kwargs['date_array'] = []
