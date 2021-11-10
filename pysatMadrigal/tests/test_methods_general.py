@@ -329,9 +329,12 @@ class TestMultFileTypes(object):
                                        data_path=self.inst.files.data_path,
                                        supported_tags=self.supported_tags)
 
-        # Test the output
+        # Prepare the testing data
         out_list = [os.path.join(self.inst.files.data_path, ofile)
                     for ofile in out_files]
+        ntimes = 1 if same_time else len(self.temp_files)
 
+        # Test the listed file names and time indexes
         pysat.utils.testing.assert_lists_equal(out_list, self.temp_files)
+        assert len(out_files.index.unique()) == ntimes
         return
