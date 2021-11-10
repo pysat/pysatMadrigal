@@ -275,9 +275,10 @@ class TestListFiles(object):
     def teardown(self):
         """Clean up previous testing."""
 
-        # Remove the temporary directory and file
+        # Remove the temporary file, if it exists
         for tfile in self.temp_files:
-            os.remove(tfile)
+            if os.path.isfile(tfile):
+                os.remove(tfile)
 
         del self.inst, self.temp_files, self.supported_tags
         return
