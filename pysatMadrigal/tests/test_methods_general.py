@@ -8,6 +8,7 @@
 import gzip
 import tempfile
 import os
+import pysat
 import pytest
 
 from pysatMadrigal.instruments.methods import general
@@ -252,4 +253,85 @@ class TestSimpleFiles(object):
             assert str(data[col][0]).find(values[i]) == 0
             assert meta[col, meta.labels.name] == col
 
+        return
+
+
+class TestMultFileTypes(object):
+    """Tests for general methods with mixed file types."""
+
+    def setup(self):
+        """Create a clean testing setup."""
+
+        # Initalize a pysat Instrument
+        self.inst = pysat.Instrument('pysat', 'testing')
+
+        # Initialize a test file name and supported tags
+        self.temp_files = []
+        self.supported_tags = {self.inst.inst_id: {
+            self.inst.tag: '{{year:4d}}-{{month:02d}}-{{day:02d}}.{file_type}'}}
+
+        return
+
+    def teardown(self):
+        """Clean up previous testing."""
+
+        # Remove the temporary directory and file
+        for tfile in self.temp_files:
+            os.remove(tfile)
+
+        del self.inst, self.temp_files, self.supported_tags
+        return
+
+    def write_temp_files(self, same_time=False):
+        """Create empty temporary files.
+
+        Parameters
+        ----------
+        same_time : bool
+            Use the same base filename for the temporary files with different
+            extension if True, use different base filenames if False.
+            (default=False)
+
+        """
+
+        for i, ext in enumerate(general.file_types.values()):
+            # Get the desired base file name
+            j = 0 if same_time else i
+            base_filename = os.path.splitext(self.inst.files.files[j])[0]
+            temp_file = os.path.join(self.inst.files.data_path,
+                                     "{:s}.{:s}".format(base_filename, ext))
+
+            # Create and save the temporary file to the file list
+            self.temp_files.append(temp_file)
+            with open(temp_file, 'w'):
+                pass  # Create an empty file
+
+        return
+
+    @pytest.mark.parametrize("same_time", [True, False])
+    def test_list_files_mult_type(self, same_time):
+        """Test `list_files` with multiple file types.
+
+        Parameters
+        ----------
+        same_time : bool
+            Use the same base filename for the temporary files with different
+            extension if True, use different base filenames if False.
+            (default=False)
+
+        """
+
+        #  Write the temporary files
+        self.write_temp_files(same_time=same_time)
+
+        # List the temporary files
+        out_files = general.list_files(self.inst.tag, self.inst.inst_id,
+                                       data_path=self.inst.files.data_path,
+                                       supported_tags=self.supported_tags)
+
+        # Test the output
+        out_list = [os.path.join(self.inst.files.data_path, ofile)
+                    for ofile in out_files]
+
+        pysat.utils.testing.assert_lists_equal(out_list, self.temp_files)
         return
