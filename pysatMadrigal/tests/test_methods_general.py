@@ -256,8 +256,8 @@ class TestSimpleFiles(object):
         return
 
 
-class TestMultFileTypes(object):
-    """Tests for general methods with mixed file types."""
+class TestListFiles(object):
+    """Tests for general methods function `list_files`."""
 
     def setup(self):
         """Create a clean testing setup."""
@@ -317,7 +317,6 @@ class TestMultFileTypes(object):
         same_time : bool
             Use the same base filename for the temporary files with different
             extension if True, use different base filenames if False.
-            (default=False)
 
         """
 
@@ -337,4 +336,52 @@ class TestMultFileTypes(object):
         # Test the listed file names and time indexes
         pysat.utils.testing.assert_lists_equal(out_list, self.temp_files)
         assert len(out_files.index.unique()) == ntimes
+        return
+
+    @pytest.mark.parametrize("same_time", [True, False])
+    @pytest.mark.parametrize("file_type", [
+        ftype for ftype in general.file_types.keys()])
+    def test_list_files_single_type(self, same_time, file_type):
+        """Test `list_files` with multiple file types.
+
+        Parameters
+        ----------
+        same_time : bool
+            Use the same base filename for the temporary files with different
+            extension if True, use different base filenames if False.
+        file_type : str
+            File type to list.
+
+        """
+
+        #  Write the temporary files
+        self.write_temp_files(same_time=same_time)
+
+        # List the temporary files
+        out_files = general.list_files(self.inst.tag, self.inst.inst_id,
+                                       data_path=self.inst.files.data_path,
+                                       supported_tags=self.supported_tags,
+                                       file_type=file_type)
+
+        # Prepare the testing data
+        out_list = [os.path.join(self.inst.files.data_path, ofile)
+                    for ofile in out_files]
+
+        # Test the listed file names and time indexes
+        pysat.utils.testing.assert_list_contains(out_list, self.temp_files,
+                                                 test_case=True)
+        assert len(out_files.index) == 1
+        return
+
+    def test_list_no_files(self):
+        """Test listing files without creating temporary files."""
+
+        # List the temporary files with
+        out_files = general.list_files(self.inst.tag, self.inst.inst_id,
+                                       data_path=self.inst.files.data_path,
+                                       supported_tags=self.supported_tags)
+
+        # Test the output
+        assert len(out_files) == 0
+        assert len(out_files.index) == 0
         return
