@@ -6,10 +6,15 @@
 """Unit tests for the general instrument methods."""
 
 import gzip
+import logging
+import netCDF4 as nc
+import numpy as np
 import tempfile
 import os
+import pandas as pds
 import pysat
 import pytest
+import xarray as xr
 
 from pysatMadrigal.instruments.methods import general
 
@@ -31,6 +36,22 @@ class TestLocal(object):
         """Test the Madrigal acknowledgements."""
         self.out = general.cedar_rules()
         assert self.out.find("CEDAR 'Rules of the Road'") >= 0
+        return
+
+    @pytest.mark.parametrize("xarray_coords", [None, ["lat"]])
+    def test_empty_load(self, xarray_coords):
+        """Test the general load function with no data files."""
+
+        # Run the empty load
+        self.out = general.load([], xarray_coords=xarray_coords)
+
+        # Test the empty output
+        if xarray_coords is None:
+            assert isinstance(self.out[0], pds.DataFrame)
+        else:
+            assert isinstance(self.out[0], xr.Dataset)
+
+        assert self.out[1] == pysat.Meta()
         return
 
 
@@ -170,6 +191,10 @@ class TestSimpleFiles(object):
         self.datalines = "\n".join(["year month day hour min sec data1",
                                     "2009 1 1 0 0 0 -4.7"])
 
+        # Initialize the output
+        self.data = None
+        self.meta = None
+
         return
 
     def teardown(self):
@@ -179,7 +204,7 @@ class TestSimpleFiles(object):
         os.remove(self.temp_file)
         self.data_path.cleanup()
 
-        del self.data_path, self.temp_file, self.datalines
+        del self.data_path, self.temp_file, self.datalines, self.data, self.meta
         return
 
     def write_temp_file(self, use_gzip=True):
@@ -201,6 +226,25 @@ class TestSimpleFiles(object):
 
         with local_open(self.temp_file, 'w') as fout:
             fout.write(bytes(self.datalines, 'utf-8'))
+
+        return
+
+    def eval_data_and_metadata(self):
+        """Evaluate the loaded test data and metadata."""
+
+        # Test the loaded data
+        tst_lines = self.datalines.split('\n')
+        header = tst_lines[0].split()
+        values = tst_lines[1].split()
+
+        # Assert the data columns and number of values are the same
+        assert len(header) == len(self.data.columns)
+        assert len(self.data.index) == len(tst_lines) - 1
+
+        # Test the values for the meta data name and the first data value
+        for i, col in enumerate(header):
+            assert str(self.data[col][0]).find(values[i]) == 0
+            assert self.meta[col, self.meta.labels.name] == col
 
         return
 
@@ -230,28 +274,178 @@ class TestSimpleFiles(object):
         assert str(verr).find("unknown coordinate key") >= 0
         return
 
-    def test_load(self):
-        """Test successsful loading of data and metadata."""
+    @pytest.mark.parametrize('xarray_coords', [None, ['time']])
+    def test_load(self, xarray_coords):
+        """Test successsful loading of data and metadata.
+
+        Parameters
+        ----------
+        xarray_coords : NoneType or list
+            Possible xarray_coords for a good simple file
+
+        """
 
         # Write a temporary file
         self.write_temp_file()
 
         # Get the data and metadata
-        data, meta = general.load([self.temp_file])
+        self.data, self.meta = general.load([self.temp_file],
+                                            xarray_coords=xarray_coords)
+
+        return
+
+    def test_load_duplicate_times(self, caplog):
+        """Test successful data and metadata loading with duplicate times."""
+
+        # Add a duplicate line
+        self.datalines = '\n'.join([self.datalines,
+                                    self.datalines.split('\n')[-1]])
+
+        # Write a temporary file
+        self.write_temp_file()
+
+        # Get the data and metadata, catching warnings
+        with caplog.at_level(logging.WARN, logger='pysat'):
+            self.data, self.meta = general.load([self.temp_file])
 
         # Test the loaded data
-        tst_lines = self.datalines.split('\n')
-        header = tst_lines[0].split()
-        values = tst_lines[1].split()
+        self.eval_data_and_metadata()
 
-        # Assert the data columns and number of values are the same
-        assert len(header) == len(data.columns)
-        assert len(data.index) == len(tst_lines) - 1
+        # Test the logging message
+        captured = caplog.text
+        assert captured.find("duplicated time indices") >= 0
+        return
 
-        # Test the values for the meta data name and the first data value
-        for i, col in enumerate(header):
-            assert str(data[col][0]).find(values[i]) == 0
-            assert meta[col, meta.labels.name] == col
+
+class TestNetCDFFiles(object):
+    """Tests for general methods with NetCDF files."""
+
+    def setup(self):
+        """Create a clean testing setup."""
+
+        # Create testing directory
+        self.data_path = tempfile.TemporaryDirectory()
+
+        # Initialize a test file name
+        self.temp_files = []
+        self.xarray_coords = [{('time',): ['time'],
+                               ('lat',): ['lat'],
+                               ('lon',): ['lon'],
+                               ('time', 'lat', 'lon'): ['value']}]
+
+        # Initialize the output
+        self.data = None
+        self.meta = None
+
+        return
+
+    def teardown(self):
+        """Clean up previous testing."""
+
+        # Remove the temporary directory and file
+        for tfile in self.temp_files:
+            if os.path.isfile(tfile):
+                os.remove(tfile)
+        self.data_path.cleanup()
+
+        del self.data_path, self.temp_files, self.xarray_coords, self.data
+        del self.meta
+        return
+
+    def write_temp_files(self, nfiles=0):
+        """Write data to a temporary file, zipping if desired.
+
+        Parameters
+        ----------
+        nfiles : int
+            Number of temporary NetCDF files to write (default=0)
+
+        """
+
+        for i in range(nfiles):
+            tfile = os.path.join(self.data_path.name,
+                                 "temp{:d}.netCDF4".format(i))
+
+            # Write a temporary file with data, based off of example:
+            # https://opensourceoptions.com/blog/
+            #    create-netcdf-files-with-python/
+            with nc.Dataset(tfile, "w", format="NETCDF4") as ds:
+                # Write the file attributes
+                if nfiles > 1:
+                    ds.catalog_text = "catalog text test"
+
+                # Write the file dimensions, using Madrigal defaults
+                ds.createDimension('timestamps', None)
+                ds.createDimension('lat', 10)
+                ds.createDimension('lon', 10)
+
+                # Write the data
+                dat_dict = {dkey: ds.createVariable(dkey, 'f4', (dkey,))
+                            for dkey in ['timestamps', 'lat', 'lon']}
+
+                dat_dict['value'] = ds.createVariable(
+                    'value', 'f4', ('timestamps', 'lat', 'lon',))
+
+                dat_dict['timestamps'][0] = i
+                dat_dict['lat'][:] = np.arange(40.0, 50.0, 1.0)
+                dat_dict['lon'][:] = np.arange(-110.0, -100.0, 1.0)
+                dat_dict['value'][0, :, :] = np.random.uniform(0, 100,
+                                                               size=(10, 10))
+
+                # Write the default Madrigal meta data
+                dat_dict['value'].units = 'test'
+                dat_dict['value'].description = 'test data set'
+
+            self.temp_files.append(tfile)
+
+        return
+
+    def eval_dataset_meta_output(self):
+        """Evaluate the dataset and meta output for the temp files."""
+
+        pysat.utils.testing.assert_lists_equal(
+            [ckey for ckey in self.data.coords.keys()], ['time', 'lat', 'lon'])
+        assert "value" in self.data.data_vars
+        assert self.data['time'].shape[0] == len(self.temp_files)
+        assert "value" in self.meta.keys()
+        return
+
+    @pytest.mark.parametrize("nfiles", [1, 2, 3])
+    def test_load_netcdf(self, nfiles):
+        """Test the loading of single or multiple NetCDF files.
+
+        Parameters
+        ----------
+        nfiles : int
+            Number of NetCDF files to load
+
+        """
+
+        # Create the temporary files
+        self.write_temp_files(nfiles=nfiles)
+
+        # Load the file data
+        self.data, self.meta = general.load(self.temp_files, self.xarray_coords)
+
+        # Evaluate the loaded data
+        self.eval_dataset_meta_output()
+
+        return
+
+    def test_load_netcdf_extra_xarray_coord(self):
+        """Test the loading of a NetCDF file with extra xarray coordinates."""
+
+        # Create the temporary files
+        self.write_temp_files(nfiles=1)
+
+        # Add extra xarray coordinates
+        self.xarray_coords[0][('space',)] = ['space']
+
+        # Load the file data
+        self.data, self.meta = general.load(self.temp_files, self.xarray_coords)
+
+        # Evaluate the loaded data
+        self.eval_dataset_meta_output()
 
         return
 
