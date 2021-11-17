@@ -35,7 +35,7 @@ def cedar_rules():
 
 
 def load(fnames, tag='', inst_id='', xarray_coords=None):
-    """Loads data from Madrigal into Pandas or XArray
+    """Loads data from Madrigal into Pandas or XArray.
 
     Parameters
     ----------
@@ -43,13 +43,12 @@ def load(fnames, tag='', inst_id='', xarray_coords=None):
         Iterable of filename strings, full path, to data files to be loaded.
         This input is nominally provided by pysat itself.
     tag : str
-        Tag name used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself. While
-        tag defaults to None here, pysat provides '' as the default
-        tag unless specified by user at Instrument instantiation. (default='')
+        Tag name used to identify particular data set to be loaded. This input
+        is nominally provided by pysat itself and is not used here. (default='')
     inst_id : str
-        Satellite ID used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself. (default='')
+        Instrument ID used to identify particular data set to be loaded.
+        This input is nominally provided by pysat itself, and is not used here.
+        (default='')
     xarray_coords : list or NoneType
         List of keywords to use as coordinates if xarray output is desired
         instead of a Pandas DataFrame.  Can build an xarray Dataset
@@ -109,7 +108,8 @@ def load(fnames, tag='', inst_id='', xarray_coords=None):
 
     if len(load_file_types["netCDF4"]) > 0:
         # Currently not saving file header data, as all metadata is at
-        # the data variable level
+        # the data variable level. The attributes are only saved if they occur
+        # in all of the loaded files.
         if 'catalog_text' in file_data.attrs:
             notes = file_data.attrs['catalog_text']
         else:
