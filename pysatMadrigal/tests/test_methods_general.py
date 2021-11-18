@@ -620,8 +620,7 @@ class TestListFiles(object):
                     for ofile in out_files]
 
         # Test the listed file names and time indexes
-        pysat.utils.testing.assert_list_contains(out_list, self.temp_files,
-                                                 test_case=True)
+        pysat.utils.testing.assert_list_contains(out_list, self.temp_files)
         assert len(out_files.index) == 1
         return
 
