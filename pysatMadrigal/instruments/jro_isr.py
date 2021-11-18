@@ -151,7 +151,7 @@ def preprocess(self):
     general.filter_data_single_date(self)
 
     # Warn the user about low altitude drifts if no cleaning is being performed
-    if self.clean_level is None:
+    if self.clean_level == 'none' or self.clean_level is None:
         logger.warning(' '.join(["interpretation of drifts below 200 km",
                                  "should always be done in partnership",
                                  "with the contact people"]))
