@@ -645,8 +645,8 @@ class TestListFiles(object):
         return
 
 
-class TestMadrigalWrapper(object):
-    """Unit tests for the MadrigalWeb related general functions."""
+class TestMadrigalExp(object):
+    """Unit tests for the MadrigalWeb functions that use MadrigalExperiment."""
 
     def setup(self):
         """Create a clean testing environment."""
