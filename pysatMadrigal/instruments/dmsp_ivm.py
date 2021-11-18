@@ -129,7 +129,7 @@ def init(self):
 
 
 def clean(self):
-    """Routine to return DMSP IVM data cleaned to the specified level
+    """Clean DMSP IVM data cleaned to the specified level.
 
     Note
     ----
@@ -138,31 +138,28 @@ def clean(self):
     'clean' enforces that both RPA and DM flags are <= 1
     'dusty' <= 2
     'dirty' <= 3
-    'none' Causes pysat to skip this routine
 
-    Routine is called by pysat, and not by the end user directly.
+    When called directly by pysat, a clean level of 'none' causes pysat to skip
+    this routine.
 
     """
 
     if self.tag == 'utd':
         if self.clean_level == 'clean':
-            idx, = np.where((self['rpa_flag_ut'] <= 1)
-                            & (self['idm_flag_ut'] <= 1))
+            iclean, = np.where((self['rpa_flag_ut'] <= 1)
+                               & (self['idm_flag_ut'] <= 1))
         elif self.clean_level == 'dusty':
-            idx, = np.where((self['rpa_flag_ut'] <= 2)
-                            & (self['idm_flag_ut'] <= 2))
+            iclean, = np.where((self['rpa_flag_ut'] <= 2)
+                               & (self['idm_flag_ut'] <= 2))
         elif self.clean_level == 'dirty':
-            idx, = np.where((self['rpa_flag_ut'] <= 3)
-                            & (self['idm_flag_ut'] <= 3))
-        else:
-            idx = slice(0, self.index.shape[0])
+            iclean, = np.where((self['rpa_flag_ut'] <= 3)
+                               & (self['idm_flag_ut'] <= 3))
     else:
-        if self.clean_level in ['clean', 'dusty', 'dirty']:
-            logger.warning('this level 1 data has no quality flags')
-        idx = slice(0, self.index.shape[0])
+        logger.warning('this level 1 data has no quality flags')
+        iclean = slice(0, self.index.shape[0])
 
     # Downselect data based upon cleaning conditions above
-    self.data = self[idx]
+    self.data = self[iclean]
 
     return
 
