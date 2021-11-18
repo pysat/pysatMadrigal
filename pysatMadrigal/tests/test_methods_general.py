@@ -21,6 +21,10 @@ import xarray as xr
 
 from pysatMadrigal.instruments.methods import general
 
+# Get the pysat version for skipping tests that currently require the
+# develop branch
+pv_major, pv_minor, pv_bug = [int(ps) for ps in pysat.__version__.split(".")]
+
 
 class TestLocal(object):
     """Unit tests for general methods that run locally."""
@@ -57,8 +61,8 @@ class TestLocal(object):
         assert self.out[1] == pysat.Meta()
         return
 
-    @pytest.mark.skipif(not hasattr(pysat.instruments.pysat_testing,
-                                    '_test_dates'),
+    @pytest.mark.skipif(pv_major < 3 or (pv_major == 3 and pv_minor < 1)
+                        or (pv_major == 3 and pv_minor == 0 and pv_bug > 1),
                         reason="requires newer pysat version.")
     @pytest.mark.parametrize("pad", [None, pds.DateOffset(days=2)])
     def test_filter_data_single_date(self, pad):
