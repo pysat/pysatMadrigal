@@ -563,7 +563,7 @@ def good_exp(exp, date_array=None):
     ----------
     exp : MadrigalExperimentFile
         MadrigalExperimentFile object
-    date_array : array-like or NoneType
+    date_array : list-like or NoneType
         List of datetimes to download data for. The sequence of dates need not
         be contiguous. If None, then any valid experiment will be assumed
         to be valid. (default=None)
@@ -768,9 +768,7 @@ def list_files(tag, inst_id, data_path=None, format_str=None,
             two_digit_year_break=two_digit_year_break, delimiter=delimiter))
 
     # Combine the file lists, ensuring the files are correctly ordered
-    if len(out_series) == 0:
-        out = pds.Series(dtype=str)
-    elif len(out_series) == 1:
+    if len(out_series) == 1:
         out = out_series[0]
     else:
         out = pds.concat(out_series).sort_index()
