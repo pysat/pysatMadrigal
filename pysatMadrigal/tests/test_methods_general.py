@@ -61,8 +61,8 @@ class TestLocal(object):
         assert self.out[1] == pysat.Meta()
         return
 
-    @pytest.mark.skipif(pv_major < 3 or (pv_major == 3 and pv_minor < 1)
-                        or (pv_major == 3 and pv_minor == 0 and pv_bug > 1),
+    @pytest.mark.skipif(pv_major < 3 or (pv_major == 3 and pv_minor == 0
+                                         and pv_bug <= 1),
                         reason="requires newer pysat version.")
     @pytest.mark.parametrize("pad", [None, pds.DateOffset(days=2)])
     def test_filter_data_single_date(self, pad):
