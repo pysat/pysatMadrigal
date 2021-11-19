@@ -5,12 +5,25 @@
 # ----------------------------------------------------------------------------
 """Unit tests for the general instrument methods."""
 
+import datetime as dt
 import gzip
+import logging
+import numpy as np
 import tempfile
 import os
+
+import netCDF4 as nc
+from madrigalWeb import madrigalWeb
+import pysat
+import pandas as pds
 import pytest
+import xarray as xr
 
 from pysatMadrigal.instruments.methods import general
+
+# Get the pysat version for skipping tests that currently require the
+# develop branch
+pv_major, pv_minor, pv_bug = [int(ps) for ps in pysat.__version__.split(".")]
 
 
 class TestLocal(object):
@@ -30,6 +43,57 @@ class TestLocal(object):
         """Test the Madrigal acknowledgements."""
         self.out = general.cedar_rules()
         assert self.out.find("CEDAR 'Rules of the Road'") >= 0
+        return
+
+    @pytest.mark.parametrize("xarray_coords", [None, ["lat"]])
+    def test_empty_load(self, xarray_coords):
+        """Test the general load function with no data files."""
+
+        # Run the empty load
+        self.out = general.load([], xarray_coords=xarray_coords)
+
+        # Test the empty output
+        if xarray_coords is None:
+            assert isinstance(self.out[0], pds.DataFrame)
+        else:
+            assert isinstance(self.out[0], xr.Dataset)
+
+        assert self.out[1] == pysat.Meta()
+        return
+
+    @pytest.mark.skipif(pv_major < 3 or (pv_major == 3 and pv_minor == 0
+                                         and pv_bug <= 1),
+                        reason="requires newer pysat version.")
+    @pytest.mark.parametrize("pad", [None, pds.DateOffset(days=2)])
+    def test_filter_data_single_date(self, pad):
+        """Test Instrument data filtering success.
+
+        Parameters
+        ----------
+        pad : dict, pds.DateOffset, or NoneType
+            Pad values.  If not None, no filtering will be performed.
+
+        """
+
+        # Initalize the test Instrument
+        self.out = pysat.Instrument('pysat', 'testing', pad=pad)
+
+        # Load a mult-day period
+        start = self.out.inst_module._test_dates['']['']
+        stop = start + dt.timedelta(days=2)
+        self.out.load(date=start, end_date=stop)
+
+        # Filter the loaded data
+        general.filter_data_single_date(self.out)
+
+        # Ensure the expected data is in the Instrument
+        assert self.out.date == start
+        assert self.out.index[0] == start
+        if pad is None:
+            assert self.out.index[-1] == start + dt.timedelta(seconds=86399)
+        else:
+            assert self.out.index[-1] == stop - dt.timedelta(seconds=1)
+
         return
 
 
@@ -169,6 +233,10 @@ class TestSimpleFiles(object):
         self.datalines = "\n".join(["year month day hour min sec data1",
                                     "2009 1 1 0 0 0 -4.7"])
 
+        # Initialize the output
+        self.data = None
+        self.meta = None
+
         return
 
     def teardown(self):
@@ -178,7 +246,7 @@ class TestSimpleFiles(object):
         os.remove(self.temp_file)
         self.data_path.cleanup()
 
-        del self.data_path, self.temp_file, self.datalines
+        del self.data_path, self.temp_file, self.datalines, self.data, self.meta
         return
 
     def write_temp_file(self, use_gzip=True):
@@ -200,6 +268,25 @@ class TestSimpleFiles(object):
 
         with local_open(self.temp_file, 'w') as fout:
             fout.write(bytes(self.datalines, 'utf-8'))
+
+        return
+
+    def eval_data_and_metadata(self):
+        """Evaluate the loaded test data and metadata."""
+
+        # Test the loaded data
+        tst_lines = self.datalines.split('\n')
+        header = tst_lines[0].split()
+        values = tst_lines[1].split()
+
+        # Assert the data columns and number of values are the same
+        assert len(header) == len(self.data.columns)
+        assert len(self.data.index) == len(tst_lines) - 1
+
+        # Test the values for the meta data name and the first data value
+        for i, col in enumerate(header):
+            assert str(self.data[col][0]).find(values[i]) == 0
+            assert self.meta[col, self.meta.labels.name] == col
 
         return
 
@@ -229,27 +316,418 @@ class TestSimpleFiles(object):
         assert str(verr).find("unknown coordinate key") >= 0
         return
 
-    def test_load(self):
-        """Test successsful loading of data and metadata."""
+    @pytest.mark.parametrize('xarray_coords', [None, ['time']])
+    def test_load(self, xarray_coords):
+        """Test successsful loading of data and metadata.
+
+        Parameters
+        ----------
+        xarray_coords : NoneType or list
+            Possible xarray_coords for a good simple file
+
+        """
 
         # Write a temporary file
         self.write_temp_file()
 
         # Get the data and metadata
-        data, meta = general.load([self.temp_file])
+        self.data, self.meta = general.load([self.temp_file],
+                                            xarray_coords=xarray_coords)
+
+        self.eval_data_and_metadata()
+        return
+
+    def test_load_duplicate_times(self, caplog):
+        """Test successful data and metadata loading with duplicate times."""
+
+        # Add a duplicate line
+        self.datalines = '\n'.join([self.datalines,
+                                    self.datalines.split('\n')[-1]])
+
+        # Write a temporary file
+        self.write_temp_file()
+
+        # Get the data and metadata, catching warnings
+        with caplog.at_level(logging.WARN, logger='pysat'):
+            self.data, self.meta = general.load([self.temp_file])
 
         # Test the loaded data
-        tst_lines = self.datalines.split('\n')
-        header = tst_lines[0].split()
-        values = tst_lines[1].split()
+        self.eval_data_and_metadata()
 
-        # Assert the data columns and number of values are the same
-        assert len(header) == len(data.columns)
-        assert len(data.index) == len(tst_lines) - 1
+        # Test the logging message
+        captured = caplog.text
+        assert captured.find("duplicated time indices") >= 0
+        return
 
-        # Test the values for the meta data name and the first data value
-        for i, col in enumerate(header):
-            assert str(data[col][0]).find(values[i]) == 0
-            assert meta[col, meta.labels.name] == col
 
+class TestNetCDFFiles(object):
+    """Tests for general methods with NetCDF files."""
+
+    def setup(self):
+        """Create a clean testing setup."""
+
+        # Create testing directory
+        self.data_path = tempfile.TemporaryDirectory()
+
+        # Initialize a test file name
+        self.temp_files = []
+        self.xarray_coords = [{('time',): ['time'],
+                               ('lat',): ['lat'],
+                               ('lon',): ['lon'],
+                               ('time', 'lat', 'lon'): ['value']}]
+
+        # Initialize the output
+        self.data = None
+        self.meta = None
+
+        return
+
+    def teardown(self):
+        """Clean up previous testing."""
+
+        # Remove the temporary directory and file
+        for tfile in self.temp_files:
+            if os.path.isfile(tfile):
+                os.remove(tfile)
+        self.data_path.cleanup()
+
+        del self.data_path, self.temp_files, self.xarray_coords, self.data
+        del self.meta
+        return
+
+    def write_temp_files(self, nfiles=0):
+        """Write data to a temporary file, zipping if desired.
+
+        Parameters
+        ----------
+        nfiles : int
+            Number of temporary NetCDF files to write (default=0)
+
+        """
+
+        for i in range(nfiles):
+            tfile = os.path.join(self.data_path.name,
+                                 "temp{:d}.netCDF4".format(i))
+
+            # Write a temporary file with data, based off of example:
+            # https://opensourceoptions.com/blog/
+            #    create-netcdf-files-with-python/
+            with nc.Dataset(tfile, "w", format="NETCDF4") as ds:
+                # Write the file attributes
+                if nfiles > 1:
+                    ds.catalog_text = "catalog text test"
+
+                # Write the file dimensions, using Madrigal defaults
+                ds.createDimension('timestamps', None)
+                ds.createDimension('lat', 10)
+                ds.createDimension('lon', 10)
+
+                # Write the data
+                dat_dict = {dkey: ds.createVariable(dkey, 'f4', (dkey,))
+                            for dkey in ['timestamps', 'lat', 'lon']}
+
+                dat_dict['value'] = ds.createVariable(
+                    'value', 'f4', ('timestamps', 'lat', 'lon',))
+
+                dat_dict['timestamps'][0] = i
+                dat_dict['lat'][:] = np.arange(40.0, 50.0, 1.0)
+                dat_dict['lon'][:] = np.arange(-110.0, -100.0, 1.0)
+                dat_dict['value'][0, :, :] = np.random.uniform(0, 100,
+                                                               size=(10, 10))
+
+                # Write the default Madrigal meta data
+                dat_dict['value'].units = 'test'
+                dat_dict['value'].description = 'test data set'
+
+            self.temp_files.append(tfile)
+
+        return
+
+    def eval_dataset_meta_output(self):
+        """Evaluate the dataset and meta output for the temp files."""
+
+        pysat.utils.testing.assert_lists_equal(
+            [ckey for ckey in self.data.coords.keys()], ['time', 'lat', 'lon'])
+        assert "value" in self.data.data_vars
+        assert self.data['time'].shape[0] == len(self.temp_files)
+        assert "value" in self.meta.keys()
+        return
+
+    @pytest.mark.parametrize("nfiles", [1, 2, 3])
+    def test_load_netcdf(self, nfiles):
+        """Test the loading of single or multiple NetCDF files.
+
+        Parameters
+        ----------
+        nfiles : int
+            Number of NetCDF files to load
+
+        """
+
+        # Create the temporary files
+        self.write_temp_files(nfiles=nfiles)
+
+        # Load the file data
+        self.data, self.meta = general.load(self.temp_files, self.xarray_coords)
+
+        # Evaluate the loaded data
+        self.eval_dataset_meta_output()
+
+        return
+
+    def test_load_netcdf_extra_xarray_coord(self):
+        """Test the loading of a NetCDF file with extra xarray coordinates."""
+
+        # Create the temporary files
+        self.write_temp_files(nfiles=1)
+
+        # Add extra xarray coordinates
+        self.xarray_coords[0][('space',)] = ['space']
+
+        # Load the file data
+        self.data, self.meta = general.load(self.temp_files, self.xarray_coords)
+
+        # Evaluate the loaded data
+        self.eval_dataset_meta_output()
+
+        return
+
+
+class TestListFiles(object):
+    """Tests for general methods function `list_files`."""
+
+    def setup(self):
+        """Create a clean testing setup."""
+
+        # Initalize a pysat Instrument
+        self.inst = pysat.Instrument('pysat', 'testing')
+
+        # Initialize a test file name and supported tags
+        self.temp_files = []
+        self.supported_tags = {self.inst.inst_id: {
+            self.inst.tag: '{{year:4d}}-{{month:02d}}-{{day:02d}}.{file_type}'}}
+
+        # Create the Instrument data path.
+        # TODO:#61 Once pysat is updated, use pysat.utils.files function.
+        try:
+            os.makedirs(self.inst.files.data_path)
+        except OSError:
+            pass
+
+        return
+
+    def teardown(self):
+        """Clean up previous testing."""
+
+        # Remove the temporary file, if it exists
+        for tfile in self.temp_files:
+            if os.path.isfile(tfile):
+                os.remove(tfile)
+
+        del self.inst, self.temp_files, self.supported_tags
+        return
+
+    def write_temp_files(self, same_time=False):
+        """Create empty temporary files.
+
+        Parameters
+        ----------
+        same_time : bool
+            Use the same base filename for the temporary files with different
+            extension if True, use different base filenames if False.
+            (default=False)
+
+        Return
+        ------
+        bool
+            True if the correct number of files were created, False if not
+
+        """
+
+        for i, ext in enumerate(general.file_types.values()):
+            # Get the desired base file name
+            j = 0 if same_time else i
+            base_filename = os.path.splitext(self.inst.files.files[j])[0]
+            temp_file = os.path.join(self.inst.files.data_path,
+                                     "{:s}.{:s}".format(base_filename, ext))
+
+            # Create and save the temporary file to the file list
+            with open(temp_file, 'w'):
+                pass  # Create an empty file
+
+            # Add file to list if it exists
+            if os.path.isfile(temp_file):
+                self.temp_files.append(temp_file)
+
+        return len(self.temp_files) == len(general.file_types.values())
+
+    @pytest.mark.parametrize("same_time", [True, False])
+    def test_list_files_mult_type(self, same_time):
+        """Test `list_files` with multiple file types.
+
+        Parameters
+        ----------
+        same_time : bool
+            Use the same base filename for the temporary files with different
+            extension if True, use different base filenames if False.
+
+        """
+
+        #  Write the temporary files
+        assert self.write_temp_files(same_time=same_time)
+
+        # List the temporary files
+        out_files = general.list_files(self.inst.tag, self.inst.inst_id,
+                                       data_path=self.inst.files.data_path,
+                                       supported_tags=self.supported_tags)
+
+        # Prepare the testing data
+        out_list = [os.path.join(self.inst.files.data_path, ofile)
+                    for ofile in out_files]
+        ntimes = 1 if same_time else len(self.temp_files)
+
+        # Test the listed file names and time indexes
+        pysat.utils.testing.assert_lists_equal(out_list, self.temp_files)
+        assert len(out_files.index.unique()) == ntimes
+        return
+
+    @pytest.mark.parametrize("same_time", [True, False])
+    @pytest.mark.parametrize("file_type", [
+        ftype for ftype in general.file_types.keys()])
+    def test_list_files_single_type(self, same_time, file_type):
+        """Test `list_files` with multiple file types.
+
+        Parameters
+        ----------
+        same_time : bool
+            Use the same base filename for the temporary files with different
+            extension if True, use different base filenames if False.
+        file_type : str
+            File type to list.
+
+        """
+
+        #  Write the temporary files
+        assert self.write_temp_files(same_time=same_time)
+
+        # List the temporary files
+        out_files = general.list_files(self.inst.tag, self.inst.inst_id,
+                                       data_path=self.inst.files.data_path,
+                                       supported_tags=self.supported_tags,
+                                       file_type=file_type)
+
+        # Prepare the testing data
+        out_list = [os.path.join(self.inst.files.data_path, ofile)
+                    for ofile in out_files]
+
+        # Test the listed file names and time indexes
+        pysat.utils.testing.assert_list_contains(out_list, self.temp_files)
+        assert len(out_files.index) == 1
+        return
+
+    @pytest.mark.parametrize("file_type", [None, 'hdf5', 'simple', 'netCDF4'])
+    def test_list_no_files(self, file_type):
+        """Test listing files without creating temporary files.
+
+        Parameters
+        ----------
+        file_type : str or NoneType
+            File format for Madrigal data. If None, will look for all known
+            file types.
+
+        """
+
+        # List the temporary files with
+        out_files = general.list_files(self.inst.tag, self.inst.inst_id,
+                                       data_path=self.inst.files.data_path,
+                                       supported_tags=self.supported_tags,
+                                       file_type=file_type)
+
+        # Test the output
+        assert len(out_files) == 0
+        assert len(out_files.index) == 0
+        return
+
+
+class TestMadrigalExp(object):
+    """Unit tests for the MadrigalWeb functions that use MadrigalExperiment."""
+
+    def setup(self):
+        """Create a clean testing environment."""
+        self.exp = None
+        self.start = dt.datetime(1950, 1, 1)
+        self.stop = dt.datetime.utcnow()
+        return
+
+    def teardown(self):
+        """Tear down the existing testing environment."""
+        del self.exp, self.start, self.stop
+        return
+
+    def set_exp_list(self, exp_id):
+        """Set a Madrigal experiment object.
+
+        Parameters
+        ----------
+        exp_id : int
+            Madrigal experiment ID
+
+        """
+        self.exp = madrigalWeb.MadrigalExperiment(
+            exp_id, "http://cedar.openmadrigal.org", "test experiment",
+            1, "test site", 10, "test instrument", self.start.year,
+            self.start.month, self.start.day, self.start.hour,
+            self.start.minute, self.start.second, self.stop.year,
+            self.stop.month, self.stop.day, self.stop.hour, self.stop.minute,
+            self.stop.second, True, "http://cedar.openmadrigal.org/fake",
+            "pysat test", "pysat.developers@gmail.com", "20010101", True, "1.0")
+
+        return
+
+    @pytest.mark.parametrize("exp_id", [0, 1010001])
+    @pytest.mark.parametrize("date_array", [
+        None, [dt.datetime(2001, 1, 1)],
+        pds.date_range(dt.datetime(2001, 1, 1), dt.datetime(2001, 1, 3)),
+        [dt.datetime(1001, 1, 1), dt.datetime(2001, 1, 15)]])
+    def test_good_exp_is_good(self, exp_id, date_array):
+        """Test the `general.good_exp` function returns True.
+
+        Parameters
+        ----------
+        exp_id : int
+            Madrigal experiment ID
+        date_array : list-like or NoneType
+            List of datetime download times or None to only test that the
+            Madrigal experiment is valid.
+
+        """
+
+        # Set the MadrigalExperiment object using good fake information
+        self.set_exp_list(exp_id)
+
+        # Ensure experiment test returns True
+        assert general.good_exp(self.exp, date_array)
+
+        return
+
+    @pytest.mark.parametrize("exp_id,date_array", [
+        (-1, None), (108000, [dt.datetime(1001, 1, 1)])])
+    def test_good_exp_is_bad(self, exp_id, date_array):
+        """Test the `general.good_exp` function returns True.
+
+        Parameters
+        ----------
+        exp_id : int
+            Madrigal experiment ID
+        date_array : list-like or NoneType
+            List of datetime download times or None to only test that the
+            Madrigal experiment is valid.
+
+        """
+
+        # Set the MadrigalExperiment object using bad fake information
+        self.set_exp_list(exp_id)
+
+        # Ensure the experiment test returns False
+        assert not general.good_exp(self.exp, date_array)
         return
