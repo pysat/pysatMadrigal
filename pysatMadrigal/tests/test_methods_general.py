@@ -333,7 +333,7 @@ class TestSimpleFiles(object):
         # Get the data and metadata
         self.data, self.meta = general.load([self.temp_file],
                                             xarray_coords=xarray_coords)
-
+self.eval_data_and_metadata()
         return
 
     def test_load_duplicate_times(self, caplog):
