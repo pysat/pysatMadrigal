@@ -82,17 +82,9 @@ _test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
                     'oblique_rand': dt.datetime(2000, 11, 9),
                     'oblique_long': dt.datetime(2010, 4, 12)}}
 
+
 # ----------------------------------------------------------------------------
 # Instrument methods
-
-# Madrigal will sometimes include multiple days within a file
-# labeled with a single date.
-# Filter out this extra data using the pysat nanokernel processing queue.
-# To ensure this function is always applied first, we set the filter
-# function as the default function for (JRO).
-# Default function is run first by the nanokernel on every load call.
-preprocess = general.filter_data_single_date
-
 
 def init(self):
     """Initializes the Instrument object with values specific to JRO ISR
@@ -108,7 +100,7 @@ def init(self):
 
 
 def clean(self):
-    """Routine to return JRO ISR data cleaned to the specified level
+    """Clean the JRO ISR data cleaned to the specified level.
 
     Note
     ----
@@ -116,14 +108,13 @@ def clean(self):
     'clean' is unknown for oblique modes, over 200 km for drifts
     'dusty' is the same as clean
     'Dirty' is the same as clean
-    'None' None
 
-    Routine is called by pysat, and not by the end user directly.
+    When called by pysat, a clean level of None will skip this routine.
 
     """
 
     # Default to selecting all of the data
-    idx = {'gdalt': [i for i in range(self.data.indexes['gdalt'].shape[0])]}
+    iclean = {'gdalt': [i for i in range(self.data.indexes['gdalt'].shape[0])]}
 
     if self.tag.find('oblique') == 0:
         # Oblique profile cleaning
@@ -142,16 +133,28 @@ def clean(self):
             if self.clean_level in ['clean', 'dusty']:
                 logger.warning('this level 2 data has no quality flags')
 
-            ida, = np.where((self.data.indexes['gdalt'] > 200.0))
-            idx['gdalt'] = np.unique(ida)
-        else:
-            logger.warning(' '.join(["interpretation of drifts below 200 km",
-                                     "should always be done in partnership",
-                                     "with the contact people"]))
+            idalt, = np.where((self.data.indexes['gdalt'] > 200.0))
+            iclean['gdalt'] = np.unique(idalt)
 
-    # downselect data based upon cleaning conditions above
-    self.data = self[idx]
+    # Downselect data based upon cleaning conditions above
+    self.data = self[iclean]
 
+    return
+
+
+def preprocess(self):
+    """Preprocess data to default loaded data to a single day."""
+
+    # Madrigal will sometimes include multiple days within a file
+    # labeled with a single date. This routine filters out this extra data
+    # using the pysat nanokernel processing queue.
+    general.filter_data_single_date(self)
+
+    # Warn the user about low altitude drifts if no cleaning is being performed
+    if self.clean_level == 'none' or self.clean_level is None:
+        logger.warning(' '.join(["interpretation of drifts below 200 km",
+                                 "should always be done in partnership",
+                                 "with the contact people"]))
     return
 
 

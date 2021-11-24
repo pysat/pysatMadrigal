@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.1.0] - 2021-XX-XX
 - Enhancements
    - Improved definitions of general and GNSS meta data
+   - Removed unused logic in cleaning routines
+   - Moved warning for no cleaning of JRO ISR data to preprocess
 - Documentation
    - Added examples for JRO and GNSS data
 - Testing
