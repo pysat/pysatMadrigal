@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# Full license can be found in License.md
+# Full author list can be found in .zenodo.json file
+# DOI:10.5281/zenodo.3824979
+# ----------------------------------------------------------------------------
+"""Unit tests for the Instruments."""
+
 import tempfile
 import pytest
 
@@ -50,22 +57,20 @@ for method in method_list:
 
 class TestInstruments(InstTestClass):
     def setup_class(self):
-        """Runs once before the tests to initialize the testing setup
-        """
+        """Initialize the testing setup."""
         # Make sure to use a temporary directory so that the user's setup is
         # not altered
         self.tempdir = tempfile.TemporaryDirectory()
         self.saved_path = pysat.params['data_dirs']
         pysat.params.data['data_dirs'] = [self.tempdir.name]
 
-        # Developers for instrument libraries should update the following line
-        # to point to their own subpackage location, e.g.,
-        # self.inst_loc = mypackage.instruments
+        # Point to the Instrument subpackage location
         self.inst_loc = pysatMadrigal.instruments
+        return
 
     def teardown_class(self):
-        """Runs after every method to clean up previous testing
-        """
+        """Clean up previous testing."""
         pysat.params.data['data_dirs'] = self.saved_path
         self.tempdir.cleanup()
         del self.inst_loc, self.saved_path, self.tempdir
+        return
