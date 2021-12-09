@@ -115,7 +115,11 @@ def load(fnames, tag='', inst_id='', xarray_coords=None):
         else:
             notes = "No catalog text"
 
-        for item in file_data.data_vars.keys():
+        # Get the coordinate and data variable names
+        meta_items = [dkey for dkey in file_data.data_vars.keys()]
+        meta_items.extend([dkey for dkey in file_data.coords.keys()])
+
+        for item in meta_items:
             name_string = item
             unit_string = file_data[item].attrs['units']
             desc_string = file_data[item].attrs['description']
