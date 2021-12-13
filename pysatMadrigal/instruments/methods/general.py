@@ -115,15 +115,23 @@ def load(fnames, tag='', inst_id='', xarray_coords=None):
         else:
             notes = "No catalog text"
 
-        for item in file_data.data_vars.keys():
-            name_string = item
-            unit_string = file_data[item].attrs['units']
-            desc_string = file_data[item].attrs['description']
-            meta[name_string.lower()] = {meta.labels.name: name_string,
-                                         meta.labels.notes: notes,
-                                         meta.labels.units: unit_string,
-                                         meta.labels.desc: desc_string,
-                                         meta.labels.fill_val: np.nan}
+        # Get the coordinate and data variable names
+        meta_items = [dkey for dkey in file_data.data_vars.keys()]
+        meta_items.extend([dkey for dkey in file_data.coords.keys()])
+
+        for item in meta_items:
+            # Set the meta values for the expected labels
+            meta_dict = {meta.labels.name: item, meta.labels.fill_val: np.nan,
+                         meta.labels.notes: notes}
+
+            for key, label in [('units', meta.labels.units),
+                               ('description', meta.labels.desc)]:
+                if key in file_data[item].attrs.keys():
+                    meta_dict[label] = file_data[item].attrs[key]
+                else:
+                    meta_dict[label] = ''
+
+            meta[item.lower()] = meta_dict
 
             # Remove any metadata from xarray
             file_data[item].attrs = {}

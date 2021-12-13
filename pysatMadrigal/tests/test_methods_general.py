@@ -436,8 +436,9 @@ class TestNetCDFFiles(object):
                                                                size=(10, 10))
 
                 # Write the default Madrigal meta data
-                dat_dict['value'].units = 'test'
-                dat_dict['value'].description = 'test data set'
+                for dat_name in ['lat', 'lon', 'value']:
+                    dat_dict[dat_name].units = 'deg'
+                    dat_dict[dat_name].description = 'test data set'
 
             self.temp_files.append(tfile)
 
@@ -446,11 +447,27 @@ class TestNetCDFFiles(object):
     def eval_dataset_meta_output(self):
         """Evaluate the dataset and meta output for the temp files."""
 
+        # Evaluate the Instrument data variables and coordinates
         pysat.utils.testing.assert_lists_equal(
             [ckey for ckey in self.data.coords.keys()], ['time', 'lat', 'lon'])
         assert "value" in self.data.data_vars
         assert self.data['time'].shape[0] == len(self.temp_files)
-        assert "value" in self.meta.keys()
+
+        # Evaluate the meta data
+        meta_keys = ['timestamps', 'lat', 'lon', 'value']
+        pysat.utils.testing.assert_lists_equal(
+            [ckey for ckey in self.meta.keys()], meta_keys)
+
+        for mkey in meta_keys:
+            uval = '' if mkey == 'timestamps' else 'deg'
+            dval = '' if mkey == 'timestamps' else 'test data set'
+            assert self.meta[mkey, self.meta.labels.units] == uval, \
+                "unexpected unit metadata for {:}: {:}".format(
+                    repr(mkey), repr(self.meta[mkey, self.meta.labels.units]))
+            assert self.meta[mkey, self.meta.labels.desc] == dval, \
+                "unexpected unit metadata for {:}: {:}".format(
+                    repr(mkey), repr(self.meta[mkey, self.meta.labels.desc]))
+
         return
 
     @pytest.mark.parametrize("nfiles", [1, 2, 3])
