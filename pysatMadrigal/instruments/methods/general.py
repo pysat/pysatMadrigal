@@ -34,6 +34,191 @@ def cedar_rules():
     return ackn
 
 
+def known_madrigal_inst_codes(pandas_format=None):
+    """Supplies known Madrigal instrument codes with a brief description.
+
+    Parameters
+    ----------
+    pandas_format : bool or NoneType
+       Separate instrument codes by time-series (True) or multi-dimensional
+       data types (False) if a boolean is supplied, or supply all if NoneType
+       (default=None)
+
+    Returns
+    -------
+    inst_codes : dict
+        Dictionary with string instrument code values as keys and a brief
+        description of the corresponding instrument as the value.
+
+    """
+
+    time_series = {'120': 'Interplanetary Mag Field and Solar Wind',
+                   '210': 'Geophysical Indicies', '211': 'AE Index',
+                   '212': 'DST Index', '170': 'POES Spacecraft Particle Flux',
+                   '180': 'DMSP-Auroral Boundary Index',
+                   '8100': 'Defense Meteorological Satellite Program',
+                   '8105': 'Van Allen Probes', '8400': 'Jason/Topex Ocean TEC',
+                   '8250': 'Jicamarca Magnetometer',
+                   '8255': 'Piura Magnetometer',
+                   '8300': 'Sodankyla Magnetometer',
+                   '7800': 'Green Bank Telescope'}
+    multi_dim = {'10': 'Jicamarca ISR', '20': 'Arecibo ISR Linefeed',
+                 '21': 'Arecibo ISR Gregorian',
+                 '22': 'Arecibo ISR Velocity Vector',
+                 '25': 'MU ISR', '30': 'Millstone Hill ISR',
+                 '31': 'Millstone Hill UHF Steerable Antenna',
+                 '32': 'Millstone Hill UHF Zenith Antenna',
+                 '40': 'St. Santin ISR', '41': 'St. Santin Nançay Receiver',
+                 '42': 'St. Santin Mende Receiver',
+                 '43': 'St. Santin Monpazier Receiver',
+                 '45': 'Kharkov Ukraine ISR', '50': 'Chatanika ISR',
+                 '53': 'ISTP Irkutsk Radar', '57': 'UK Malvern ISR',
+                 '61': 'Poker Flat ISR', '70': 'EISCAT combined ISRs',
+                 '71': 'EISCAT Kiruna UHF ISR', '72': 'EISCAT Tromsø UHF ISR',
+                 '73': 'EISCAT Sodankylä UHF ISR',
+                 '74': 'EISCAT Tromsø VHF ISR', '75': 'EISCAT Kiruna VHF ISR',
+                 '76': 'EISCAT Sodankylä VHF ISR', '80': 'Sondrestrom ISR',
+                 '85': 'ALTAIR ISR', '91': 'Resolute Bay North ISR',
+                 '92': 'Resolute Bay Canada ISR',
+                 '95': 'EISCAT Svalbard ISR Longyearbyen',
+                 '100': 'QuJing ISR', '310': 'TGCM/TIGCM model',
+                 '311': 'AMIE Model', '312': 'USU-TDIM Model',
+                 '320': 'Solar sd Tides', '321': 'Lunar sd Tides',
+                 '322': 'GSWM model', '820': 'Halley HF Radar',
+                 '830': 'Syowa Station HF Radar', '845': 'Kapuskasing HF Radar',
+                 '861': 'Saskatoon HF Radar', '870': 'Goose Bay HF Radar',
+                 '900': 'Hankasalmi HF Radar', '910': 'Stokkseyri HF Radar',
+                 '911': 'Pykkvibaer HF Radar', '1040': 'Arecibo MST Radar',
+                 '1140': 'Poker Flat MST Radar',
+                 '1180': 'SOUSY Svalbard MST Radar Longyearbyen',
+                 '1210': 'Scott Base MF Radar',
+                 '1215': 'Davis Antarctica MF radar',
+                 '1220': 'Mawson MF Radar', '1221': 'Rothera MF radar',
+                 '1230': 'Christchurch MF Radar',
+                 '1240': 'Adelaide MF Radar', '1245': 'Rarotonga MF radar',
+                 '1254': 'Tirunelveli MF radar', '1270': 'Kauai MF radar',
+                 '1275': 'Yamagawa MF radar', '1285': 'Platteville MF radar',
+                 '1310': 'Wakkanai MF radar', '1320': 'Collm LF Radar',
+                 '1340': 'Saskatoon MF Radar',
+                 '1375': 'The Poker Flat MF radar', '1390': 'Tromsø MF Radar',
+                 '1395': 'Syowa MF Radar', '1400': 'Halley MF Radar',
+                 '13': 'JASMET Jicamarca All-Sky Specular Meteor Radar',
+                 '1539': 'Ascension Island Meteor Radar',
+                 '1540': 'Rothera Meteor Radar',
+                 '1560': 'Atlanta meteor Radar', '1620': 'Durham meteor Radar',
+                 '1750': 'Obninsk meteor radar', '1775': 'Esrange meteor radar',
+                 '1780': 'Wuhan meteor radar', '1781': 'Mohe meteor radar',
+                 '1782': 'Beijing meteor radar', '1783': 'Sanya meteor radar',
+                 '1784': 'South Pole meteor radar',
+                 '1785': 'Southern Argentina Agile Meteor Radar',
+                 '1786': 'Cachoeira Paulista Meteor Radar',
+                 '1787': 'Buckland Park Meteor Radar',
+                 '1788': 'Kingston Meteor Radar', '1790': 'Andes Meteor Radar',
+                 '1791': 'Southern Cross Meteor Radar',
+                 '1792': 'Las Campanas Meteor Radar',
+                 '1793': 'CONDOR multi-static meteor radar system',
+                 '2090': 'Christmas Island ST/MEDAC Radar',
+                 '2200': 'Platteville ST/MEDAC Radar',
+                 '2550': 'ULowell Digisonde MLH Radar',
+                 '2890': 'Sondre Stromfjord Digisonde',
+                 '2900': 'Sodankylä Ionosonde (SO166)',
+                 '2930': 'Qaanaaq Digisonde ST/MEDAC Radars',
+                 '2950': 'EISCAT Tromsø Dynasonde',
+                 '2951': 'EISCAT Svalbard Dynasonde',
+                 '2952': 'IRF Dynasonde at EISCAT site Kiruna',
+                 '5000': 'South Pole Fabry-Perot', '5005': 'Palmer Fabry Perot',
+                 '5015': 'Arrival Heights Fabry-Perot',
+                 '5020': 'Halley Fabry-Perot',
+                 '5060': 'Mount John Fabry-Perot',
+                 '5140': 'Fabry-Perot Arequipa',
+                 '5145': 'Fabry-Perot Jicamarca', '5150': 'Fabry-Perot Mobile',
+                 '5160': 'Arecibo Fabry-Perot',
+                 '5190': 'Kitt Peak H-alpha Fabry-Perot',
+                 '5240': 'Fritz Peak Fabry-Perot',
+                 '5292': 'Ann Arbor Fabry-Perot',
+                 '5300': 'Peach Mountain Fabry-Perot',
+                 '5340': 'Millstone Hill Fabry-Perot',
+                 '5360': 'Millstone Hill High-Res Fabry-Perot',
+                 '5370': 'Arecibo Imaging Doppler Fabry-Perot',
+                 '5380': 'Culebra Fabry-Perot',
+                 '5430': 'Watson Lake Fabry-Perot',
+                 '5460': 'College Fabry-Perot',
+                 '5465': 'Poker Flat all-sky scanning Fabry-Perot',
+                 '5470': 'Fort Yukon Fabry-Perot',
+                 '5475': 'Poker Flat Fabry-Perot',
+                 '5480': 'Sondre Stromfjord Fabry-Perots',
+                 '5510': 'Inuvik NWT Fabry-Perot',
+                 '5535': 'Resolute Bay Fabry-Perot',
+                 '5540': 'Thule Fabry-Perot', '5545': 'Cariri Brazil FPI',
+                 '5546': 'Cajazeiras Brazil FPI',
+                 '5547': 'Pisgah Astronomical Research FPI',
+                 '5548': 'Urbana Atmospheric Observatory FPI',
+                 '5549': 'Kirtland Airforce Base FPI',
+                 '5550': 'Virginia Tech FPI',
+                 '5551': 'Peach Mountain (MiniME) FPI',
+                 '5552': 'Merihill Peru FPI', '5553': 'Nazca Peru FPI',
+                 '5554': 'Eastern Kentucky FPI',
+                 '5600': 'Jang Bogo Station FPI',
+                 '5700': 'South Pole Michelson Interferometer',
+                 '5720': 'Daytona Beach Michelson Interferometer',
+                 '5860': 'Stockholm IR Michelson',
+                 '5900': 'Sondrestrom Michelson Interferometer',
+                 '5950': 'Resolute Bay Michelson Interferometer',
+                 '5980': 'Eureka Michelson Interferometer',
+                 '6205': 'Arecibo Potassium [K] lidar',
+                 '6206': 'Arecibo Sodium [Na] lidar',
+                 '6300': 'CEDAR lidar', '6320': 'Colorado State sodium lidar',
+                 '6330': 'Rayleigh lidar at the ALO - USU/CASS',
+                 '6340': 'Andes Na T/W Lidar', '6350': 'ALOMAR Sodium Lidar',
+                 '6360': 'CU STAR Sodium Lidar', '6370': 'USU Na lidar',
+                 '6380': 'Poker Flat lidar', '7190': 'USU CCD Imager',
+                 '7192': 'USU Advanced Mesospheric Temperature Mapper',
+                 '7200': 'BU Millstone All-Sky Imager',
+                 '7201': 'BU Arecibo All-Sky Imager',
+                 '7202': 'BU Asiago All-Sky Imager',
+                 '7203': 'BU El Leoncito All-Sky Imager',
+                 '7204': 'BU McDonald All-Sky Imager',
+                 '7205': 'BU Rio Grande All-Sky Imager',
+                 '7206': 'BU Jicamarca All-Sky Imager', '7240': 'MIO',
+                 '7580': 'All-sky cameras at Qaanaaq',
+                 '11': 'Jicamarca Bistatic Radar', '840': 'JULIA',
+                 '3000': 'ARL UT TBB Receiver',
+                 '7600': 'Chelmsford HS Ozone Radiometer',
+                 '7602': 'Lancaster UK Ozone Radiometer',
+                 '7603': 'Bridgewater MA Ozone Radiometer',
+                 '7604': 'Union College Ozone Radiometer',
+                 '7605': 'UNC Greensboro Ozone Radiometer',
+                 '7606': 'Lynnfield HS Ozone Radiometer',
+                 '7607': 'Alaska Pacific Ozone Radiometer',
+                 '7608': 'Hermanus SA Ozone Radiometer',
+                 '7609': 'Sanae Antarctic Ozone Radiometer',
+                 '7610': 'Sodankylä Ozone Radiometer',
+                 '7611': 'Lancaster2 UK Ozone Radiometer',
+                 '7612': 'Haystack Ridge Ozone Radiometer',
+                 '7613': 'Haystack NUC3 8-channel Ozone Radiometer',
+                 '7614': 'Fairbanks Ozone Radiometer',
+                 '8001': 'South Pole Scintillation Receiver',
+                 '8000': 'World-wide GNSS Receiver Network',
+                 '8002': 'McMurdo Scintillation Receiver',
+                 '8010': 'GNSS Scintillation Network',
+                 '3010': 'Davis Czerny-Turner Scanning Spectrophotometer',
+                 '3320': 'Wuppertal (DE) Czerny-Turner OH Grating Spectrometer',
+                 '4470': 'Poker Flat 4 Channel Filter Photometer',
+                 '4473': 'Fort Yukon 4 Channel Filter Photometer',
+                 '4480': 'Arecibo red line photometer',
+                 '4481': 'Arecibo green line photometer',
+                 '7191': 'USU Mesospheric Temperature Mapper'}
+
+    if pandas_format is None:
+        inst_codes = dict(**time_series, **multi_dim)
+    elif pandas_format:
+        inst_codes = time_series
+    else:
+        inst_codes = multi_dim
+
+    return inst_codes
+
+
 def load(fnames, tag='', inst_id='', xarray_coords=None):
     """Loads data from Madrigal into Pandas or XArray.
 
@@ -861,13 +1046,19 @@ def _check_madrigal_params(inst_code, user, password):
 
     """
 
-    if inst_code is None:
-        raise ValueError("Must supply Madrigal instrument code")
+    inst_codes = known_madrigal_inst_codes(None)
+
+    if inst_code not in inst_codes.keys():
+        raise ValueError(''.join(["Unknown Madrigal instrument code: ",
+                                  repr(inst_code), ". If this is a valid ",
+                                  "Madrigal instrument code, please update ",
+                                  "`pysatMadrigal.instruments.methods.general",
+                                  ".known_madrigal_inst_codes`."]))
 
     if not (isinstance(user, str) and isinstance(password, str)):
         raise ValueError(' '.join(("The madrigal database requries a username",
                                    "and password.  Please input these as",
-                                   "user='firstname+lastname' and",
+                                   "user='firstname lastname' and",
                                    "password='myname@email.address' in this",
                                    "function.")))
 
