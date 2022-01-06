@@ -1,12 +1,10 @@
+#!/usr/bin/env python
+# Full license can be found in License.md
+# Full author list can be found in .zenodo.json file
+# DOI:10.5281/zenodo.3824979
+# ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-.
-"""Supports the Incoherent Scatter Radar at the Jicamarca Radio Observatory
-
-The Incoherent Scatter Radar (ISR) at the Jicamarca Radio Observatory (JRO)
-observes ion drifts, line-of-sight neutral winds, electron density and
-temperature, ion temperature, and ion composition through three overarching
-experiments.
-
-Downloads data from the JRO Madrigal Database.
+"""Supports the Incoherent Scatter Radar at the Jicamarca Radio Observatory.
 
 Properties
 ----------
@@ -30,7 +28,15 @@ Examples
 
 Note
 ----
-    Please provide name and email when downloading data with this routine.
+The Incoherent Scatter Radar (ISR) at the Jicamarca Radio Observatory (JRO)
+observes ion drifts, line-of-sight neutral winds, electron density and
+temperature, ion temperature, and ion composition through three overarching
+experiments.
+
+Downloads data from the JRO Madrigal Database.
+
+Please provide name (user) and email (password) when downloading data with this
+routine.
 
 """
 
