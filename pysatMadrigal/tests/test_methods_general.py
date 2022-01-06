@@ -96,13 +96,38 @@ class TestLocal(object):
 
         return
 
+    @pytest.mark.parametrize("pandas_format", [None, True, False])
+    def test_known_madrigal_inst_codes(self, pandas_format):
+        """Test the output that specifies known Madrigal instrument codes.
+
+        Parameters
+        ----------
+        pandas_format : bool or NoneType
+            Separate instrument codes by time-series (True) or multi-dimensional
+            data types (False) if a boolean is supplied, or supply all if
+            NoneType (default=None)
+
+        """
+
+        self.out = general.known_madrigal_inst_codes(pandas_format)
+
+        assert isinstance(self.out, dict)
+
+        if pandas_format is not False:
+            assert '120' in self.out.keys()
+
+        if pandas_format is not True:
+            assert '10' in self.out.keys()
+
+        return
+
 
 class TestErrors(object):
     """Tests for errors raised by the general methods."""
 
     def setup(self):
         """Create a clean testing setup."""
-        self.kwargs = {'inst_code': 'inst_code',
+        self.kwargs = {'inst_code': '10',
                        'user': 'username',
                        'password': 'password',
                        'kindats': {'testing': {'tag': 1000}},
@@ -114,17 +139,25 @@ class TestErrors(object):
         del self.kwargs
         return
 
-    def test_check_madrigal_params_no_code(self):
-        """Test that an error is thrown if None is passed through."""
+    @pytest.mark.parametrize("inst_code", [None, "-47"])
+    def test_check_madrigal_params_no_code(self, inst_code):
+        """Test that an error is thrown if None is passed through.
+
+        Parameters
+        ----------
+        inst_code : str or NoneType
+            A bad Madrigal instrument code
+
+        """
         # Set up the kwargs for this test
         del self.kwargs['kindats'], self.kwargs['supported_tags']
-        self.kwargs['inst_code'] = None
+        self.kwargs['inst_code'] = inst_code
 
         # Get the expected error message and evaluate it
         with pytest.raises(ValueError) as verr:
             general._check_madrigal_params(**self.kwargs)
 
-        assert str(verr).find("Must supply Madrigal instrument code") >= 0
+        assert str(verr).find("Unknown Madrigal instrument code") >= 0
         return
 
     @pytest.mark.parametrize("bad_val", [None, 17, False, 12.34])
