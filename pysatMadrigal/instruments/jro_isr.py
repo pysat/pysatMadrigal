@@ -209,7 +209,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     Notes
     -----
     The user's names should be provided in field user. Ruby Payne-Scott should
-    be entered as Ruby+Payne-Scott
+    be entered as "Ruby Payne-Scott"
 
     The password field should be the user's email address. These parameters
     are passed to Madrigal when downloading.
@@ -221,6 +221,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     general.download(date_array, inst_code=str(madrigal_inst_code),
                      kindat=madrigal_tag[inst_id][tag], data_path=data_path,
                      user=user, password=password, file_type=file_type)
+    return
 
 
 def load(fnames, tag=None, inst_id=None):
