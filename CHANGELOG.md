@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
    - Improved definitions of general and GNSS meta data
    - Removed unused logic in cleaning routines
    - Moved warning for no cleaning of JRO ISR data to preprocess
+   - Added a general Madrigal instrument for time-series data
+   - Added a function to specify all known Madrigal instrument codes
 - Documentation
    - Added examples for JRO and GNSS data
 - Testing
