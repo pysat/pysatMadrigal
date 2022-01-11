@@ -41,16 +41,16 @@ def references(name):
 
 
 def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_vel_key='ion_v_sat_for'):
-    """ Smooth the ram drifts using a rolling mean
+    """Smooth the ram drifts using a rolling mean.
 
     Parameters
     ----------
     inst : pysat.Instrument
         DMSP IVM Instrument object
-    rpa_flag_key : string or NoneType
+    rpa_flag_key : str or NoneType
         RPA flag key, if None will not select any data. The UTD RPA flag key
         is 'rpa_flag_ut' (default=None)
-    rpa_vel_key : string
+    rpa_vel_key : str
         RPA velocity data key (default='ion_v_sat_for')
 
     """
@@ -66,12 +66,12 @@ def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_vel_key='ion_v_sat_for'):
 
 
 def update_DMSP_ephemeris(inst, ephem=None):
-    """Updates DMSP instrument data with DMSP ephemeris
+    """Update DMSP instrument data with improved DMSP ephemeris.
 
     Parameters
     ----------
     inst : pysat.Instrument
-       DMSP IVM Instrumet object
+       DMSP IVM Instrument object
     ephem : pysat.Instrument or NoneType
         DMSP IVM_EPHEM instrument object
 
@@ -106,7 +106,7 @@ def update_DMSP_ephemeris(inst, ephem=None):
 
 
 def add_drift_unit_vectors(inst):
-    """ Add unit vectors for the satellite velocity
+    """Add unit vectors for expressing plasma motion at high latitudes.
 
     Parameters
     ----------
@@ -115,7 +115,13 @@ def add_drift_unit_vectors(inst):
 
     Note
     ----
-    Assumes that the RAM vector is pointed perfectly forward
+    Assumes that the RAM vector is pointed perfectly forward. Expresses the
+    satellite ram and crosstrack directions along x (points along 6 MLT)
+    and y (points along 12 MLT) unit unit vectors. Also expresses the same
+    parameters along polar coordinate directions, r (origin at magnetic pole)
+    and theta (theta=0 points along x). Adds variables `unit_ram_x`,
+    `unit_ram_y`, `unit_cross_x`, `unit_cross_y`, `unit_ram_r`,
+    `unit_ram_theta`, `unit_cross_r`, `unit_cross_theta`.
 
     """
     # Calculate theta and R in radians from MLT and MLat, respectively
@@ -155,7 +161,7 @@ def add_drift_unit_vectors(inst):
 def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
                              rpa_vel_key='ion_v_sat_for',
                              cross_vel_key='ion_v_sat_left'):
-    """ Add polar cap drifts in cartesian coordinates
+    """Add polar cap drifts in cartesian coordinates.
 
     Parameters
     ----------
@@ -173,6 +179,9 @@ def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
     ----
     Polar cap drifts assume there is no vertical component to the X-Y
     velocities.
+
+    x points along same direction as from magnetic pole towards 6 MLT, and
+    y points along same direction as from magnetic pole towards 12 MLT.
 
     Adds 'ion_vel_pc_x', 'ion_vel_pc_y', and 'partial'.  The last data key
     indicates whether RPA data was available (False) or not (True).
