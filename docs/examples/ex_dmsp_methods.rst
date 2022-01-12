@@ -68,7 +68,7 @@ in :py:meth:`pysatMadrigal.instruments.methods.dmsp`.
                         clim=[0, 1000.])
 
    # Plot drifts without both an RPA and DM measurement in red.
-   idx, = np.where(ivm['partial'] == True)
+   idx, = np.where(ivm['partial'])
    ax.quiver(theta[idx], r[idx], slice_x[idx], slice_y[idx], color='r',
              scale=10000)
 
