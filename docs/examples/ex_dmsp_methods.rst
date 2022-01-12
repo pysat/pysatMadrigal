@@ -46,9 +46,12 @@ in :py:meth:`pysatMadrigal.instruments.methods.dmsp`.
    f = plt.figure()
    ax = f.add_subplot(111, polar=True)
    ax.set_rlim(0, 40.)
-   ax.set_xticklabels([6, 9, 12, 15, 18, 21, 24, 3])
+   ax.set_xticks(np.linspace(0, 2. * np.pi - np.pi / 4., 8))
+   ax.set_xticklabels(['', 9, 12, 15, 18, 21, 24, 3])
+   ax.set_xlabel('MLT')
    ax.set_yticks([10, 20, 30, 40])
    ax.set_yticklabels([80, 70, 60, 50])
+   ax.text(np.deg2rad(-5.), 41, 'MLAT', rotation=-90.)
    ax.grid(True)
 
    # Location of spacecraft in relative polar coords for plotting.
