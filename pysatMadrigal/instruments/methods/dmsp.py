@@ -117,7 +117,7 @@ def add_drift_unit_vectors(inst):
     ----
     Assumes that the RAM vector is pointed perfectly forward. Expresses the
     satellite ram and crosstrack directions along x (points along 6 MLT)
-    and y (points along 12 MLT) unit unit vectors. Also expresses the same
+    and y (points along 12 MLT) unit vectors. Also expresses the same
     parameters along polar coordinate directions, r (origin at magnetic pole)
     and theta (theta=0 points along x). Adds variables `unit_ram_x`,
     `unit_ram_y`, `unit_cross_x`, `unit_cross_y`, `unit_ram_r`,
