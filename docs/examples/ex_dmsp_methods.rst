@@ -43,7 +43,7 @@ in :py:meth:`pysatMadrigal.instruments.methods.dmsp`.
    ivm.load(date=fdate)
 
    # Plot multiple orbital passes across polar cap
-   f = plt.figure()
+   fig = plt.figure()
    ax = f.add_subplot(111, polar=True)
    ax.set_rlim(0, 40.)
    ax.set_xticks(np.linspace(0, 2. * np.pi - np.pi / 4., 8))
@@ -55,8 +55,8 @@ in :py:meth:`pysatMadrigal.instruments.methods.dmsp`.
    ax.grid(True)
 
    # Location of spacecraft in relative polar coords for plotting.
-   theta = ivm['mlt'] * (np.pi / 12.) - np.pi / 2.
-   r = 90.- np.abs(ivm['mlat'])
+   theta = ivm['mlt'] * (np.pi / 12.) - np.pi / 2.0
+   r = 90.0- np.abs(ivm['mlat'])
 
    # Calculate magnitude of ion drifts for color values
    mag = np.sqrt(ivm['ion_vel_pc_x']**2 + ivm['ion_vel_pc_y']**2)
