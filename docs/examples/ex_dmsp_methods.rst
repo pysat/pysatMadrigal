@@ -56,7 +56,7 @@ in :py:meth:`pysatMadrigal.instruments.methods.dmsp`.
 
    # Location of spacecraft in relative polar coords for plotting.
    theta = ivm['mlt'] * (np.pi / 12.) - np.pi / 2.0
-   r = 90.0- np.abs(ivm['mlat'])
+   radius = 90.0- np.abs(ivm['mlat'])
 
    # Calculate magnitude of ion drifts for color values
    mag = np.sqrt(ivm['ion_vel_pc_x']**2 + ivm['ion_vel_pc_y']**2)
@@ -64,13 +64,13 @@ in :py:meth:`pysatMadrigal.instruments.methods.dmsp`.
    # Make plot of ion drifts
    slice_x = ma.masked_where(np.isnan(ivm['ion_vel_pc_x']), ivm['ion_vel_pc_x'])
    slice_y = ma.masked_where(np.isnan(ivm['ion_vel_pc_y']), ivm['ion_vel_pc_y'])
-   vec_plot = ax.quiver(theta, r, slice_x, slice_y, mag, scale=10000,
+   vec_plot = ax.quiver(theta, radius, slice_x, slice_y, mag, scale=10000,
                         clim=[0, 1000.])
 
    # Plot drifts without both an RPA and DM measurement in red.
-   idx, = np.where(ivm['partial'])
-   ax.quiver(theta[idx], r[idx], slice_x[idx], slice_y[idx], color='r',
-             scale=10000)
+   ipartial, = np.where(ivm['partial'])
+   ax.quiver(theta[ipartial], radius[ipartial], slice_x[ipartial],
+             slice_y[ipartial], color='r', scale=10000)
 
    # Title, colorbar, and save.
    plt.title('DMSP Ion Drifts')
