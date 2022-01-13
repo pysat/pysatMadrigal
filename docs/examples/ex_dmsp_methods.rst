@@ -44,7 +44,7 @@ in :py:meth:`pysatMadrigal.instruments.methods.dmsp`.
 
    # Plot multiple orbital passes across polar cap
    fig = plt.figure()
-   ax = f.add_subplot(111, polar=True)
+   ax = fig.add_subplot(111, polar=True)
    ax.set_rlim(0, 40.)
    ax.set_xticks(np.linspace(0, 2. * np.pi - np.pi / 4., 8))
    ax.set_xticklabels(['', 9, 12, 15, 18, 21, 24, 3])
