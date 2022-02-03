@@ -75,7 +75,7 @@ in :py:meth:`pysatMadrigal.instruments.methods.dmsp`.
    # Title, colorbar, and save.
    plt.title('DMSP Ion Drifts')
    label = ''.join(['(', ivm.meta['ion_vel_pc_x', ivm.meta.labels.units], ')'])
-   label = ''.join(['Ion Drift ', label])
+   label = ''.join(['2D Horizontal Ion Drift ', label])
    plt.colorbar(vec_plot, label=label)
    plt.tight_layout()
    plt.savefig('ex_dmsp_methods.png')
