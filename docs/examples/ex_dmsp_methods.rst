@@ -37,7 +37,7 @@ in :py:meth:`pysatMadrigal.instruments.methods.dmsp`.
 
    # Download data if not already on system
    if fdate not in ivm.files.files.index:
-       ivm.download(fdate)
+       ivm.download(fdate, user='first+lastname', password='myname@email.address')
 
    # Load data
    ivm.load(date=fdate)
@@ -74,10 +74,12 @@ in :py:meth:`pysatMadrigal.instruments.methods.dmsp`.
 
    # Title, colorbar, and save.
    plt.title('DMSP Ion Drifts')
-   plt.colorbar(vec_plot, label='m/s')
+   label = ''.join(['(', ivm.meta['ion_vel_pc_x', ivm.meta.labels.units], ')'])
+   label = ''.join(['Ion Drift ', label])
+   plt.colorbar(vec_plot, label=label)
    plt.tight_layout()
-   plt.show()
    plt.savefig('ex_dmsp_methods.png')
+   plt.show()
 
 
 .. image:: ../figures/ex_dmsp_methods.png
