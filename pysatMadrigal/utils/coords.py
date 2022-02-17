@@ -191,6 +191,7 @@ def local_spherical_to_cartesian(az_in, el_in, r_in, inverse=False):
 
     return x_out, y_out, z_out
 
+
 def spherical_to_cartesian(theta_in, phi_in, r_in, inverse=False):
     """Convert a position from spherical to cartesian, or vice-versa.
 
