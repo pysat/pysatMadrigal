@@ -48,10 +48,10 @@ class TestJROCalcLoc(object):
         # Set the hard-coded values
         self.az = 206.0
         self.el = 87.0
-        self.lat_min = -16.3188
-        self.lat_max = -12.3379
-        self.lon_min = -76.8249
-        self.lon_max = -76.3531
+        self.lat_min = -12.3232
+        self.lat_max = -11.9931
+        self.lon_min = -77.04998
+        self.lon_max = -76.89074
         self.tol = 1.0e-4
         return
 
@@ -116,22 +116,26 @@ class TestJROCalcLoc(object):
         """Evaluate the calculated latitude output."""
         # Test the minimum
         assert abs(out_lat.min() - self.lat_min) < self.tol, \
-            "Beam latitude values reach below the expected minimum."
+            "Beam latitudes below the expected minimum: |{:}| < |{:}|.".format(
+                out_lat.min(), self.lat_min)
 
         # Test the maximum
         assert abs(out_lat.max() - self.lat_max) < self.tol, \
-            "Beam latitude values reach above the expected maximum."
+            "Beam latitudes above the expected maximum: |{:}| < |{:}|.".format(
+                out_lat.max(), self.lat_max)
         return
 
     def eval_calc_lon_range(self, out_lon):
         """Evaluate the calculated longitude output."""
         # Test the minimum
         assert abs(out_lon.min() - self.lon_min) < self.tol, \
-            "Beam longitude values reach below the expected minimum."
+            "Beam longitudes below the expected minimum: |{:}| < |{:}|.".format(
+                out_lon.min(), self.lon_min)
 
         # Test the maximum
         assert abs(out_lon.max() - self.lon_max) < self.tol, \
-            "Beam longitude values reach above the expected maximum."
+            "Beam longitudes above the expected maximum: |{:}| < |{:}|.".format(
+                out_lon.max(), self.lon_max)
         return
 
     @pytest.mark.parametrize("azel_type, err_msg", [
