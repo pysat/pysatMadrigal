@@ -9,8 +9,9 @@ import datetime as dt
 import gzip
 import logging
 import numpy as np
-import tempfile
 import os
+from packaging import version
+import tempfile
 
 import netCDF4 as nc
 from madrigalWeb import madrigalWeb
@@ -20,10 +21,6 @@ import pytest
 import xarray as xr
 
 from pysatMadrigal.instruments.methods import general
-
-# Get the pysat version for skipping tests that currently require the
-# develop branch
-pv_major, pv_minor, pv_bug = [int(ps) for ps in pysat.__version__.split(".")]
 
 
 class TestLocal(object):
@@ -61,8 +58,8 @@ class TestLocal(object):
         assert self.out[1] == pysat.Meta()
         return
 
-    @pytest.mark.skipif(pv_major < 3 or (pv_major == 3 and pv_minor == 0
-                                         and pv_bug <= 1),
+    @pytest.mark.skipif(version.Version(pysat.__version__)
+                        < version.Version('3.1.0'),
                         reason="requires newer pysat version.")
     @pytest.mark.parametrize("pad", [None, pds.DateOffset(days=2)])
     def test_filter_data_single_date(self, pad):
@@ -119,6 +116,83 @@ class TestLocal(object):
         if pandas_format is not True:
             assert '10' in self.out.keys()
 
+        return
+
+    @pytest.mark.parametrize("inst_code", [120, 120.0, "120"])
+    def test_known_madrigal_inst_codes(self, inst_code):
+        """Test the file format string for known Madrigal instrument codes.
+
+        Parameters
+        ----------
+        inst_code : int, float, or str
+            Madrigal instrument code for a well-defined file format
+
+        """
+
+        # Get the function output
+        self.out = general.madrigal_file_format_str(inst_code)
+
+        # Test the formatted string
+        for req_str in ['year', 'month', 'day', 'file_type']:
+            assert self.out.find(req_str) > 0, "{:s} not in {:s}".format(
+                req_str, self.out)
+        return
+
+    @pytest.mark.parametrize("inst_code, msg", [
+        (8001, "file format string missing date info"),
+        (1, "file format string not available for instrument code"),
+        (8000, "file format string has multiple '*'"),
+        (8400, "file format string has '*' between formatting constraints")])
+    def test_known_madrigal_inst_codes_with_warnings(self, inst_code, msg,
+                                                     caplog):
+        """Test poorly constrained file formats for Madrigal instrument codes.
+
+        Parameters
+        ----------
+        inst_code : int
+            Madrigal instrument code for a poorly constrained file format
+        msg : str
+            Logger warning message
+
+        """
+
+        # Get the output and raise the logging warning
+        with caplog.at_level(logging.WARN, logger='pysat'):
+            self.out = general.madrigal_file_format_str(inst_code)
+
+        # Test the formatted string
+        assert self.out.find("file_type") > 0, \
+            "'file_type' missing from {:s}".format(self.out)
+
+        # Test the logger warning
+        assert len(caplog.records) == 1, "unexpected number of warnings"
+        assert caplog.records[0].levelname == "WARNING"
+        assert caplog.records[0].message.find(msg) >= 0
+        return
+
+    @pytest.mark.parametrize("inst_code, msg", [
+        (8001, "file format string missing date info"),
+        (1, "file format string not available for instrument code"),
+        (8000, "file format string has multiple '*'"),
+        (8400, "file format string has '*' between formatting constraints")])
+    def test_known_madrigal_inst_codes_with_errors(self, inst_code, msg):
+        """Test poorly constrained file formats raise ValueErrors.
+
+        Parameters
+        ----------
+        inst_code : int
+            Madrigal instrument code for a poorly constrained file format
+        msg : str
+            Logger warning message
+
+        """
+
+        # Get the output and raise the logging warning
+        with pytest.raises(ValueError) as verr:
+            general.madrigal_file_format_str(inst_code, strict=True)
+
+        # Test the logger warning
+        assert str(verr).find(msg) >= 0
         return
 
 
