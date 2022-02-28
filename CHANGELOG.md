@@ -2,17 +2,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.1.0] - 2021-XX-XX
+## [0.1.0] - 2022-XX-XX
 - Enhancements
    - Improved definitions of general and GNSS meta data
    - Removed unused logic in cleaning routines
    - Moved warning for no cleaning of JRO ISR data to preprocess
    - Added a general Madrigal instrument for time-series data
-   - Added a function to specify all known Madrigal instrument codes
+   - Added functions to specify all known Madrigal instrument codes and
+     file formats
 - Documentation
    - Added examples for JRO and GNSS data
 - Testing
    - Added unit tests for general, JRO, and GNSS methods
+   - Added the packaging module to handle version logic
 
 ## [0.0.4] - 2021-06-11
 - Made changes to structure to comply with updates in pysat 3.0.0
