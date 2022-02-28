@@ -15,6 +15,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Testing
    - Added unit tests for general, JRO, and GNSS methods
    - Added the packaging module to handle version logic
+- Bug
+   - Fixed bugs in the coordinate conversion functions
 
 ## [0.0.4] - 2021-06-11
 - Made changes to structure to comply with updates in pysat 3.0.0
