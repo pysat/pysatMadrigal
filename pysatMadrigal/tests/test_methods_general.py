@@ -119,7 +119,7 @@ class TestLocal(object):
         return
 
     @pytest.mark.parametrize("inst_code", [120, 120.0, "120"])
-    def test_known_madrigal_inst_codes(self, inst_code):
+    def test_madrigal_file_format_str(self, inst_code):
         """Test the file format string for known Madrigal instrument codes.
 
         Parameters
@@ -143,8 +143,8 @@ class TestLocal(object):
         (1, "file format string not available for instrument code"),
         (8000, "file format string has multiple '*'"),
         (8400, "file format string has '*' between formatting constraints")])
-    def test_known_madrigal_inst_codes_with_warnings(self, inst_code, msg,
-                                                     caplog):
+    def test_madrigal_file_format_str_with_warnings(self, inst_code, msg,
+                                                    caplog):
         """Test poorly constrained file formats for Madrigal instrument codes.
 
         Parameters
@@ -175,7 +175,7 @@ class TestLocal(object):
         (1, "file format string not available for instrument code"),
         (8000, "file format string has multiple '*'"),
         (8400, "file format string has '*' between formatting constraints")])
-    def test_known_madrigal_inst_codes_with_errors(self, inst_code, msg):
+    def test_madrigal_file_format_str_with_errors(self, inst_code, msg):
         """Test poorly constrained file formats raise ValueErrors.
 
         Parameters
