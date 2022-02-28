@@ -1,6 +1,7 @@
 h5py
 madrigalWeb
 numpy
+packaging
 pandas
 pysat>=3.0
 xarray
