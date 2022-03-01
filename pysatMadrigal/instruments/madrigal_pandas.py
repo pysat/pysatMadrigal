@@ -49,6 +49,7 @@ Examples
 ::
 
 
+    import datetime as dt
     import pysat
     import pysatMadrigal as py_mad
 
@@ -57,7 +58,7 @@ Examples
                                 tag='180', kindat='17110')
     dmsp_abi.download(dt.datetime(2015, 12, 30), dt.datetime(2015, 12, 31),
                       user='Firstname+Lastname', password='email@address.com')
-    dmsp_abi.load(2017, 363)
+    dmsp_abi.load(date=dt.datetime(2015, 12, 30))
 
 """
 
