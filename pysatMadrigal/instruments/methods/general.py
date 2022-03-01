@@ -1010,11 +1010,12 @@ def get_remote_filenames(inst_code=None, kindat='', user=None, password=None,
 
     # Iterate over experiments to grab files for each one
     files = list()
-    logger.info("Found {:d} Madrigal experiments".format(len(exp_list)))
+    istr = "Found {:d} Madrigal experiments between {:s} and {:s}".format(
+        len(exp_list), start.strftime('%d %B %Y'), stop.strftime('%d %B %Y'))
+    logger.info(istr)
     for exp in exp_list:
         if good_exp(exp, date_array=date_array):
             file_list = web_data.getExperimentFiles(exp.id)
-
             if len(kindat) == 0:
                 files.extend(file_list)
             else:
