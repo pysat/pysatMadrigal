@@ -56,9 +56,9 @@ Examples
     # Download DMSP data from Madrigal
     dmsp_abi = pysat.Instrument(inst_module=py_mad.instruments.madrigal_pandas,
                                 tag='180', kindat='17110')
-    dmsp_abi.download(dt.datetime(2015, 12, 30), dt.datetime(2015, 12, 31),
+    dmsp_abi.download(dt.datetime(2015, 1, 1), dt.datetime(2015, 1, 2),
                       user='Firstname+Lastname', password='email@address.com')
-    dmsp_abi.load(date=dt.datetime(2015, 12, 30))
+    dmsp_abi.load(date=dt.datetime(2015, 1, 1))
 
 """
 
@@ -99,7 +99,7 @@ supported_tags = {ss: {tag: general.madrigal_file_format_str(tag)
 
 # Need to sort out test day setting for unit testing, maybe through a remote
 # function
-_test_dates = {'': {tag: dt.datetime(2015, 12, 30) for tag in tags.keys()}}
+_test_dates = {'': {tag: dt.datetime(2015, 1, 1) for tag in tags.keys()}}
 _test_download = {'': {tag: True if tag == '180' else False
                        for tag in tags.keys()}}
 
