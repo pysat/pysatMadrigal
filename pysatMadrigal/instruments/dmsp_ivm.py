@@ -129,7 +129,7 @@ def init(self):
 
 
 def clean(self):
-    """Routine to return DMSP IVM data cleaned to the specified level
+    """Clean DMSP IVM data cleaned to the specified level.
 
     Note
     ----
@@ -138,31 +138,28 @@ def clean(self):
     'clean' enforces that both RPA and DM flags are <= 1
     'dusty' <= 2
     'dirty' <= 3
-    'none' Causes pysat to skip this routine
 
-    Routine is called by pysat, and not by the end user directly.
+    When called directly by pysat, a clean level of 'none' causes pysat to skip
+    this routine.
 
     """
 
     if self.tag == 'utd':
         if self.clean_level == 'clean':
-            idx, = np.where((self['rpa_flag_ut'] <= 1)
-                            & (self['idm_flag_ut'] <= 1))
+            iclean, = np.where((self['rpa_flag_ut'] <= 1)
+                               & (self['idm_flag_ut'] <= 1))
         elif self.clean_level == 'dusty':
-            idx, = np.where((self['rpa_flag_ut'] <= 2)
-                            & (self['idm_flag_ut'] <= 2))
+            iclean, = np.where((self['rpa_flag_ut'] <= 2)
+                               & (self['idm_flag_ut'] <= 2))
         elif self.clean_level == 'dirty':
-            idx, = np.where((self['rpa_flag_ut'] <= 3)
-                            & (self['idm_flag_ut'] <= 3))
-        else:
-            idx = slice(0, self.index.shape[0])
+            iclean, = np.where((self['rpa_flag_ut'] <= 3)
+                               & (self['idm_flag_ut'] <= 3))
     else:
-        if self.clean_level in ['clean', 'dusty', 'dirty']:
-            logger.warning('this level 1 data has no quality flags')
-        idx = slice(0, self.index.shape[0])
+        logger.warning('this level 1 data has no quality flags')
+        iclean = slice(0, self.index.shape[0])
 
     # Downselect data based upon cleaning conditions above
-    self.data = self[idx]
+    self.data = self[iclean]
 
     return
 
@@ -195,21 +192,21 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     date_array : array-like
         list of datetimes to download data for. The sequence of dates need not
         be contiguous.
-    tag : string
+    tag : str
         Tag identifier used for particular dataset. This input is provided by
         pysat. (default='')
-    inst_id : string
+    inst_id : str
         Satellite ID string identifier used for particular dataset. This input
         is provided by pysat. (default='')
-    data_path : string
+    data_path : str
         Path to directory to download data to. (default=None)
-    user : string
+    user : str
         User string input used for download. Provided by user and passed via
-        pysat. If an account is required for dowloads this routine here must
+        pysat. If an account is required for downloads this routine here must
         error if user not supplied. (default=None)
-    password : string
+    password : str
         Password for data download. (default=None)
-    file_type : string
+    file_type : str
         File format for Madrigal data. (default='hdf5')
 
     Note

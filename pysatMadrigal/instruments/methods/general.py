@@ -34,22 +34,21 @@ def cedar_rules():
     return ackn
 
 
-def load(fnames, tag=None, inst_id=None, xarray_coords=None):
-    """Loads data from Madrigal into Pandas or XArray
+def load(fnames, tag='', inst_id='', xarray_coords=None):
+    """Loads data from Madrigal into Pandas or XArray.
 
     Parameters
     ----------
     fnames : array-like
-        iterable of filename strings, full path, to data files to be loaded.
+        Iterable of filename strings, full path, to data files to be loaded.
         This input is nominally provided by pysat itself.
     tag : str
-        tag name used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself. While
-        tag defaults to None here, pysat provides '' as the default
-        tag unless specified by user at Instrument instantiation. (default='')
+        Tag name used to identify particular data set to be loaded. This input
+        is nominally provided by pysat itself and is not used here. (default='')
     inst_id : str
-        Satellite ID used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself. (default='')
+        Instrument ID used to identify particular data set to be loaded.
+        This input is nominally provided by pysat itself, and is not used here.
+        (default='')
     xarray_coords : list or NoneType
         List of keywords to use as coordinates if xarray output is desired
         instead of a Pandas DataFrame.  Can build an xarray Dataset
@@ -66,6 +65,12 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
         A pandas DataFrame or xarray Dataset holding the data from the file
     meta : pysat.Meta
         Metadata from the file, as well as default values from pysat
+
+    Raises
+    ------
+    ValueError
+       If data columns expected to create the time index are missing or if
+       coordinates are not supplied for all data columns.
 
     Note
     ----
@@ -103,21 +108,30 @@ def load(fnames, tag=None, inst_id=None, xarray_coords=None):
 
     if len(load_file_types["netCDF4"]) > 0:
         # Currently not saving file header data, as all metadata is at
-        # the data variable level
+        # the data variable level. The attributes are only saved if they occur
+        # in all of the loaded files.
         if 'catalog_text' in file_data.attrs:
             notes = file_data.attrs['catalog_text']
         else:
             notes = "No catalog text"
 
-        for item in file_data.data_vars.keys():
-            name_string = item
-            unit_string = file_data[item].attrs['units']
-            desc_string = file_data[item].attrs['description']
-            meta[name_string.lower()] = {meta.labels.name: name_string,
-                                         meta.labels.notes: notes,
-                                         meta.labels.units: unit_string,
-                                         meta.labels.desc: desc_string,
-                                         meta.labels.fill_val: np.nan}
+        # Get the coordinate and data variable names
+        meta_items = [dkey for dkey in file_data.data_vars.keys()]
+        meta_items.extend([dkey for dkey in file_data.coords.keys()])
+
+        for item in meta_items:
+            # Set the meta values for the expected labels
+            meta_dict = {meta.labels.name: item, meta.labels.fill_val: np.nan,
+                         meta.labels.notes: notes}
+
+            for key, label in [('units', meta.labels.units),
+                               ('description', meta.labels.desc)]:
+                if key in file_data[item].attrs.keys():
+                    meta_dict[label] = file_data[item].attrs[key]
+                else:
+                    meta_dict[label] = ''
+
+            meta[item.lower()] = meta_dict
 
             # Remove any metadata from xarray
             file_data[item].attrs = {}
@@ -359,26 +373,31 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
     date_array : array-like
         list of datetimes to download data for. The sequence of dates need not
         be contiguous.
-    inst_code : string
+    inst_code : str
         Madrigal instrument code(s), cast as a string.  If multiple are used,
         separate them with commas. (default=None)
-    kindat : string
+    kindat : str
         Experiment instrument code(s), cast as a string.  If multiple are used,
         separate them with commas. (default=None)
-    data_path : string
+    data_path : str
         Path to directory to download data to. (default=None)
-    user : string
+    user : str
         User string input used for download. Provided by user and passed via
         pysat. If an account is required for dowloads this routine here must
         error if user not supplied. (default=None)
-    password : string
+    password : str
         Password for data download. (default=None)
-    url : string
+    url : str
         URL for Madrigal site (default='http://cedar.openmadrigal.org')
-    file_type : string
+    file_type : str
         File format for Madrigal data.  Load routines currently only accepts
         'hdf5' and 'netCDF4', but any of the Madrigal options may be used
         here. (default='hdf5')
+
+    Raises
+    ------
+    ValueError
+        If the specified input type or Madrigal experiment codes are unknown
 
     Note
     ----
@@ -439,40 +458,39 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
     return
 
 
-def get_remote_filenames(inst_code=None, kindat=None, user=None,
-                         password=None, web_data=None,
-                         url="http://cedar.openmadrigal.org",
+def get_remote_filenames(inst_code=None, kindat=None, user=None, password=None,
+                         web_data=None, url="http://cedar.openmadrigal.org",
                          start=dt.datetime(1900, 1, 1), stop=dt.datetime.now(),
                          date_array=None):
     """Retrieve the remote filenames for a specified Madrigal experiment
 
     Parameters
     ----------
-    inst_code : string
+    inst_code : str or NoneType
         Madrigal instrument code(s), cast as a string.  If multiple are used,
         separate them with commas. (default=None)
-    kindat : string
+    kindat : str or NoneType
         Madrigal experiment code(s), cast as a string.  If multiple are used,
         separate them with commas.  If not supplied, all will be returned.
         (default=None)
-    data_path : string
+    data_path : str or NoneType
         Path to directory to download data to. (default=None)
-    user : string
+    user : str or NoneType
         User string input used for download. Provided by user and passed via
         pysat. If an account is required for dowloads this routine here must
         error if user not supplied. (default=None)
-    password : string
+    password : str or NoneType
         Password for data download. (default=None)
-    web_data : MadrigalData
+    web_data : MadrigalData or NoneType
         Open connection to Madrigal database or None (will initiate using url)
         (default=None)
-    url : string
+    url : str
         URL for Madrigal site (default='http://cedar.openmadrigal.org')
     start : dt.datetime
         Starting time for file list (defaults to 01-01-1900)
     stop : dt.datetime
         Ending time for the file list (defaults to time of run)
-    date_array : dt.datetime
+    date_array : dt.datetime or NoneType
         Array of datetimes to download data for. The sequence of dates need not
         be contiguous and will be used instead of start and stop if supplied.
         (default=None)
@@ -481,6 +499,11 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
     -------
     files : madrigalWeb.madrigalWeb.MadrigalExperimentFile
         Madrigal file object that contains remote experiment file data
+
+    Raises
+    ------
+    ValueError
+        If unexpected date_array input is supplied
 
     Note
     ----
@@ -542,15 +565,16 @@ def get_remote_filenames(inst_code=None, kindat=None, user=None,
 
 
 def good_exp(exp, date_array=None):
-    """ Determine if a Madrigal experiment has good data for specified dates
+    """Determine if a Madrigal experiment has good data for specified dates.
 
     Parameters
     ----------
     exp : MadrigalExperimentFile
         MadrigalExperimentFile object
-    date_array : array-like
-        list of datetimes to download data for. The sequence of dates need not
-        be contiguous.
+    date_array : list-like or NoneType
+        List of datetimes to download data for. The sequence of dates need not
+        be contiguous. If None, then any valid experiment will be assumed
+        to be valid. (default=None)
 
     Returns
     -------
@@ -587,13 +611,13 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
 
     Parameters
     ----------
-    tag : string or NoneType
-        Denotes type of file to load.  Accepted types are <tag strings>.
-        (default=None)
-    inst_id : string or NoneType
-        Specifies the satellite ID for a constellation.  Not used.
-        (default=None)
-    inst_code : string
+    tag : str
+        Denotes type of file to load.  Accepts strings corresponding to the
+        appropriate Madrigal Instrument `tags`.
+    inst_id : str
+        Specifies the instrument ID to load. Accepts strings corresponding to
+        the appropriate Madrigal Instrument `inst_ids`.
+    inst_code : str or NoneType
         Madrigal instrument code(s), cast as a string.  If multiple are used,
         separate them with commas. (default=None)
     kindats : dict
@@ -601,18 +625,18 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
         keys and tags as second level keys with Madrigal experiment code(s)
         as values.  These should be strings, with multiple codes separated by
         commas. (default=None)
-    data_path : string
+    data_path : str or NoneType
         Path to directory to download data to. (default=None)
-    user : string
+    user : str or NoneType
         User string input used for download. Provided by user and passed via
         pysat. If an account is required for dowloads this routine here must
         error if user not supplied. (default=None)
-    password : string
+    password : str or NoneType
         Password for data download. (default=None)
     supported_tags : dict or NoneType
         keys are inst_id, each containing a dict keyed by tag
         where the values file format template strings. (default=None)
-    url : string
+    url : str
         URL for Madrigal site (default='http://cedar.openmadrigal.org')
     two_digit_year_break : int
         If filenames only store two digits for the year, then
@@ -688,27 +712,27 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
                                                       two_digit_year_break)
 
 
-def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
+def list_files(tag, inst_id, data_path=None, format_str=None,
                supported_tags=None, file_cadence=dt.timedelta(days=1),
                two_digit_year_break=None, delimiter=None, file_type=None):
     """Return a Pandas Series of every file for chosen Instrument data.
 
     Parameters
     ----------
-    tag : string or NoneType
-        Denotes type of file to load.  Accepted types are <tag strings>.
-        (default=None)
-    inst_id : string or NoneType
-        Specifies the satellite ID for a constellation.  Not used.
-        (default=None)
-    data_path : string or NoneType
+    tag : str
+        Denotes type of file to load.  Accepts strings corresponding to the
+        appropriate Madrigal Instrument `tags`.
+    inst_id : str
+        Specifies the instrument ID to load. Accepts strings corresponding to
+        the appropriate Madrigal Instrument `inst_ids`.
+    data_path : str or NoneType
         Path to data directory.  If None is specified, the value previously
         set in Instrument.files.data_path is used.  (default=None)
-    format_str : string or NoneType
+    format_str : str or NoneType
         User specified file format.  If None is specified, the default
         formats associated with the supplied tags are used. (default=None)
     supported_tags : dict or NoneType
-        keys are inst_id, each containing a dict keyed by tag
+        Keys are inst_id, each containing a dict keyed by tag
         where the values file format template strings. (default=None)
     file_cadence : dt.timedelta or pds.DateOffset
         pysat assumes a daily file cadence, but some instrument data file
@@ -720,7 +744,7 @@ def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
         added for years >= two_digit_year_break and '2000' will be added for
         years < two_digit_year_break. If None, then four-digit years are
         assumed. (default=None)
-    delimiter : string or NoneType
+    delimiter : str or NoneType
         Delimiter string upon which files will be split (e.g., '.'). If None,
         filenames will be parsed presuming a fixed width format. (default=None)
     file_type : str or NoneType
@@ -752,9 +776,7 @@ def list_files(tag=None, inst_id=None, data_path=None, format_str=None,
             two_digit_year_break=two_digit_year_break, delimiter=delimiter))
 
     # Combine the file lists, ensuring the files are correctly ordered
-    if len(out_series) == 0:
-        out = pds.Series(dtype=str)
-    elif len(out_series) == 1:
+    if len(out_series) == 1:
         out = out_series[0]
     else:
         out = pds.concat(out_series).sort_index()
@@ -780,6 +802,8 @@ def filter_data_single_date(inst):
     data padding is enabled the final data available within the instrument
     will be downselected by pysat to only include the date specified.
 
+    Examples
+    --------
     This routine is intended to be added to the Instrument
     nanokernel processing queue via
     ::
@@ -820,13 +844,13 @@ def _check_madrigal_params(inst_code, user, password):
 
     Parameters
     ----------
-    inst_code : str
+    inst_code : str or NoneType
         Madrigal instrument code(s), cast as a string.  If multiple are used,
         separate them with commas.
-    user : str
+    user : str or NoneType
         The user's names should be provided in field user. Ruby Payne-Scott
         should be entered as Ruby+Payne-Scott
-    password : str
+    password : str or NoneType
         The password field should be the user's email address. These parameters
             are passed to Madrigal when downloading.
 

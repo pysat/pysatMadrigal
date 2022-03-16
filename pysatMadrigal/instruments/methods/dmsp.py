@@ -41,16 +41,16 @@ def references(name):
 
 
 def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_vel_key='ion_v_sat_for'):
-    """ Smooth the ram drifts using a rolling mean
+    """Smooth the ram drifts using a rolling mean.
 
     Parameters
     ----------
     inst : pysat.Instrument
         DMSP IVM Instrument object
-    rpa_flag_key : string or NoneType
+    rpa_flag_key : str or NoneType
         RPA flag key, if None will not select any data. The UTD RPA flag key
         is 'rpa_flag_ut' (default=None)
-    rpa_vel_key : string
+    rpa_vel_key : str
         RPA velocity data key (default='ion_v_sat_for')
 
     """
@@ -66,12 +66,12 @@ def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_vel_key='ion_v_sat_for'):
 
 
 def update_DMSP_ephemeris(inst, ephem=None):
-    """Updates DMSP instrument data with DMSP ephemeris
+    """Update DMSP instrument data with improved DMSP ephemeris.
 
     Parameters
     ----------
     inst : pysat.Instrument
-       DMSP IVM Instrumet object
+       DMSP IVM Instrument object
     ephem : pysat.Instrument or NoneType
         DMSP IVM_EPHEM instrument object
 
@@ -106,7 +106,7 @@ def update_DMSP_ephemeris(inst, ephem=None):
 
 
 def add_drift_unit_vectors(inst):
-    """ Add unit vectors for the satellite velocity
+    """Add unit vectors for expressing plasma motion at high latitudes.
 
     Parameters
     ----------
@@ -115,7 +115,13 @@ def add_drift_unit_vectors(inst):
 
     Note
     ----
-    Assumes that the RAM vector is pointed perfectly forward
+    Assumes that the RAM vector is pointed perfectly forward. Expresses the
+    satellite ram and crosstrack directions along x (points along 6 MLT)
+    and y (points along 12 MLT) unit vectors. Also expresses the same
+    parameters along polar coordinate directions, r (origin at magnetic pole)
+    and theta (theta=0 points along x). Adds variables `unit_ram_x`,
+    `unit_ram_y`, `unit_cross_x`, `unit_cross_y`, `unit_ram_r`,
+    `unit_ram_theta`, `unit_cross_r`, `unit_cross_theta`.
 
     """
     # Calculate theta and R in radians from MLT and MLat, respectively
@@ -149,13 +155,80 @@ def add_drift_unit_vectors(inst):
                             + inst['unit_cross_y'] * np.sin(theta))
     inst['unit_cross_theta'] = (-inst['unit_cross_x'] * np.sin(theta)
                                 + inst['unit_cross_y'] * np.cos(theta))
+
+    # Add metadata, ram drift, x-y
+    desc = ''.join(['Unit vector for the satellite ram direction, polar x',
+                    ' component. Origin at magnetic pole, points toward ',
+                    '6 MLT.'])
+    meta_dict = {inst.meta.labels.units: '',
+                 inst.meta.labels.name: ''.join(['Unit Vector - ram - x']),
+                 inst.meta.labels.desc: desc, inst.meta.labels.fill_val: np.nan,
+                 inst.meta.labels.min_val: -1., inst.meta.labels.max_val: 1.}
+    inst.meta['unit_ram_x'] = meta_dict
+
+    desc = ''.join(['Unit vector for the satellite ram direction, polar y ',
+                    'component. Origin at magnetic pole, points toward ',
+                    '12 MLT.'])
+    meta_dict[inst.meta.labels.desc] = desc
+    meta_dict[inst.meta.labels.name] = ''.join(['Unit Vector - ram - y']),
+    inst.meta['unit_ram_y'] = meta_dict
+
+    # Cross-track metadata, x-y
+    desc = ''.join(['Unit vector for the satellite cross-track direction, ',
+                    'polar x component. Origin at magnetic pole, ',
+                    'points toward 6 MLT.'])
+    meta_dict = {inst.meta.labels.units: '',
+                 inst.meta.labels.name: ''.join(['Unit Vector - cross - x']),
+                 inst.meta.labels.desc: desc, inst.meta.labels.fill_val: np.nan,
+                 inst.meta.labels.min_val: -1., inst.meta.labels.max_val: 1.}
+    inst.meta['unit_cross_x'] = meta_dict
+
+    desc = ''.join(['Unit vector for the satellite cross-track direction, ',
+                    'polar y component. Origin at magnetic pole, ',
+                    'points toward 12 MLT.'])
+    meta_dict[inst.meta.labels.desc] = desc
+    meta_dict[inst.meta.labels.name] = ''.join(['Unit Vector - cross - ',
+                                                'y']),
+    inst.meta['unit_cross_y'] = meta_dict
+
+    # Ram metadata, polar coords
+    desc = ''.join(['Unit vector for the satellite ram direction, polar radial',
+                    ' component. Origin at magnetic pole.'])
+    meta_dict = {inst.meta.labels.units: '',
+                 inst.meta.labels.name: ''.join(['Unit Vector - ram - r']),
+                 inst.meta.labels.desc: desc, inst.meta.labels.fill_val: np.nan,
+                 inst.meta.labels.min_val: -1., inst.meta.labels.max_val: 1.}
+    inst.meta['unit_ram_r'] = meta_dict
+
+    desc = ''.join(['Unit vector for the satellite ram direction, polar theta ',
+                    'component. Origin at magnetic pole.'])
+    meta_dict[inst.meta.labels.desc] = desc
+    meta_dict[inst.meta.labels.name] = ''.join(['Unit Vector - ram - theta']),
+    inst.meta['unit_ram_theta'] = meta_dict
+
+    # Cross-track metadata, polar coords
+    desc = ''.join(['Unit vector for the satellite cross-track direction, ',
+                    'polar radial component. Origin at magnetic pole.'])
+    meta_dict = {inst.meta.labels.units: '',
+                 inst.meta.labels.name: ''.join(['Unit Vector - cross - r']),
+                 inst.meta.labels.desc: desc, inst.meta.labels.fill_val: np.nan,
+                 inst.meta.labels.min_val: -1., inst.meta.labels.max_val: 1.}
+    inst.meta['unit_cross_r'] = meta_dict
+
+    desc = ''.join(['Unit vector for the satellite cross-track direction, ',
+                    'polar theta component. Origin at magnetic pole.'])
+    meta_dict[inst.meta.labels.desc] = desc
+    meta_dict[inst.meta.labels.name] = ''.join(['Unit Vector - cross - ',
+                                                'theta']),
+    inst.meta['unit_cross_theta'] = meta_dict
+
     return
 
 
 def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
                              rpa_vel_key='ion_v_sat_for',
                              cross_vel_key='ion_v_sat_left'):
-    """ Add polar cap drifts in cartesian coordinates
+    """Add polar cap drifts in cartesian coordinates.
 
     Parameters
     ----------
@@ -173,6 +246,9 @@ def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
     ----
     Polar cap drifts assume there is no vertical component to the X-Y
     velocities.
+
+    x points along same direction as from magnetic pole towards 6 MLT, and
+    y points along same direction as from magnetic pole towards 12 MLT.
 
     Adds 'ion_vel_pc_x', 'ion_vel_pc_y', and 'partial'.  The last data key
     indicates whether RPA data was available (False) or not (True).
@@ -199,8 +275,47 @@ def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
     inst['ion_vel_pc_y'] = (iv_x * inst['unit_ram_y']
                             + inst[cross_vel_key] * inst['unit_cross_y'])
 
+    # Add metadata
+    desc = ''.join(['Ion velocity along the polar cap "{}" direction,',
+                    'which points from the magnetic pole towards {:02d} MLT.'])
+    notes = ''.join(['Generated by combining plasma drift measurements ',
+                     'from the RPA and DM along the "x" or "y" polar cap ',
+                     'directions, as appropriate.'])
+    units = inst.meta[cross_vel_key, inst.meta.labels.units]
+    inst.meta['ion_vel_pc_x'] = {inst.meta.labels.units: units,
+                                 inst.meta.labels.name: ''.join(['Ion Velocity',
+                                                                 '- Polar ',
+                                                                 'Cap - x']),
+                                 inst.meta.labels.desc: desc.format('x', 6),
+                                 inst.meta.labels.fill_val: np.nan,
+                                 inst.meta.labels.min_val: -np.inf,
+                                 inst.meta.labels.max_val: np.inf,
+                                 inst.meta.labels.notes: notes}
+
+    inst.meta['ion_vel_pc_y'] = {inst.meta.labels.units: units,
+                                 inst.meta.labels.name: ''.join(['Ion Velocity',
+                                                                 '- Polar ',
+                                                                 'Cap - y']),
+                                 inst.meta.labels.desc: desc.format('y',
+                                                                    12),
+                                 inst.meta.labels.fill_val: np.nan,
+                                 inst.meta.labels.min_val: -np.inf,
+                                 inst.meta.labels.max_val: np.inf,
+                                 inst.meta.labels.notes: notes}
+
     # Flag the velocities as full (False) or partial (True)
     inst['partial'] = False
     inst[rpa_idx, 'partial'] = True
+
+    desc = ''.join(['True if reported measurement is incomplete as it only ',
+                    'has contributions from either the RPA or DM, not both.'])
+    inst.meta['partial'] = {inst.meta.labels.units: '',
+                            inst.meta.labels.name: ''.join(['Partial ',
+                                                            'Vector ',
+                                                            'Flag']),
+                            inst.meta.labels.desc: desc,
+                            inst.meta.labels.fill_val: np.nan,
+                            inst.meta.labels.min_val: False,
+                            inst.meta.labels.max_val: True}
 
     return

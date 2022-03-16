@@ -94,12 +94,12 @@ def init(self):
 
 
 def clean(self):
-    """Routine to return GNSS TEC data at a specific level
+    """Clean GNSS TEC data to a specific level.
 
     Note
     ----
-    Supports 'clean', 'dusty', 'dirty', or 'None'.
-    Routine is called by pysat, and not by the end user directly.
+    Supports 'clean', 'dusty', and 'dirty'.  Not called by pysat if
+    `clean_level` is None.
 
     """
     if self.tag == "vtec":

@@ -5,10 +5,14 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.1.0] - 2021-XX-XX
 - Enhancements
    - Improved definitions of general and GNSS meta data
+   - Removed unused logic in cleaning routines
+   - Moved warning for no cleaning of JRO ISR data to preprocess
 - Documentation
    - Added examples for JRO and GNSS data
 - Testing
-   - Added unit tests for JRO and GNSS methods
+   - Added unit tests for general, JRO, and GNSS methods
+- Bug
+   - Fixed bugs in the coordinate conversion functions
 
 ## [0.0.4] - 2021-06-11
 - Made changes to structure to comply with updates in pysat 3.0.0
