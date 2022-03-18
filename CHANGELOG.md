@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.0.4] - 2021-06-11
 - Made changes to structure to comply with updates in pysat 3.0.0
+- Migrated CI tests from Travis CI to GitHub Actions
 - Deprecations
   - Restructed Instrument methods, moving `madrigal` to `general` and extracting
     local methods from the instrument modules to platform-specific method files
