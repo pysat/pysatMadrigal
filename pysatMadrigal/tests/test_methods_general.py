@@ -170,6 +170,30 @@ class TestLocal(object):
         assert caplog.records[0].message.find(msg) >= 0
         return
 
+    @pytest.mark.parametrize("inst_code", [8001, 1, 8000, 8400])
+    def test_madrigal_file_format_str_quiet_warnings(self, inst_code, caplog):
+        """Test quiet, poorly constrained file formats for Madrigal inst codes.
+
+        Parameters
+        ----------
+        inst_code : int
+            Madrigal instrument code for a poorly constrained file format
+
+        """
+
+        # Get the output and raise the logging warning
+        with caplog.at_level(logging.WARN, logger='pysat'):
+            self.out = general.madrigal_file_format_str(inst_code,
+                                                        verbose=False)
+
+        # Test the formatted string
+        assert self.out.find("file_type") > 0, \
+            "'file_type' missing from {:s}".format(self.out)
+
+        # Test the logger warning
+        assert len(caplog.records) == 0, "unexpected number of warnings"
+        return
+
     @pytest.mark.parametrize("inst_code, msg", [
         (8001, "file format string missing date info"),
         (1, "file format string not available for instrument code"),

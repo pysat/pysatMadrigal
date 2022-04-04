@@ -68,7 +68,7 @@ madrigal_tag = {'': {'drifts': "1910", 'drifts_ave': "1911",
                      'oblique_long': "1802"}, }
 
 # Local attributes
-jro_fname = general.madrigal_file_format_str(madrigal_inst_code)
+jro_fname = general.madrigal_file_format_str(madrigal_inst_code, verbose=False)
 supported_tags = {ss: {'drifts': jro_fname.replace("*", "drifts"),
                        'drifts_ave': jro_fname.replace("*", "drifts_avg"),
                        'oblique_stan': jro_fname.replace("*", ""),

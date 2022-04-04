@@ -224,22 +224,30 @@ def known_madrigal_inst_codes(pandas_format=None):
     return inst_codes
 
 
-def madrigal_file_format_str(inst_code, strict=False):
+def madrigal_file_format_str(inst_code, strict=False, verbose=True):
     """Supplies known Madrigal instrument codes with a brief description.
 
     Parameters
     ----------
     inst_code : int
-       Madrigal instrument code as an integer
+        Madrigal instrument code as an integer
     strict : bool
-       If True, returns only file formats that will definitely not have a
-       problem being parsed by pysat.  If False, will return any file format.
-       (default=False)
+        If True, returns only file formats that will definitely not have a
+        problem being parsed by pysat.  If False, will return any file format.
+        (default=False)
+    verbose : bool
+        If True raises logging warnings, if False does not log any warnings.
+        (default=True)
 
     Returns
     -------
     fstr : str
         File formatting string that may or may not be parsable by pysat
+
+    Raises
+    ------
+    ValueError
+        If file formats with problems would be returned and `strict` is True.
 
     Note
     ----
@@ -476,7 +484,7 @@ def madrigal_file_format_str(inst_code, strict=False):
     if len(msg) > 0:
         if strict:
             raise ValueError(msg)
-        else:
+        elif verbose:
             logger.warning(msg)
 
     fstr += "{file_type}"

@@ -59,7 +59,8 @@ madrigal_inst_code = 8000
 madrigal_tag = {'': {'vtec': '3500'}}  # TODO(#12): `, 'los': '3505'}}`
 
 # Local attributes
-fname = general.madrigal_file_format_str(madrigal_inst_code).split("*")
+fname = general.madrigal_file_format_str(madrigal_inst_code,
+                                         verbose=False).split("*")
 supported_tags = {ss: {'vtec': ''.join(['gps', fname[1], 'g', fname[2]])}
                   for ss in inst_ids.keys()}
 remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
