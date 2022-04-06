@@ -100,8 +100,7 @@ supported_tags = {ss: {tag: general.madrigal_file_format_str(tag)
 # Need to sort out test day setting for unit testing, maybe through a remote
 # function
 _test_dates = {'': {tag: dt.datetime(2015, 1, 1) for tag in tags.keys()}}
-_test_download = {'': {tag: True if tag == '180' else False
-                       for tag in tags.keys()}}
+_test_download = {'': {tag: True for tag in tags.keys()}}
 
 # ----------------------------------------------------------------------------
 # Instrument methods
