@@ -99,7 +99,7 @@ supported_tags = {ss: {tag: general.madrigal_file_format_str(tag)
 
 # Need to sort out test day setting for unit testing, maybe through a remote
 # function
-_test_dates = {'': {tag: dt.datetime(2015, 1, 1) for tag in tags.keys()}}
+_test_dates = {'': {tag: dt.datetime(2009, 11, 10) for tag in tags.keys()}}
 _test_download = {'': {tag: True for tag in tags.keys()}}
 
 # ----------------------------------------------------------------------------
@@ -346,9 +346,24 @@ def list_remote_files(tag, inst_id, kindat='', user=None, password=None,
                for ss in inst_ids.keys()}
 
     # Set the list_remote_files routine
-    remote_files = general.list_remote_files(
-        tag, inst_id, inst_code=int(tag), kindats=kindats, user=user,
-        password=password, supported_tags=remote_tags, url=url,
-        two_digit_year_break=two_digit_year_break, start=start, stop=stop)
+    try:
+        remote_files = general.list_remote_files(
+            tag, inst_id, inst_code=int(tag), kindats=kindats, user=user,
+            password=password, supported_tags=remote_tags, url=url,
+            two_digit_year_break=two_digit_year_break, start=start, stop=stop)
+    except ValueError as verr:
+        if remote_tags[inst_id][tag].find('.hdf5') > 0:
+            # Some data sets use the alternative file ending for HDF5 files
+            remote_tags[inst_id][tag] = remote_tags[inst_id][tag].replace(
+                '.hdf5', '.h5')
+
+            # Re-try the file listing
+            remote_files = general.list_remote_files(
+                tag, inst_id, inst_code=int(tag), kindats=kindats, user=user,
+                password=password, supported_tags=remote_tags, url=url,
+                two_digit_year_break=two_digit_year_break, start=start,
+                stop=stop)
+        else:
+            raise ValueError(verr)
 
     return remote_files
