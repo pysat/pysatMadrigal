@@ -981,7 +981,7 @@ def get_remote_filenames(inst_code=None, kindat='', user=None, password=None,
 
     _check_madrigal_params(inst_code=inst_code, user=user, password=password)
 
-    if kindat == '':
+    if kindat in ['', '*']:
         kindat = []
     else:
         kindat = [int(kk) for kk in kindat.split(",")]
