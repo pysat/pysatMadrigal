@@ -1173,8 +1173,12 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
 
     # Parse these filenames to grab out the ones we want
     logger.info("Parsing filenames")
-    stored = pysat.utils.files.parse_fixed_width_filenames(filenames,
-                                                           format_str)
+    if format_str.find('*') > 0:
+        stored = pysat.utils.files.parse_fixed_width_filenames(filenames,
+                                                               format_str)
+    else:
+        stored = pysat.utils.files.parse_delimited_filenames(filenames,
+                                                             format_str, '.')
 
     # Process the parsed filenames and return a properly formatted Series
     logger.info("Processing filenames")
