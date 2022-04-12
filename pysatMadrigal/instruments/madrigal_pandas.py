@@ -99,7 +99,12 @@ supported_tags = {ss: {tag: general.madrigal_file_format_str(tag)
 
 # Need to sort out test day setting for unit testing, maybe through a remote
 # function
-_test_dates = {'': {tag: dt.datetime(2009, 11, 10) for tag in tags.keys()}}
+tag_dates = {'120': dt.datetime(1963, 11, 27), '170': dt.datetime(1998, 7, 1),
+             '180': dt.datetime(2000, 1, 1), '210': dt.datetime(1950, 1, 1),
+             '211': dt.datetime(1978, 1, 1), '212': dt.datetime(1957, 1, 1),
+             '7800': dt.datetime(2009, 11, 10), '8105': dt.datetime(2017, 9, 1)}
+_test_dates = {'': {tag: tag_dates[tag] if tag in tag_dates.keys()
+                    else tag_dates['7800'] for tag in tags.keys()}}
 _test_download = {'': {tag: True for tag in tags.keys()}}
 
 # ----------------------------------------------------------------------------
