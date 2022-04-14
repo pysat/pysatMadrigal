@@ -10,6 +10,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
    - Added a general Madrigal instrument for time-series data
    - Added functions to specify all known Madrigal instrument codes and
      file formats
+   - Adapted general listing functions to allow file formats with '*' wildcards
+     between '.' delimiters, required for some Madrigal file formats
 - Documentation
    - Added examples for JRO and GNSS data
 - Testing

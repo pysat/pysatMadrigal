@@ -3,5 +3,5 @@ madrigalWeb
 numpy
 packaging
 pandas
-pysat>=3.0
+pysat>=3.0.2
 xarray
