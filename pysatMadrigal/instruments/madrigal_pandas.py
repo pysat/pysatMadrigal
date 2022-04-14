@@ -222,6 +222,10 @@ def list_files(tag, inst_id, data_path, kindat='', format_str=None,
     else:
         two_digit_year_break = 50
 
+    # Determine if a delimiter is needed
+    if delimiter is None and local_tags[inst_id][tag].find('*') >= 0:
+        delimiter = '.'
+
     out = general.list_files(tag, inst_id, data_path, format_str=format_str,
                              supported_tags=local_tags,
                              file_cadence=file_cadence,
