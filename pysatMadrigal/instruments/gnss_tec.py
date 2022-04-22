@@ -77,7 +77,7 @@ _test_dates = {'': {'vtec': dt.datetime(2017, 11, 19)}}
 
 
 def init(self):
-    """Initializes the Instrument object with values specific to GNSS TEC."""
+    """Initialize the Instrument object with values specific to GNSS TEC."""
 
     self.acknowledgements = '\n'.join([gnss.acknowledgements(self.name),
                                        general.cedar_rules()])
@@ -169,7 +169,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
 
 
 def load(fnames, tag='', inst_id=''):
-    """Routine to load the GNSS TEC data.
+    """Load the GNSS TEC data.
 
     Parameters
     ----------
