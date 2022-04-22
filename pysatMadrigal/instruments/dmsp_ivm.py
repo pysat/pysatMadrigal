@@ -4,8 +4,8 @@
 # DOI:10.5281/zenodo.3824979
 # ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-
-"""Supports the Ion Velocity Meter (IVM)
-onboard the Defense Meteorological Satellite Program (DMSP).
+"""Supports the Ion Velocity Meter (IVM) onboard the Defense Meteorological
+Satellite Program (DMSP).
 
 The IVM is comprised of the Retarding Potential Analyzer (RPA) and
 Drift Meter (DM). The RPA measures the energy of plasma along the
@@ -111,16 +111,7 @@ _test_dates = {
 
 
 def init(self):
-    """Initializes the Instrument object with values specific to DMSP IVM
-
-    Runs once upon instantiation.
-
-    Parameters
-    ----------
-    self : pysat.Instrument
-        This object
-
-    """
+    """Initializes the Instrument object with values specific to DMSP IVM."""
 
     logger.info(general.cedar_rules())
     self.acknowledgements = general.cedar_rules()
@@ -162,7 +153,6 @@ def clean(self):
     self.data = self[iclean]
 
     return
-
 
 # ----------------------------------------------------------------------------
 # Instrument functions
