@@ -216,7 +216,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
 
 
 def load(fnames, tag='', inst_id=''):
-    """ Routine to load the JRO ISR data
+    """Load the JRO ISR data.
 
     Parameters
     -----------
