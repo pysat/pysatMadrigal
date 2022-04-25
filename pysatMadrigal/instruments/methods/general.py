@@ -441,6 +441,7 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
         # Build the local filename
         local_file = os.path.join(data_path,
                                   os.path.basename(mad_file.name))
+
         if local_file.find(file_type) <= 0:
             split_file = local_file.split(".")
             split_file[-1] = file_type
