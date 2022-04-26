@@ -4,10 +4,7 @@
 # DOI:10.5281/zenodo.3824979
 # ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-
-"""Methods supporting the Defense Meteorological Satellite Program (DMSP)
-platform
-
-"""
+"""Methods supporting the Defense Meteorological Satellite Program (DMSP)."""
 
 import numpy as np
 import pandas as pds
@@ -16,7 +13,7 @@ from pysat import logger
 
 
 def references(name):
-    """Provides references for the DMSP instruments and experiments
+    """Provide references for the DMSP instruments and experiments.
 
     Parameters
     ----------

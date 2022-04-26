@@ -12,8 +12,11 @@ This project adheres to [Semantic Versioning](https://semver.org/).
      file formats
    - Adapted general listing functions to allow file formats with '*' wildcards
      between '.' delimiters, required for some Madrigal file formats
+   - Standardized the Instrument method kwarg defaults
+   - Added 'site' tag to the GNSS TEC Instrument
 - Documentation
    - Added examples for JRO and GNSS data
+   - Improved the docstring style
 - Testing
    - Added unit tests for general, JRO, and GNSS methods
    - Added the packaging module to handle version logic

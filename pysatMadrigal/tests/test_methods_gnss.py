@@ -25,7 +25,7 @@ class TestGNSSRefs(object):
 
     @pytest.mark.parametrize("func, comp_str, in_args", [
         ('acknowledgements', 'GPS TEC data products', ['tec']),
-        ('references', 'Rideout and Coster', ['tec', 'vtec'])])
+        ('references', 'Rideout and Coster', ['tec'])])
     def test_ref_output(self, func, comp_str, in_args):
         """Test the GNSS acknowledgements and references."""
         self.out = getattr(gnss, func)(*in_args)

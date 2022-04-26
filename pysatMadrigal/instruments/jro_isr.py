@@ -92,8 +92,7 @@ _test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
 # Instrument methods
 
 def init(self):
-    """Initializes the Instrument object with values specific to JRO ISR
-    """
+    """Initialize the Instrument object with values specific to JRO ISR."""
 
     ackn_str = '\n'.join([jro.acknowledgements(), general.cedar_rules()])
 
@@ -223,19 +222,19 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     return
 
 
-def load(fnames, tag=None, inst_id=None):
-    """ Routine to load the JRO ISR data
+def load(fnames, tag='', inst_id=''):
+    """Load the JRO ISR data.
 
     Parameters
     -----------
     fnames : list
         List of filenames
-    tag : str or NoneType
+    tag : str
         tag name used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself. (default=None)
-    inst_id : str or NoneType
+        This input is nominally provided by pysat itself. (default='')
+    inst_id : str
         Instrument ID used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself. (default=None)
+        This input is nominally provided by pysat itself. (default='')
 
     Returns
     --------
