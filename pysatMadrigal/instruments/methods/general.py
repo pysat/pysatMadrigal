@@ -702,6 +702,13 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
 
     filenames = [os.path.basename(file_exp.name) for file_exp in files]
 
+    # Madrigal uses 'h5' for some experiments and 'hdf5' for others
+    format_ext = os.path.splitext(format_str)[-1]
+    if len(filenames) > 0 and format_ext == '.hdf5':
+        file_ext = os.path.splitext(filenames[-1])[-1]
+        if file_ext == '.h5':
+            format_str = format_str.replace('.hdf5', '.h5')
+
     # Parse these filenames to grab out the ones we want
     logger.info("Parsing filenames")
     stored = pysat.utils.files.parse_fixed_width_filenames(filenames,
