@@ -7,9 +7,11 @@ This project adheres to [Semantic Versioning](https://semver.org/).
    - Improved definitions of general and GNSS meta data
    - Removed unused logic in cleaning routines
    - Moved warning for no cleaning of JRO ISR data to preprocess
+   - Standardized the Instrument method kwarg defaults
    - Added 'site' tag to the GNSS TEC Instrument
 - Documentation
    - Added examples for JRO and GNSS data
+   - Improved the docstring style
 - Testing
    - Added unit tests for general, JRO, and GNSS methods
 - Bug

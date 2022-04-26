@@ -4,12 +4,11 @@
 # DOI:10.5281/zenodo.3824979
 # ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-
-"""Methods supporting the Global Navigation Satellite System platform
-"""
+"""Methods supporting the Global Navigation Satellite System platform."""
 
 
 def acknowledgements(name):
-    """Provide the acknowledgements for different GNSS instruments
+    """Provide the acknowledgements for different GNSS instruments.
 
     Parameters
     ----------

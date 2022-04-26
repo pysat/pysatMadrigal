@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-.
-"""Supports the MIT Haystack GNSS TEC data products
+"""Supports the MIT Haystack GNSS TEC data products.
 
 The Global Navigation Satellite System (GNSS) is used in conjunction with a
 world-wide receiver network to produce total electron content (TEC) data
@@ -83,12 +83,10 @@ _test_dates = {'': {'vtec': dt.datetime(2017, 11, 19),
 def init(self):
     """Initialize the Instrument object with values specific to GNSS TEC."""
 
-    ackn_str = '\n'.join([gnss.acknowledgements(self.name),
-                          general.cedar_rules()])
-
-    logger.info(ackn_str)
-    self.acknowledgements = ackn_str
+    self.acknowledgements = '\n'.join([gnss.acknowledgements(self.name),
+                                       general.cedar_rules()])
     self.references = gnss.references(self.name)
+    logger.info(self.acknowledgements)
 
     return
 
@@ -228,19 +226,19 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     return
 
 
-def load(fnames, tag=None, inst_id=None):
-    """ Routine to load the GNSS TEC data
+def load(fnames, tag='', inst_id=''):
+    """Load the GNSS TEC data.
 
     Parameters
     ----------
     fnames : list
         List of filenames
-    tag : str or NoneType
+    tag : str
         tag name used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself. (default=None)
-    inst_id : str or NoneType
+        This input is nominally provided by pysat itself. (default='')
+    inst_id : str
         Instrument ID used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself. (default=None)
+        This input is nominally provided by pysat itself. (default='')
 
     Returns
     -------

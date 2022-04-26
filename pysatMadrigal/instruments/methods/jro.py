@@ -4,8 +4,7 @@
 # DOI:10.5281/zenodo.3824979
 # ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-
-"""Methods supporting the Jicamarca Radio Observatory (JRO) platform
-"""
+"""Methods supporting the Jicamarca Radio Observatory (JRO) platform."""
 
 import numpy as np
 
@@ -15,7 +14,7 @@ from pysatMadrigal.utils import coords
 
 
 def acknowledgements():
-    """Provides acknowlegements for the JRO instruments and experiments
+    """Provide acknowlegements for the JRO instruments and experiments.
 
     Returns
     -------
@@ -31,7 +30,7 @@ def acknowledgements():
 
 
 def references():
-    """Provides references for the JRO instruments and experiments
+    """Provide references for the JRO instruments and experiments.
 
     Returns
     -------
@@ -45,7 +44,7 @@ def references():
 
 
 def calc_measurement_loc(inst):
-    """ Calculate the instrument measurement location in geographic coordinates
+    """Calculate the instrument measurement location in geographic coordinates.
 
     Parameters
     ----------
