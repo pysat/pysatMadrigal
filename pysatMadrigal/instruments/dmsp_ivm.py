@@ -111,7 +111,7 @@ _test_dates = {
 
 
 def init(self):
-    """Initializes the Instrument object with values specific to DMSP IVM."""
+    """Initialize the Instrument object with values specific to DMSP IVM."""
 
     logger.info(general.cedar_rules())
     self.acknowledgements = general.cedar_rules()

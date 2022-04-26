@@ -51,7 +51,7 @@ def acknowledgements(name):
 
 
 def references(name, tag):
-    """Provides suggested references for the specified data set.
+    """Provide suggested references for the specified data set.
 
     Parameters
     ----------

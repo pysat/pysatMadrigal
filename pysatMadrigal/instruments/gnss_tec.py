@@ -175,7 +175,7 @@ def load(fnames, tag='', inst_id=''):
     ----------
     fnames : list
         List of filenames
-    tag : st
+    tag : str
         tag name used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default='')
     inst_id : str
