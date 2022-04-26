@@ -49,25 +49,21 @@ def acknowledgements(name):
 
     return ackn[name]
 
-
-def references(name, tag):
+def references(name):
     """Provide suggested references for the specified data set.
 
     Parameters
     ----------
     name : str
         Instrument name
-    tag : str
-        Instrument tag
 
     Returns
     -------
     refs : str
         Suggested Instrument reference(s)
 
-s    """
+    """
 
-    refs = {'tec':
-            {'vtec': "Rideout and Coster (2006) doi:10.1007/s10291-006-0029-5"}}
+    refs = {'tec': "Rideout and Coster (2006) doi:10.1007/s10291-006-0029-5"}
 
-    return refs[name][tag]
+    return refs[name]
