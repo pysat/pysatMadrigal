@@ -639,10 +639,12 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
         where the values file format template strings. (default=None)
     url : str
         URL for Madrigal site (default='http://cedar.openmadrigal.org')
-    two_digit_year_break : int
+    two_digit_year_break : int or dict or NoneType
         If filenames only store two digits for the year, then
         '1900' will be added for years >= two_digit_year_break
         and '2000' will be added for years < two_digit_year_break.
+        If user inputs a dict, must be keyed by `inst_id`, containing a dict
+        keyed by `tag`, containing values for `two_digit_year_break`.
     start : dt.datetime
         Starting time for file list (defaults to 01-01-1900)
     stop : dt.datetime
@@ -694,6 +696,20 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
     # Raise KeyError if input dictionaries don't match the input
     format_str = supported_tags[inst_id][tag]
     kindat = kindats[inst_id][tag]
+
+    # Pull out two_digit_year_break if user supplies a dict
+    if isinstance(two_digit_year_break, dict):
+        if inst_id not in two_digit_year_break.keys():
+            estr = ''.join(['`two_digit_year_break` does not include key ',
+                            'value ', inst_id])
+            raise ValueError(estr)
+            if tag not in two_digit_year_break[inst_id].keys():
+                estr = ''.join(['`two_digit_year_break[inst_id]` does not ',
+                                'include key value ', tag])
+                raise ValueError(estr)
+
+        # Extract value from input dict
+        two_digit_year_break = two_digit_year_break[inst_id][tag]
 
     # Retrieve remote file experiment list
     files = get_remote_filenames(inst_code=inst_code, kindat=kindat, user=user,
