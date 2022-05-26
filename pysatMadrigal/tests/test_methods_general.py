@@ -176,7 +176,7 @@ class TestErrors(object):
 
         tdyb = {'': {'not_tag': 99},
                 'not_id': {'tag': 99}}
-        self.kwargs['two_digit_year_break'] = tdby
+        self.kwargs['two_digit_year_break'] = tdbyb
 
         # Get the expected error message for bad `tag` and evaluate it
         with pytest.raises(KeyError) as kerr:
