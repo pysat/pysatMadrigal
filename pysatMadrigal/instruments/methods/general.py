@@ -702,11 +702,12 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
         if inst_id not in two_digit_year_break.keys():
             estr = ''.join(['`two_digit_year_break` does not include key ',
                             'value ', inst_id])
-            raise ValueError(estr)
-            if tag not in two_digit_year_break[inst_id].keys():
-                estr = ''.join(['`two_digit_year_break[inst_id]` does not ',
-                                'include key value ', tag])
-                raise ValueError(estr)
+            raise KeyError(estr)
+
+        if tag not in two_digit_year_break[inst_id].keys():
+            estr = ''.join(['`two_digit_year_break[inst_id]` does not ',
+                            'include key value ', tag])
+            raise KeyError(estr)
 
         # Extract value from input dict
         two_digit_year_break = two_digit_year_break[inst_id][tag]
