@@ -171,7 +171,7 @@ class TestErrors(object):
         assert str(verr).find("Must supply supported_tags and kindats") >= 0
         return
 
-    def test_list_remote_files_bad_tag_inst_id(self):
+    def test_list_remote_files_bad_tag_inst_id_year_dict(self):
         """Test error is thrown if `two_digit_year_break` missing values."""
 
         tdyb = {'': {'not_tag': 99},
@@ -193,7 +193,7 @@ class TestErrors(object):
 
         return
 
-    def test_list_remote_files_bad_tag_inst_id_year_dict(self):
+    def test_list_remote_files_bad_tag_inst_id(self):
         """Test that an error is thrown if None is passed through."""
 
         # Get the expected error message and evaluate it
