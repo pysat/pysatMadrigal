@@ -202,6 +202,7 @@ class TestErrors(object):
 
         assert str(kerr).find('not_tag') >= 0
         return
+
     @pytest.mark.parametrize("in_key, in_val, test_verr", [
         ("kindat", None, "Must supply Madrigal experiment code"),
         ("file_type", "not a file", "Unknown file format")])
