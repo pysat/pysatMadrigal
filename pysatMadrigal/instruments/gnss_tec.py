@@ -119,7 +119,9 @@ def clean(self):
 list_remote_files = functools.partial(general.list_remote_files,
                                       supported_tags=remote_tags,
                                       inst_code=madrigal_inst_code,
-                                      kindats=madrigal_tag)
+                                      kindats=madrigal_tag,
+                                      two_digit_year_break={'': {'vtec': 99,
+                                                                 'site': None}})
 
 
 def list_files(tag, inst_id, data_path=None, format_str=None,
