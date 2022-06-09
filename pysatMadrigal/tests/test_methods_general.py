@@ -171,30 +171,6 @@ class TestErrors(object):
         assert str(verr).find("Must supply supported_tags and kindats") >= 0
         return
 
-    def test_list_remote_files_bad_tag_inst_id_year_dict(self):
-        """Test error is thrown if `two_digit_year_break` missing values."""
-
-        tdyb = {'tag1': {'testing': 99}}
-        self.kwargs['two_digit_year_break'] = tdyb
-
-        # Get the expected error message for bad `tag` and evaluate it
-        with pytest.raises(KeyError) as kerr:
-            general.list_remote_files('tag', 'testing', **self.kwargs)
-
-        assert str(kerr).find('break` does not include key') >= 0
-
-        tdyb = {'testing': {'tag1': 99}}
-        self.kwargs['two_digit_year_break'] = tdyb
-
-        # Get the expected error message for bad `inst_id` and evaluate it
-        with pytest.raises(KeyError) as kerr:
-            general.list_remote_files('tag', 'testing',
-                                      **self.kwargs)
-
-        assert str(kerr).find('[inst_id]` does not include key') >= 0
-
-        return
-
     def test_list_remote_files_bad_tag_inst_id(self):
         """Test that an error is thrown if None is passed through."""
 
