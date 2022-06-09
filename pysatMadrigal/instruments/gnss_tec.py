@@ -37,7 +37,6 @@ Please provide name and email when downloading data with this routine.
 """
 
 import datetime as dt
-import functools
 import numpy as np
 
 from pysat import logger
