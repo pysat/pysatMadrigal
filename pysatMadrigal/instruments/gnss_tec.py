@@ -324,14 +324,14 @@ def list_remote_files(tag, inst_id, start=dt.datetime(1900, 1, 1),
 
     if tag == 'site':
         files = general.list_remote_files(
-            supported_tags=remote_tags, inst_code=madrigal_inst_code,
-            kindats=madrigal_tag, start=start, stop=stop, user=user,
-            password=password)
+            tag, inst_id, supported_tags=remote_tags,
+            inst_code=madrigal_inst_code, kindats=madrigal_tag, start=start,
+            stop=stop, user=user, password=password)
 
     elif tag == 'vtec':
         files = general.list_remote_files(
-            supported_tags=remote_tags, inst_code=madrigal_inst_code,
-            kindats=madrigal_tag, start=start, stop=stop, user=user,
-            password=password, two_digit_year_break=99)
+            tag, inst_id, supported_tags=remote_tags,
+            inst_code=madrigal_inst_code, kindats=madrigal_tag, start=start,
+            stop=stop, user=user, password=password, two_digit_year_break=99)
 
     return files
