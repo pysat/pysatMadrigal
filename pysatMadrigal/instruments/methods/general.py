@@ -697,8 +697,8 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
     format_str = supported_tags[inst_id][tag]
     kindat = kindats[inst_id][tag]
 
-    # Note that default of pysat.Instrument.remote_file_list for start and stop
-    # is None. Setting defaults needed for Madrigal.
+    # Note that default of `pysat.Instrument.remote_file_list` for start and
+    # stop is None. Setting defaults needed for Madrigal.
     if start is None:
         start = dt.datetime(1900, 1, 1)
     if stop is None:
