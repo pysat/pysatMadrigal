@@ -285,7 +285,7 @@ def load(fnames, tag='', inst_id=''):
     return data, meta
 
 
-def list_remote_files(tag, inst_id, start=dt.datetime(1900, 1, 1),
+def list_remote_files(tag, inst_id, start=dt.datetime(1998, 10, 15),
                       stop=dt.datetime.utcnow(), user=None, password=None):
     """Return a Pandas Series of every file for chosen remote data.
 

@@ -642,13 +642,11 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
     two_digit_year_break : int or NoneType
         If filenames only store two digits for the year, then
         '1900' will be added for years >= two_digit_year_break
-        and '2000' will be added for years < two_digit_year_break.
-    start : dt.datetime or NoneType
-        Starting time for file list. If None, replaces with default.
-        (default=01-01-1900)
-    stop : dt.datetime or NoneType
-        Ending time for the file list. If None, replaces with default.
-        (default=time of run)
+        and '2000' will be added for years < two_digit_year_break. (default=None)
+    start : dt.datetime
+        Starting time for file list.  (default=01-01-1900)
+    stop : dt.datetime
+        Ending time for the file list. (default=time of run)
 
     Returns
     -------
