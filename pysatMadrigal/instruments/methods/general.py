@@ -640,9 +640,9 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
     url : str
         URL for Madrigal site (default='http://cedar.openmadrigal.org')
     two_digit_year_break : int or NoneType
-        If filenames only store two digits for the year, then
-        '1900' will be added for years >= two_digit_year_break
-        and '2000' will be added for years < two_digit_year_break. (default=None)
+        If filenames only store two digits for the year, then '1900' will be
+        added for years >= two_digit_year_break and '2000' will be added for
+        years < two_digit_year_break. (default=None)
     start : dt.datetime
         Starting time for file list.  (default=01-01-1900)
     stop : dt.datetime
