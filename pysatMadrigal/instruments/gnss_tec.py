@@ -299,7 +299,7 @@ def list_remote_files(tag, inst_id, start=dt.datetime(1998, 10, 15),
         provided by pysat itself.
     start : dt.datetime or NoneType
         Starting time for file list. If None, replaced with default.
-        (default=01-01-1900)
+        (default=10-15-1998)
     stop : dt.datetime or NoneType
         Ending time for the file list. If None, replaced with default.
         (default=time of run)
