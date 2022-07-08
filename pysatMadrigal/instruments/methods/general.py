@@ -630,7 +630,7 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
         Path to directory to download data to. (default=None)
     user : str or NoneType
         User string input used for download. Provided by user and passed via
-        pysat. If an account is required for dowloads this routine here must
+        pysat. If an account is required for downloads this routine here must
         error if user not supplied. (default=None)
     password : str or NoneType
         Password for data download. (default=None)
@@ -639,14 +639,14 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
         where the values file format template strings. (default=None)
     url : str
         URL for Madrigal site (default='http://cedar.openmadrigal.org')
-    two_digit_year_break : int
-        If filenames only store two digits for the year, then
-        '1900' will be added for years >= two_digit_year_break
-        and '2000' will be added for years < two_digit_year_break.
+    two_digit_year_break : int or NoneType
+        If filenames only store two digits for the year, then '1900' will be
+        added for years >= two_digit_year_break and '2000' will be added for
+        years < two_digit_year_break. (default=None)
     start : dt.datetime
-        Starting time for file list (defaults to 01-01-1900)
+        Starting time for file list.  (default=01-01-1900)
     stop : dt.datetime
-        Ending time for the file list (defaults to time of run)
+        Ending time for the file list. (default=time of run)
 
     Returns
     -------
@@ -694,6 +694,13 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
     # Raise KeyError if input dictionaries don't match the input
     format_str = supported_tags[inst_id][tag]
     kindat = kindats[inst_id][tag]
+
+    # TODO(#1022, pysat) Note default of `pysat.Instrument.remote_file_list`
+    #  for start and stop is None. Setting defaults needed for Madrigal.
+    if start is None:
+        start = dt.datetime(1900, 1, 1)
+    if stop is None:
+        stop = dt.datetime.utcnow()
 
     # Retrieve remote file experiment list
     files = get_remote_filenames(inst_code=inst_code, kindat=kindat, user=user,
