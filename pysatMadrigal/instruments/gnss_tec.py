@@ -37,7 +37,6 @@ Please provide name and email when downloading data with this routine.
 """
 
 import datetime as dt
-import functools
 import numpy as np
 
 from pysat import logger
@@ -113,12 +112,6 @@ def clean(self):
 # Instrument functions
 #
 # Use the default Madrigal methods
-
-# Support listing files currently available on remote server (Madrigal)
-list_remote_files = functools.partial(general.list_remote_files,
-                                      supported_tags=remote_tags,
-                                      inst_code=madrigal_inst_code,
-                                      kindats=madrigal_tag)
 
 
 def list_files(tag, inst_id, data_path=None, format_str=None,
@@ -289,3 +282,53 @@ def load(fnames, tag='', inst_id=''):
                      meta.labels.max_val: min_lon + 360.0}
 
     return data, meta
+
+
+def list_remote_files(tag, inst_id, start=dt.datetime(1998, 10, 15),
+                      stop=dt.datetime.utcnow(), user=None, password=None):
+    """Return a Pandas Series of every file for chosen remote data.
+
+    Parameters
+    ----------
+    tag : str
+        Denotes type of file to load.  This input is nominally provided
+        by pysat itself.
+    inst_id : str
+        Specifies the satellite or instrument ID. This input is nominally
+        provided by pysat itself.
+    start : dt.datetime or NoneType
+        Starting time for file list. If None, replaced with default.
+        (default=10-15-1998)
+    stop : dt.datetime or NoneType
+        Ending time for the file list. If None, replaced with default.
+        (default=time of run)
+    user : str or NoneType
+        Username to be passed along to resource with relevant data.
+        (default=None)
+    password : str or NoneType
+        User password to be passed along to resource with relevant data.
+        (default=None)
+
+    Returns
+    -------
+    files : pds.Series
+        A series of filenames, see `pysat.utils.files.process_parsed_filenames`
+        for more information.
+
+    See Also
+    --------
+    pysatMadrigal.instruments.methods.general.list_remote_files
+
+    """
+
+    if tag == 'site':
+        two_break = None
+    elif tag == 'vtec':
+        two_break = 99
+
+    files = general.list_remote_files(
+        tag, inst_id, supported_tags=remote_tags,
+        inst_code=madrigal_inst_code, kindats=madrigal_tag, start=start,
+        stop=stop, user=user, password=password, two_digit_year_break=two_break)
+
+    return files

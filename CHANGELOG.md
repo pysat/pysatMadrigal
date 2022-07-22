@@ -14,6 +14,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
      between '.' delimiters, required for some Madrigal file formats
    - Standardized the Instrument method kwarg defaults
    - Added 'site' tag to the GNSS TEC Instrument
+   - Added support for varied use of `two_digit_year_break` to 
+     `methods.general.list_remote_files`
+   - Implemented `two_digit_year_break` support for `vtec` GNSS TEC Instrument
 - Documentation
    - Added examples for JRO and GNSS data
    - Improved the docstring style
