@@ -53,21 +53,20 @@ inst_ids = {'': [tag for tag in tags.keys()]}
 
 pandas_format = False
 
-# Local attributes
-dname = '{{month:02d}}{{day:02d}}'
-vname = '.{{version:03d}}'
-supported_tags = {ss: {'vtec': ''.join(['gps{{year:02d}}', dname, 'g', vname,
-                                        ".{file_type}"]),
-                       'site': ''.join(['site_{{year:04d}}', dname, vname,
-                                        ".{file_type}"])}
-                  for ss in inst_ids.keys()}
-remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
-                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
-
 # Madrigal tags
 madrigal_inst_code = 8000
 madrigal_tag = {'': {'vtec': '3500', 'site': '3506'}}
-# , 'los': '3505'}} <- Issue #12
+# TODO(#12): `, 'los': '3505'}}`
+
+# Local attributes
+fname = general.madrigal_file_format_str(madrigal_inst_code,
+                                         verbose=False).split("*")
+supported_tags = {ss: {'vtec': ''.join(['gps', fname[1], 'g', fname[2]]),
+                       'site': ''.join(['site_{{year:04d}}{{month:02d}}',
+                                        '{{day:02d}}', fname[2]])}
+                  for ss in inst_ids.keys()}
+remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
+                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 
 # ----------------------------------------------------------------------------
 # Instrument test attributes

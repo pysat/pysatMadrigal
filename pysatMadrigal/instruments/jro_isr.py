@@ -1,12 +1,10 @@
+#!/usr/bin/env python
+# Full license can be found in License.md
+# Full author list can be found in .zenodo.json file
+# DOI:10.5281/zenodo.3824979
+# ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-.
 """Supports the Incoherent Scatter Radar at the Jicamarca Radio Observatory.
-
-The Incoherent Scatter Radar (ISR) at the Jicamarca Radio Observatory (JRO)
-observes ion drifts, line-of-sight neutral winds, electron density and
-temperature, ion temperature, and ion composition through three overarching
-experiments.
-
-Downloads data from the JRO Madrigal Database.
 
 Properties
 ----------
@@ -30,7 +28,15 @@ Examples
 
 Note
 ----
-    Please provide name and email when downloading data with this routine.
+The Incoherent Scatter Radar (ISR) at the Jicamarca Radio Observatory (JRO)
+observes ion drifts, line-of-sight neutral winds, electron density and
+temperature, ion temperature, and ion composition through three overarching
+experiments.
+
+Downloads data from the JRO Madrigal Database.
+
+Please provide name (user) and email (password) when downloading data with this
+routine.
 
 """
 
@@ -55,23 +61,22 @@ inst_ids = {'': list(tags.keys())}
 
 pandas_format = False
 
-# Local attributes
-jro_fname1 = 'jro{{year:4d}}{{month:02d}}{{day:02d}}'
-jro_fname2 = '.{{version:03d}}.{file_type}'
-supported_tags = {ss: {'drifts': jro_fname1 + "drifts" + jro_fname2,
-                       'drifts_ave': jro_fname1 + "drifts_avg" + jro_fname2,
-                       'oblique_stan': jro_fname1 + jro_fname2,
-                       'oblique_rand': jro_fname1 + "?" + jro_fname2,
-                       'oblique_long': jro_fname1 + "?" + jro_fname2}
-                  for ss in inst_ids.keys()}
-remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
-                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
-
 # Madrigal tags
 madrigal_inst_code = 10
 madrigal_tag = {'': {'drifts': "1910", 'drifts_ave': "1911",
                      'oblique_stan': "1800", 'oblique_rand': "1801",
                      'oblique_long': "1802"}, }
+
+# Local attributes
+jro_fname = general.madrigal_file_format_str(madrigal_inst_code, verbose=False)
+supported_tags = {ss: {'drifts': jro_fname.replace("*", "drifts"),
+                       'drifts_ave': jro_fname.replace("*", "drifts_avg"),
+                       'oblique_stan': jro_fname.replace("*", ""),
+                       'oblique_rand': jro_fname.replace("*", "?"),
+                       'oblique_long': jro_fname.replace("*", "?")}
+                  for ss in inst_ids.keys()}
+remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
+                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 
 # ----------------------------------------------------------------------------
 # Instrument test attributes
@@ -202,7 +207,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     Notes
     -----
     The user's names should be provided in field user. Ruby Payne-Scott should
-    be entered as Ruby+Payne-Scott
+    be entered as "Ruby Payne-Scott"
 
     The password field should be the user's email address. These parameters
     are passed to Madrigal when downloading.
@@ -214,6 +219,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     general.download(date_array, inst_code=str(madrigal_inst_code),
                      kindat=madrigal_tag[inst_id][tag], data_path=data_path,
                      user=user, password=password, file_type=file_type)
+    return
 
 
 def load(fnames, tag='', inst_id=''):

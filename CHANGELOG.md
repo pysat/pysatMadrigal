@@ -2,11 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.1.0] - 2021-XX-XX
+## [0.1.0] - 2022-XX-XX
 - Enhancements
    - Improved definitions of general and GNSS meta data
    - Removed unused logic in cleaning routines
    - Moved warning for no cleaning of JRO ISR data to preprocess
+   - Added a general Madrigal instrument for time-series data
+   - Added functions to specify all known Madrigal instrument codes and
+     file formats
+   - Adapted general listing functions to allow file formats with '*' wildcards
+     between '.' delimiters, required for some Madrigal file formats
    - Standardized the Instrument method kwarg defaults
    - Added 'site' tag to the GNSS TEC Instrument
    - Added support for varied use of `two_digit_year_break` to 
@@ -17,6 +22,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
    - Improved the docstring style
 - Testing
    - Added unit tests for general, JRO, and GNSS methods
+   - Added the packaging module to handle version logic
 - Bug
    - Fixed bugs in the coordinate conversion functions
 
