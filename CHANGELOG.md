@@ -14,7 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
      between '.' delimiters, required for some Madrigal file formats
    - Standardized the Instrument method kwarg defaults
    - Added 'site' tag to the GNSS TEC Instrument
-   - Added support for varied use of `two_digit_year_break` to 
+   - Added support for varied use of `two_digit_year_break` to
      `methods.general.list_remote_files`
    - Implemented `two_digit_year_break` support for `vtec` GNSS TEC Instrument
 - Documentation
@@ -25,6 +25,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
    - Added the packaging module to handle version logic
 - Bug
    - Fixed bugs in the coordinate conversion functions
+- Maintenance
+   - Updated GitHub action and NEP29 versions
 
 ## [0.0.4] - 2021-06-11
 - Made changes to structure to comply with updates in pysat 3.0.0
