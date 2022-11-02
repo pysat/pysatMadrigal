@@ -17,12 +17,12 @@ from pysatMadrigal.instruments.methods import jro
 class TestJRORefs(object):
     """Test the acknowledgements and references for the JRO instruments."""
 
-    def setup(self):
+    def setup_method(self):
         """Run before every method to create a clean testing setup."""
         self.out = None
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Run after every method to clean up previous testing."""
         del self.out
         return
@@ -40,7 +40,7 @@ class TestJRORefs(object):
 class TestJROCalcLoc(object):
     """Test the JRO support function `calc_measurement_loc`."""
 
-    def setup(self):
+    def setup_method(self):
         """Run before every method to create a clean testing setup."""
         self.inst = pysat.Instrument('pysat', 'testing_xarray', num_samples=100)
         self.stime = pysat.instruments.pysat_testing_xarray._test_dates['']['']
@@ -55,7 +55,7 @@ class TestJROCalcLoc(object):
         self.tol = 1.0e-4
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Run after every method to clean up previous testing."""
         del self.inst, self.stime, self.az, self.el
         del self.lat_min, self.lat_max, self.lon_min, self.lon_max, self.tol

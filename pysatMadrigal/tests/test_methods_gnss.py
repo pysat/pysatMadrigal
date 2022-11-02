@@ -13,12 +13,12 @@ from pysatMadrigal.instruments.methods import gnss
 class TestGNSSRefs(object):
     """Test the acknowledgements and references for the JRO instruments."""
 
-    def setup(self):
+    def setup_method(self):
         """Run before every method to create a clean testing setup."""
         self.out = None
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Run after every method to clean up previous testing."""
         del self.out
         return
