@@ -21,7 +21,8 @@ user_info = {module: {'user': 'pysat+CI_tests',
 # Tell the standard tests which instruments to run each test on.
 # Need to return instrument list for custom tests.
 instruments = clslib.InstLibTests.initialize_test_package(
-    clslib.InstLibTests, inst_loc=pysatNASA.instruments, user_info=user_info)
+    clslib.InstLibTests, inst_loc=pysatMadrigal.instruments,
+    user_info=user_info)
 
 
 class TestInstruments(clslib.InstLibTests):
