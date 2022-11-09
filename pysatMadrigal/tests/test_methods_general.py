@@ -26,12 +26,12 @@ from pysatMadrigal.instruments.methods import general
 class TestLocal(object):
     """Unit tests for general methods that run locally."""
 
-    def setup(self):
+    def setup_method(self):
         """Runs before every method to create a clean testing setup."""
         self.out = None
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Runs after every method to clean up previous testing."""
         del self.out
         return
@@ -223,7 +223,7 @@ class TestLocal(object):
 class TestErrors(object):
     """Tests for errors raised by the general methods."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
         self.kwargs = {'inst_code': '10',
                        'user': 'username',
@@ -232,7 +232,7 @@ class TestErrors(object):
                        'supported_tags': {'testing': {'tag': 'file%Y%m%d.nc'}}}
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
         del self.kwargs
         return
@@ -353,7 +353,7 @@ class TestErrors(object):
 class TestSimpleFiles(object):
     """Tests for general methods with simple files."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
 
         # Create testing directory
@@ -370,7 +370,7 @@ class TestSimpleFiles(object):
 
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
 
         # Remove the temporary directory and file
@@ -494,7 +494,7 @@ class TestSimpleFiles(object):
 class TestNetCDFFiles(object):
     """Tests for general methods with NetCDF files."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
 
         # Create testing directory
@@ -513,7 +513,7 @@ class TestNetCDFFiles(object):
 
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
 
         # Remove the temporary directory and file
@@ -644,7 +644,7 @@ class TestNetCDFFiles(object):
 class TestListFiles(object):
     """Tests for general methods function `list_files`."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
 
         # Initalize a pysat Instrument
@@ -664,7 +664,7 @@ class TestListFiles(object):
 
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
 
         # Remove the temporary file, if it exists
@@ -800,14 +800,14 @@ class TestListFiles(object):
 class TestMadrigalExp(object):
     """Unit tests for the MadrigalWeb functions that use MadrigalExperiment."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing environment."""
         self.exp = None
         self.start = dt.datetime(1950, 1, 1)
         self.stop = dt.datetime.utcnow()
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Tear down the existing testing environment."""
         del self.exp, self.start, self.stop
         return

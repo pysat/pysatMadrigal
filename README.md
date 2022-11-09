@@ -27,7 +27,7 @@ for the Space Physics community.  This module officially supports Python 3.7+.
 | Common modules | Community modules |
 | -------------- | ----------------- |
 | h5py           | madrigalWeb       |
-| numpy          | pysat >= 3.0.0    |
+| numpy          | pysat >= 3.0.3    |
 | pandas         |                   |
 | xarray         |                   |
 
