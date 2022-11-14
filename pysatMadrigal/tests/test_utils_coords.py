@@ -9,14 +9,14 @@ from pysatMadrigal.utils import coords
 class TestGeodeticGeocentric():
     """Unit tests for geodetic to geocentric conversion methods."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
         self.val = {'lat': 45.0, 'lon': 8.0, 'az': 52.0, 'el': 63.0}
         self.out = None
         self.loc = None
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
         del self.val, self.out, self.loc
         return
@@ -111,7 +111,7 @@ class TestGeodeticGeocentric():
 class TestGeodeticGeocentricArray(TestGeodeticGeocentric):
     """Unit tests for geodetic to geocentric array conversion."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
         arr = np.ones(shape=(10,), dtype=float)
         self.val = {'lat': 45.0 * arr,
@@ -122,7 +122,7 @@ class TestGeodeticGeocentricArray(TestGeodeticGeocentric):
         self.loc = None
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
         del self.val, self.out, self.loc
         return
@@ -131,7 +131,7 @@ class TestGeodeticGeocentricArray(TestGeodeticGeocentric):
 class TestSphereCartesian():
     """Unit tests for spherical/cartesian conversions."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
         self.val = {'az': 45.0, 'el': 30.0, 'r': 1.0,
                     'x': 0.6123724356957946,
@@ -141,7 +141,7 @@ class TestSphereCartesian():
         self.loc = None
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
         del self.val, self.out, self.loc
         return
@@ -186,7 +186,7 @@ class TestSphereCartesian():
 class TestSphereCartesianArray(TestSphereCartesian):
     """Unit tests for spherical/cartesian coordinate conversion with arrays."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
         arr = np.ones(shape=(10,), dtype=float)
         self.val = {'az': 45.0 * arr, 'el': 30.0 * arr, 'r': 1.0 * arr,
@@ -197,7 +197,7 @@ class TestSphereCartesianArray(TestSphereCartesian):
         self.loc = None
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
         del self.val, self.out, self.loc
         return
@@ -206,7 +206,7 @@ class TestSphereCartesianArray(TestSphereCartesian):
 class TestGlobalLocal():
     """Unit tests for global/local conversions."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
         self.val = {'x': 7000.0, 'y': 8000.0, 'z': 9000.0,
                     'lat': 37.5, 'lon': 289.0, 'rad': 6380.0}
@@ -214,7 +214,7 @@ class TestGlobalLocal():
         self.loc = None
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
         del self.val, self.out, self.loc
         return
@@ -270,7 +270,7 @@ class TestGlobalLocal():
 class TestGlobalLocalArray(TestGlobalLocal):
     """Unit tests for global/local conversion with arrays."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
         arr = np.ones(shape=(10,), dtype=float)
         self.val = {'x': 7000.0 * arr, 'y': 8000.0 * arr, 'z': 9000.0 * arr,
@@ -279,7 +279,7 @@ class TestGlobalLocalArray(TestGlobalLocal):
         self.loc = None
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
         del self.val, self.out, self.loc
         return
@@ -288,7 +288,7 @@ class TestGlobalLocalArray(TestGlobalLocal):
 class TestLocalHorizontalGlobal():
     """Tests for local horizontal to global geo and back."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
         self.val = {'az': 30.0, 'el': 45.0, 'dist': 1000.0,
                     'lat': 45.0, 'lon': 0.0, 'alt': 400.0}
@@ -296,7 +296,7 @@ class TestLocalHorizontalGlobal():
         self.loc = None
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
         del self.val, self.out, self.loc
         return
@@ -330,7 +330,7 @@ class TestLocalHorizontalGlobal():
 class TestLocalHorizontalGlobalArray(TestLocalHorizontalGlobal):
     """Tests for local horizontal to global geo and back."""
 
-    def setup(self):
+    def setup_method(self):
         """Create a clean testing setup."""
         arr = np.ones(shape=(10,), dtype=float)
         self.val = {'az': 30.0 * arr, 'el': 45.0 * arr, 'dist': 1000.0 * arr,
@@ -339,7 +339,7 @@ class TestLocalHorizontalGlobalArray(TestLocalHorizontalGlobal):
         self.loc = None
         return
 
-    def teardown(self):
+    def teardown_method(self):
         """Clean up previous testing."""
         del self.val, self.out, self.loc
         return
