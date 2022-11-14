@@ -27,6 +27,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
    - Fixed bugs in the coordinate conversion functions
 - Maintenance
    - Updated GitHub action and NEP29 versions
+   - Updated the minimum Madrigal version to allow HDF4 downloads
 
 ## [0.0.4] - 2021-06-11
 - Made changes to structure to comply with updates in pysat 3.0.0
