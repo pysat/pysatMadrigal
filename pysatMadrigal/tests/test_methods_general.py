@@ -656,11 +656,7 @@ class TestListFiles(object):
             self.inst.tag: '{{year:4d}}-{{month:02d}}-{{day:02d}}.{file_type}'}}
 
         # Create the Instrument data path.
-        # TODO:#61 Once pysat is updated, use pysat.utils.files function.
-        try:
-            os.makedirs(self.inst.files.data_path)
-        except OSError:
-            pass
+        pysat.utils.files.check_and_make_path(self.inst.files.data_path)
 
         return
 
