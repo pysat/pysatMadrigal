@@ -59,7 +59,7 @@ class TestLocal(object):
         return
 
     @pytest.mark.skipif(version.Version(pysat.__version__)
-                        < version.Version('3.1.0'),
+                        < version.Version('3.0.2'),
                         reason="requires newer pysat version.")
     @pytest.mark.parametrize("pad", [None, pds.DateOffset(days=2)])
     def test_filter_data_single_date(self, pad):
