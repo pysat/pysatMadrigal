@@ -26,6 +26,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 * Testing
    * Added unit tests for general, JRO, and GNSS methods
    * Added the packaging module to handle version logic
+   * Added quick-fail for main pytest command
 * Bug
    * Fixed bugs in the coordinate conversion functions
 * Maintenance
