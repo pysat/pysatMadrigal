@@ -37,7 +37,7 @@ jobs:
         python -c "import pysat; pysat.params['data_dirs'] = 'pysatData'"
 
     - name: Test with pytest
-      run: pytest -vs --cov=pysatMadrigal/
+      run: pytest -vs -x --cov=pysatMadrigal/
 
     - name: Publish results to coveralls
       env:
