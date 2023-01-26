@@ -59,7 +59,7 @@ class TestLocal(object):
         return
 
     @pytest.mark.skipif(version.Version(pysat.__version__)
-                        < version.Version('3.1.0'),
+                        < version.Version('3.0.2'),
                         reason="requires newer pysat version.")
     @pytest.mark.parametrize("pad", [None, pds.DateOffset(days=2)])
     def test_filter_data_single_date(self, pad):
@@ -656,11 +656,7 @@ class TestListFiles(object):
             self.inst.tag: '{{year:4d}}-{{month:02d}}-{{day:02d}}.{file_type}'}}
 
         # Create the Instrument data path.
-        # TODO:#61 Once pysat is updated, use pysat.utils.files function.
-        try:
-            os.makedirs(self.inst.files.data_path)
-        except OSError:
-            pass
+        pysat.utils.files.check_and_make_path(self.inst.files.data_path)
 
         return
 
