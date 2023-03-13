@@ -1165,13 +1165,6 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
     format_str = supported_tags[inst_id][tag]
     kindat = kindats[inst_id][tag]
 
-    # TODO(#1022, pysat) Note default of `pysat.Instrument.remote_file_list`
-    #  for start and stop is None. Setting defaults needed for Madrigal.
-    if start is None:
-        start = dt.datetime(1900, 1, 1)
-    if stop is None:
-        stop = dt.datetime.utcnow()
-
     # Retrieve remote file experiment list
     files = get_remote_filenames(inst_code=inst_code, kindat=kindat, user=user,
                                  password=password, url=url, start=start,
