@@ -11,7 +11,7 @@ from pysatMadrigal.instruments.methods import gnss
 
 
 class TestGNSSRefs(object):
-    """Test the acknowledgements and references for the JRO instruments."""
+    """Test the acknowledgements and references for the GNSS instruments."""
 
     def setup_method(self):
         """Run before every method to create a clean testing setup."""
