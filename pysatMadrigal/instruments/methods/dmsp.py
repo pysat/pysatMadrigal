@@ -47,7 +47,7 @@ def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_flag_max=1,
     inst : pysat.Instrument
         DMSP IVM Instrument object
     rpa_flag_key : str or NoneType
-        RPA flag key, if None will not downselect data. The UTD RPA flag key
+        RPA flag key, if None then no data is selected. The UTD RPA flag key
         is 'rpa_flag_ut' (default=None)
     rpa_flag_max : int
         Maximum allowable RPA flag (default=1)
@@ -95,7 +95,7 @@ def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_flag_max=1,
 
     # Update the metadata
     desc = 'Rolling mean of window {:d} and {:} for {:s}'.format(
-        roll_window, roll_kwargs, 'all RPA flag data' if rpa_flag_key is None
+        roll_window, roll_kwargs, 'no data selected' if rpa_flag_key is None
         else 'RPA flag data <= {:d}'.format(rpa_flag_max))
     inst.meta[smooth_key] = {inst.meta.labels.desc: desc}
 
