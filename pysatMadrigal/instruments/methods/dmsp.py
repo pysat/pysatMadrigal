@@ -126,10 +126,11 @@ def update_DMSP_ephemeris(inst, ephem=None):
     if ephem.date != inst.date:
         ephem.load(date=inst.date, verifyPad=True)
 
-        if ephem.data.empty:
-            logger.info('unable to load ephemera for {:}'.format(inst.date))
-            inst.data = pds.DataFrame(None)
-            return
+    # Ensure the correct satellite and time have ephemeris data
+    if ephem.data.empty:
+        logger.info('unable to load ephemera for {:}'.format(inst.date))
+        inst.data = pds.DataFrame(None)
+        return
 
     # Reindex the ephemeris data
     ephem.data = ephem.data.reindex(index=inst.data.index, method='pad')
