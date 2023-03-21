@@ -252,7 +252,6 @@ class TestDMSPCleaning(object):
 
         """
 
-        dmsp.add_drift_unit_vectors(self.inst)
         dmsp.add_drifts_polar_cap_x_y(self.inst, rpa_flag_key=rpa_flag_key,
                                       rpa_vel_key='dummy1',
                                       cross_vel_key='dummy4')
