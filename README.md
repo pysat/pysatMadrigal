@@ -50,11 +50,6 @@ cd pysatMadrigal/
 python setup.py install
 ```
 
-Note: pre-0.1.0 version
------------------------
-pysatMadrigal is currently provided as an alpha pre-release.  Feedback and
-contributions are appreciated.
-
 # Examples
 
 The instrument modules are portable and designed to be run like any pysat
