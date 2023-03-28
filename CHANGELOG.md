@@ -3,7 +3,7 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-[0.1.0] - 2023-XX-XX
+[0.1.0] - 2023-04-11
 --------------------
 * Enhancements
    * Improved definitions of general and GNSS meta data
