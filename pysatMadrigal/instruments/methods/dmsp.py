@@ -37,7 +37,9 @@ def references(name):
     return refs[name]
 
 
-def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_vel_key='ion_v_sat_for'):
+def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_flag_max=1,
+                      rpa_vel_key='ion_v_sat_for', smooth_key=None,
+                      roll_window=15, roll_kwargs=None):
     """Smooth the ram drifts using a rolling mean.
 
     Parameters
@@ -45,20 +47,58 @@ def smooth_ram_drifts(inst, rpa_flag_key=None, rpa_vel_key='ion_v_sat_for'):
     inst : pysat.Instrument
         DMSP IVM Instrument object
     rpa_flag_key : str or NoneType
-        RPA flag key, if None will not select any data. The UTD RPA flag key
+        RPA flag key, if None then no data is selected. The UTD RPA flag key
         is 'rpa_flag_ut' (default=None)
+    rpa_flag_max : int
+        Maximum allowable RPA flag (default=1)
     rpa_vel_key : str
         RPA velocity data key (default='ion_v_sat_for')
+    smooth_key : str or NoneType
+        If None will fill old RPA data with smoothed data, otherwise assigns
+        the smoothed data to this new variable
+    roll_window : int, offset, or BaseIndexer subclass
+        Size of the moving window (default=15)
+    roll_kwargs : dict or NoneType
+        Keyword args for rolling mean window.  If None uses {'min_periods': 5}
+        (default=None)
+
+    Raises
+    ------
+    KeyError
+        If unknown values are used for `rpa_flag_key` or `rpa_vel_key`
+
+    See Also
+    --------
+    pandas.rolling
 
     """
-
-    if rpa_flag_key in list(inst.data.keys()):
-        rpa_idx, = np.where(inst[rpa_flag_key] == 1)
-    else:
+    # Select the desired data for averaging
+    if rpa_flag_key is None:
         rpa_idx = list()
+    else:
+        rpa_idx, = np.where(inst[rpa_flag_key] <= rpa_flag_max)
 
-    inst[rpa_idx, rpa_vel_key] = inst[rpa_idx,
-                                      rpa_vel_key].rolling(15, 5).mean()
+    # Smooth the data
+    if roll_kwargs is None:
+        roll_kwargs = {'min_periods': 5}
+
+    smooth = inst[rpa_idx, rpa_vel_key].rolling(roll_window,
+                                                **roll_kwargs).mean()
+
+    # Assign the smoothed data
+    if smooth_key is None:
+        inst[rpa_idx, rpa_vel_key] = smooth
+        smooth_key = rpa_vel_key
+    else:
+        inst[smooth_key] = smooth
+        inst.meta[smooth_key] = inst.meta[rpa_vel_key]
+
+    # Update the metadata
+    desc = 'Rolling mean of window {:d} and {:} for {:s}'.format(
+        roll_window, roll_kwargs, 'no data selected' if rpa_flag_key is None
+        else 'RPA flag data <= {:d}'.format(rpa_flag_max))
+    inst.meta[smooth_key] = {inst.meta.labels.desc: desc}
+
     return
 
 
@@ -86,10 +126,11 @@ def update_DMSP_ephemeris(inst, ephem=None):
     if ephem.date != inst.date:
         ephem.load(date=inst.date, verifyPad=True)
 
-        if ephem.data.empty:
-            logger.info('unable to load ephemera for {:}'.format(inst.date))
-            inst.data = pds.DataFrame(None)
-            return
+    # Ensure the correct satellite and time have ephemeris data
+    if ephem.data.empty:
+        logger.info('unable to load ephemera for {:}'.format(inst.date))
+        inst.data = pds.DataFrame(None)
+        return
 
     # Reindex the ephemeris data
     ephem.data = ephem.data.reindex(index=inst.data.index, method='pad')

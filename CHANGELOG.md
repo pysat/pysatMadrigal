@@ -24,7 +24,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
    * Added examples for JRO and GNSS data
    * Improved the docstring and CHANGELOG style
 * Testing
-   * Added unit tests for general, JRO, and GNSS methods
+   * Added unit tests for DMSP, general, JRO, and GNSS methods
    * Added the packaging module to handle version logic
    * Added quick-fail for main pytest command
 * Bug
