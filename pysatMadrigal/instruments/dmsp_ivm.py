@@ -117,7 +117,7 @@ def init(self):
 
 
 def clean(self):
-    """Clean DMSP IVM data cleaned to the specified level.
+    """Clean DMSP IVM data to the specified level.
 
     Note
     ----
