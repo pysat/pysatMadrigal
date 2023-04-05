@@ -21,7 +21,7 @@ angle variables don't specify the beam number, **#** will be set to ``'_bm'``.
 The easiest way to use :py:meth:`instruments.methods.jro.calc_measurement_loc`
 is to attach it to the JRO ISR :py:class:`pysat.Instrument` as a `custom
 function <https://pysat.readthedocs.io/en/latest/tutorial/tutorial_custom.html>`_
-before loading data.
+before loading data. If necessary, also download the desired data.
 
 .. code::
 
@@ -33,16 +33,16 @@ before loading data.
                               tag='oblique_long')
    jro_obl.custom_attach(pysat_mad.instruments.methods.jro.calc_measurement_loc)
 
-
-If necessary, download the desired data before loading it.  The geographic
-beam locations will be present alongside the azimuths and elevations.
-
-.. code::
-
    ftime = dt.datetime(2010, 4, 12)
 
    if not ftime in jro_obl.files.files.index:
        jro_obl.download(start=ftime)
+
+The geographic beam locations will be present alongside the azimuths and
+elevations after the data is loaded.
+
+.. code::
+
 
    jro_obl.load(date=ftime)
    'gdlat_bm' in jro_obl.variables and 'gdlon_bm' in jro_obl.variables
