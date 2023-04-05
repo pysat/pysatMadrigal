@@ -346,7 +346,6 @@ class TestSimpleFiles(object):
 
     def setup_method(self):
         """Create a clean testing setup."""
-
         # Create testing directory
         self.data_path = tempfile.TemporaryDirectory()
 
@@ -363,7 +362,6 @@ class TestSimpleFiles(object):
 
     def teardown_method(self):
         """Clean up previous testing."""
-
         # Remove the temporary directory and file
         os.remove(self.temp_file)
         self.data_path.cleanup()
@@ -381,7 +379,6 @@ class TestSimpleFiles(object):
             alone if False (default=True)
 
         """
-
         local_open = open
 
         if use_gzip:

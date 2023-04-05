@@ -137,7 +137,7 @@ def init(self, kindat=''):
 
 
 def clean(self):
-    """Placeholder routine that would normally return cleaned data.
+    """Raise warning that cleaning is not possible for general data.
 
     Note
     ----

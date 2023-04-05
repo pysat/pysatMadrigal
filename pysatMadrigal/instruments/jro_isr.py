@@ -147,7 +147,6 @@ def clean(self):
 
 def preprocess(self):
     """Preprocess data to default loaded data to a single day."""
-
     # Madrigal will sometimes include multiple days within a file
     # labeled with a single date. This routine filters out this extra data
     # using the pysat nanokernel processing queue.

@@ -371,7 +371,6 @@ def local_horizontal_to_global_geo(az, el, dist, lat_orig, lon_orig, alt_orig,
     Based on J.M. Ruohoniemi's geopack and R.J. Barnes radar.pro
 
     """
-
     # If the data are in geodetic coordiantes, convert to geocentric
     if geodetic:
         (glat, glon, rearth, gaz, gel) = geodetic_to_geocentric_horizontal(
