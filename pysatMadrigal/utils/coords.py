@@ -1,13 +1,15 @@
-"""
-Coordinate transformation functions
-
-"""
+#!/usr/bin/env python
+# Full license can be found in License.md
+# Full author list can be found in .zenodo.json file
+# DOI:10.5281/zenodo.3824979
+# ----------------------------------------------------------------------------
+"""Coordinate transformation functions."""
 
 import numpy as np
 
 
 def geodetic_to_geocentric(lat_in, lon_in=None, inverse=False):
-    """Converts position from geodetic to geocentric or vice-versa.
+    """Convert position from geodetic to geocentric or vice-versa.
 
     Parameters
     ----------
@@ -72,8 +74,7 @@ def geodetic_to_geocentric(lat_in, lon_in=None, inverse=False):
 
 def geodetic_to_geocentric_horizontal(lat_in, lon_in, az_in, el_in,
                                       inverse=False):
-    """Converts from local horizontal coordinates in a geodetic system to local
-    horizontal coordinates in a geocentric system
+    """Convert from geodetic to geocentric local horizontal coordinates.
 
     Parameters
     ----------
@@ -108,7 +109,6 @@ def geodetic_to_geocentric_horizontal(lat_in, lon_in, az_in, el_in,
     Based on J.M. Ruohoniemi's geopack and R.J. Barnes radar.pro
 
     """
-
     az = np.radians(az_in)
     el = np.radians(el_in)
 
@@ -138,7 +138,7 @@ def geodetic_to_geocentric_horizontal(lat_in, lon_in, az_in, el_in,
 
 
 def local_spherical_to_cartesian(az_in, el_in, r_in, inverse=False):
-    """Convert a position from spherical to cartesian, or vice-versa
+    """Convert a position from spherical to cartesian, or vice-versa.
 
     Parameters
     ----------
@@ -170,7 +170,6 @@ def local_spherical_to_cartesian(az_in, el_in, r_in, inverse=False):
     (angle from the z-axis)
 
     """
-
     if inverse:
         # Cartesian to Spherical
         xy_sq = az_in**2 + el_in**2
@@ -225,7 +224,6 @@ def spherical_to_cartesian(theta_in, phi_in, r_in, inverse=False):
     (angle from the z-axis)
 
     """
-
     if inverse:
         # Cartesian to Spherical
         xy_sq = theta_in**2 + phi_in**2
@@ -248,7 +246,7 @@ def spherical_to_cartesian(theta_in, phi_in, r_in, inverse=False):
 
 def global_to_local_cartesian(x_in, y_in, z_in, lat_cent, lon_cent, rad_cent,
                               inverse=False):
-    """Converts a position from global to local cartesian or vice-versa.
+    """Convert a position from global to local cartesian or vice-versa.
 
     Parameters
     ----------
@@ -288,7 +286,6 @@ def global_to_local_cartesian(x_in, y_in, z_in, lat_cent, lon_cent, rad_cent,
     The local system has z pointing up, y pointing North, and x pointing East.
 
     """
-
     # Get the global cartesian coordinates of local origin
     x_cent, y_cent, z_cent = spherical_to_cartesian(lon_cent, lat_cent,
                                                     rad_cent)
@@ -339,8 +336,7 @@ def global_to_local_cartesian(x_in, y_in, z_in, lat_cent, lon_cent, rad_cent,
 
 def local_horizontal_to_global_geo(az, el, dist, lat_orig, lon_orig, alt_orig,
                                    geodetic=True):
-    """ Convert from local horizontal coordinates to geodetic or geocentric
-    coordinates
+    """Convert from local horizontal coords to geodetic or geocentric coords.
 
     Parameters
     ----------
@@ -378,9 +374,8 @@ def local_horizontal_to_global_geo(az, el, dist, lat_orig, lon_orig, alt_orig,
 
     # If the data are in geodetic coordiantes, convert to geocentric
     if geodetic:
-        (glat, glon, rearth, gaz, gel) = \
-            geodetic_to_geocentric_horizontal(lat_orig, lon_orig, az, el,
-                                              inverse=False)
+        (glat, glon, rearth, gaz, gel) = geodetic_to_geocentric_horizontal(
+            lat_orig, lon_orig, az, el, inverse=False)
         grad = rearth + alt_orig
     else:
         glat = lat_orig

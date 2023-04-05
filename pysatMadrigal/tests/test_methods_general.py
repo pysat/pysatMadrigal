@@ -13,10 +13,10 @@ import os
 from packaging import version
 import tempfile
 
-import netCDF4 as nc
 from madrigalWeb import madrigalWeb
-import pysat
+import netCDF4 as nc
 import pandas as pds
+import pysat
 import pytest
 import xarray as xr
 
@@ -27,12 +27,12 @@ class TestLocal(object):
     """Unit tests for general methods that run locally."""
 
     def setup_method(self):
-        """Runs before every method to create a clean testing setup."""
+        """Run before every method to create a clean testing setup."""
         self.out = None
         return
 
     def teardown_method(self):
-        """Runs after every method to clean up previous testing."""
+        """Run after every method to clean up previous testing."""
         del self.out
         return
 
@@ -45,7 +45,6 @@ class TestLocal(object):
     @pytest.mark.parametrize("xarray_coords", [None, ["lat"]])
     def test_empty_load(self, xarray_coords):
         """Test the general load function with no data files."""
-
         # Run the empty load
         self.out = general.load([], xarray_coords=xarray_coords)
 
@@ -71,7 +70,6 @@ class TestLocal(object):
             Pad values.  If not None, no filtering will be performed.
 
         """
-
         # Initalize the test Instrument
         self.out = pysat.Instrument('pysat', 'testing', pad=pad)
 
@@ -105,7 +103,6 @@ class TestLocal(object):
             NoneType (default=None)
 
         """
-
         self.out = general.known_madrigal_inst_codes(pandas_format)
 
         assert isinstance(self.out, dict)
@@ -128,7 +125,6 @@ class TestLocal(object):
             Madrigal instrument code for a well-defined file format
 
         """
-
         # Get the function output
         self.out = general.madrigal_file_format_str(inst_code)
 
@@ -155,7 +151,6 @@ class TestLocal(object):
             Logger warning message
 
         """
-
         # Get the output and raise the logging warning
         with caplog.at_level(logging.WARN, logger='pysat'):
             self.out = general.madrigal_file_format_str(inst_code)
@@ -180,7 +175,6 @@ class TestLocal(object):
             Madrigal instrument code for a poorly constrained file format
 
         """
-
         # Get the output and raise the logging warning
         with caplog.at_level(logging.WARN, logger='pysat'):
             self.out = general.madrigal_file_format_str(inst_code,
@@ -210,7 +204,6 @@ class TestLocal(object):
             Logger warning message
 
         """
-
         # Get the output and raise the logging warning
         with pytest.raises(ValueError) as verr:
             general.madrigal_file_format_str(inst_code, strict=True)
@@ -304,7 +297,6 @@ class TestErrors(object):
 
     def test_list_remote_files_bad_tag_inst_id(self):
         """Test that an error is thrown if None is passed through."""
-
         # Get the expected error message and evaluate it
         with pytest.raises(KeyError) as kerr:
             general.list_remote_files('testing', 'not_tag', **self.kwargs)
@@ -339,7 +331,6 @@ class TestErrors(object):
 
     def test_get_remote_filenames_bad_date_array(self):
         """Test raises ValueError for unexpected date_array input."""
-
         del self.kwargs['supported_tags'], self.kwargs['kindats']
         self.kwargs['date_array'] = []
 
@@ -404,7 +395,6 @@ class TestSimpleFiles(object):
 
     def eval_data_and_metadata(self):
         """Evaluate the loaded test data and metadata."""
-
         # Test the loaded data
         tst_lines = self.datalines.split('\n')
         header = tst_lines[0].split()
@@ -457,7 +447,6 @@ class TestSimpleFiles(object):
             Possible xarray_coords for a good simple file
 
         """
-
         # Write a temporary file
         self.write_temp_file()
 
@@ -470,7 +459,6 @@ class TestSimpleFiles(object):
 
     def test_load_duplicate_times(self, caplog):
         """Test successful data and metadata loading with duplicate times."""
-
         # Add a duplicate line
         self.datalines = '\n'.join([self.datalines,
                                     self.datalines.split('\n')[-1]])
@@ -496,7 +484,6 @@ class TestNetCDFFiles(object):
 
     def setup_method(self):
         """Create a clean testing setup."""
-
         # Create testing directory
         self.data_path = tempfile.TemporaryDirectory()
 
@@ -515,7 +502,6 @@ class TestNetCDFFiles(object):
 
     def teardown_method(self):
         """Clean up previous testing."""
-
         # Remove the temporary directory and file
         for tfile in self.temp_files:
             if os.path.isfile(tfile):
@@ -535,7 +521,6 @@ class TestNetCDFFiles(object):
             Number of temporary NetCDF files to write (default=0)
 
         """
-
         for i in range(nfiles):
             tfile = os.path.join(self.data_path.name,
                                  "temp{:d}.netCDF4".format(i))
@@ -577,7 +562,6 @@ class TestNetCDFFiles(object):
 
     def eval_dataset_meta_output(self):
         """Evaluate the dataset and meta output for the temp files."""
-
         # Evaluate the Instrument data variables and coordinates
         pysat.utils.testing.assert_lists_equal(
             [ckey for ckey in self.data.coords.keys()], ['time', 'lat', 'lon'])
@@ -611,7 +595,6 @@ class TestNetCDFFiles(object):
             Number of NetCDF files to load
 
         """
-
         # Create the temporary files
         self.write_temp_files(nfiles=nfiles)
 
@@ -625,7 +608,6 @@ class TestNetCDFFiles(object):
 
     def test_load_netcdf_extra_xarray_coord(self):
         """Test the loading of a NetCDF file with extra xarray coordinates."""
-
         # Create the temporary files
         self.write_temp_files(nfiles=1)
 
@@ -646,7 +628,6 @@ class TestListFiles(object):
 
     def setup_method(self):
         """Create a clean testing setup."""
-
         # Initalize a pysat Instrument
         self.inst = pysat.Instrument('pysat', 'testing')
 
@@ -662,7 +643,6 @@ class TestListFiles(object):
 
     def teardown_method(self):
         """Clean up previous testing."""
-
         # Remove the temporary file, if it exists
         for tfile in self.temp_files:
             if os.path.isfile(tfile):
@@ -687,7 +667,6 @@ class TestListFiles(object):
             True if the correct number of files were created, False if not
 
         """
-
         for i, ext in enumerate(general.file_types.values()):
             # Get the desired base file name
             j = 0 if same_time else i
@@ -716,7 +695,6 @@ class TestListFiles(object):
             extension if True, use different base filenames if False.
 
         """
-
         #  Write the temporary files
         assert self.write_temp_files(same_time=same_time)
 
@@ -750,7 +728,6 @@ class TestListFiles(object):
             File type to list.
 
         """
-
         #  Write the temporary files
         assert self.write_temp_files(same_time=same_time)
 
@@ -780,7 +757,6 @@ class TestListFiles(object):
             file types.
 
         """
-
         # List the temporary files with
         out_files = general.list_files(self.inst.tag, self.inst.inst_id,
                                        data_path=self.inst.files.data_path,
@@ -845,7 +821,6 @@ class TestMadrigalExp(object):
             Madrigal experiment is valid.
 
         """
-
         # Set the MadrigalExperiment object using good fake information
         self.set_exp_list(exp_id)
 
@@ -868,7 +843,6 @@ class TestMadrigalExp(object):
             Madrigal experiment is valid.
 
         """
-
         # Set the MadrigalExperiment object using bad fake information
         self.set_exp_list(exp_id)
 

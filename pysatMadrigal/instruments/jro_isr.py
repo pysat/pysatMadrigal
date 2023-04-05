@@ -46,7 +46,8 @@ import numpy as np
 
 from pysat import logger
 
-from pysatMadrigal.instruments.methods import general, jro
+from pysatMadrigal.instruments.methods import general
+from pysatMadrigal.instruments.methods import jro
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
@@ -93,7 +94,6 @@ _test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
 
 def init(self):
     """Initialize the Instrument object with values specific to JRO ISR."""
-
     ackn_str = '\n'.join([jro.acknowledgements(), general.cedar_rules()])
 
     logger.info(ackn_str)
@@ -116,7 +116,6 @@ def clean(self):
     When called by pysat, a clean level of None will skip this routine.
 
     """
-
     # Default to selecting all of the data
     iclean = {'gdalt': [i for i in range(self.data.indexes['gdalt'].shape[0])]}
 
@@ -180,7 +179,7 @@ list_remote_files = functools.partial(general.list_remote_files,
 
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
              password=None, file_type='hdf5'):
-    """Downloads data from Madrigal.
+    """Download data from Madrigal.
 
     Parameters
     ----------

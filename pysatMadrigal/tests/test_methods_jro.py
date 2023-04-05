@@ -144,7 +144,6 @@ class TestJROCalcLoc(object):
         ('dir_norange', 'No range variable found')])
     def test_bad_input_data(self, azel_type, err_msg):
         """Test raises ValueError with bad input data."""
-
         # Format the test Instrument
         self.transform_testing_to_jro(azel_type=azel_type)
 
@@ -158,7 +157,6 @@ class TestJROCalcLoc(object):
 
     def test_bad_dirnumber(self, caplog):
         """Test log warning raised for badly formated direction number."""
-
         # Format the test Instrument
         self.transform_testing_to_jro(azel_type='baddir')
 
@@ -181,7 +179,6 @@ class TestJROCalcLoc(object):
         ("both_norange", ["gdlat7", "gdlon7", "gdlat_bm", "gdlon_bm"])])
     def test_success(self, azel_type, new_vals):
         """Test the successful calculation of JRO ISR beam locations."""
-
         # Format the test Instrument
         self.transform_testing_to_jro(azel_type=azel_type)
 

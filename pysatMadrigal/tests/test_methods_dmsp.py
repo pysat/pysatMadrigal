@@ -10,7 +10,8 @@ import numpy as np
 import pytest
 
 import pysat
-from pysat.utils.testing import assert_lists_equal, eval_bad_input
+from pysat.utils.testing import assert_lists_equal
+from pysat.utils.testing import eval_bad_input
 
 from pysatMadrigal.instruments.methods import dmsp
 
@@ -75,7 +76,6 @@ class TestDMSPCleaning(object):
 
     def test_smooth_ram_drifts_none_overwrite(self):
         """Test that the drifts not are overwritten when no data selected."""
-
         # After averaging, the range should be smaller
         raw_max = self.inst[self.smooth_kwargs['rpa_vel_key']].max()
         raw_min = self.inst[self.smooth_kwargs['rpa_vel_key']].min()
@@ -93,7 +93,6 @@ class TestDMSPCleaning(object):
 
     def test_smooth_ram_drifts_none_new_val(self):
         """Test that the drifts remain alongside the smoothed drifts."""
-
         # After averaging, the range should be smaller
         raw_max = self.inst[self.smooth_kwargs['rpa_vel_key']].max()
         raw_min = self.inst[self.smooth_kwargs['rpa_vel_key']].min()
@@ -118,7 +117,6 @@ class TestDMSPCleaning(object):
     @pytest.mark.parametrize('rpa_flag_max', [0, 1])
     def test_smooth_ram_drift_flag_selection(self, rpa_flag_max):
         """Test the drift selection by RPA flag value."""
-
         # After averaging, the range should be smaller
         raw_max = self.inst[self.smooth_kwargs['rpa_vel_key']].max()
         raw_min = self.inst[self.smooth_kwargs['rpa_vel_key']].min()
@@ -147,7 +145,6 @@ class TestDMSPCleaning(object):
 
     def test_no_ephem_logger(self, caplog):
         """Test logger info raised without an ephemeris instrument."""
-
         # Try to update the ephemeris without providing any ephemeris data
         with caplog.at_level(logging.INFO, logger='pysat'):
             dmsp.update_DMSP_ephemeris(self.inst)
@@ -161,7 +158,6 @@ class TestDMSPCleaning(object):
 
     def test_no_ephem_data_logger(self, caplog):
         """Test logger info raised without ephemeris data."""
-
         ephem = pysat.Instrument('pysat', 'testing', use_header=True)
         ephem.date = self.inst.date
 
@@ -178,7 +174,6 @@ class TestDMSPCleaning(object):
 
     def test_bad_ephem_inst_id(self):
         """Test that mismatched `inst_id`s raises a ValueError."""
-
         ephem = pysat.Instrument('pysat', 'testing', use_header=True)
         ephem.inst_id = 'f15'
 
@@ -190,10 +185,9 @@ class TestDMSPCleaning(object):
 
     def test_good_ephem_local_load(self):
         """Test that `update_DMSP_ephemeris` will load correct data."""
-
         # Rename the testing instrument variables
         def add_ephem_variables(ephem):
-            """Function to add required variables to a test instrument.
+            """Add required variables to a test instrument.
 
             Parameters
             ----------
@@ -221,7 +215,6 @@ class TestDMSPCleaning(object):
 
     def test_add_drift_unit_vectors(self):
         """Test that drift unit vectors are added."""
-
         dmsp.add_drift_unit_vectors(self.inst)
 
         # Ensure the variable are present
@@ -251,7 +244,6 @@ class TestDMSPCleaning(object):
             Key for RPA flag
 
         """
-
         dmsp.add_drifts_polar_cap_x_y(self.inst, rpa_flag_key=rpa_flag_key,
                                       rpa_vel_key='dummy1',
                                       cross_vel_key='dummy4')

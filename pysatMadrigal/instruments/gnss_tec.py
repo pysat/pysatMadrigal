@@ -41,7 +41,8 @@ import numpy as np
 
 from pysat import logger
 
-from pysatMadrigal.instruments.methods import general, gnss
+from pysatMadrigal.instruments.methods import general
+from pysatMadrigal.instruments.methods import gnss
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
@@ -80,7 +81,6 @@ _test_dates = {'': {'vtec': dt.datetime(2017, 11, 19),
 
 def init(self):
     """Initialize the Instrument object with values specific to GNSS TEC."""
-
     self.acknowledgements = '\n'.join([gnss.acknowledgements(self.name),
                                        general.cedar_rules()])
     self.references = gnss.references(self.name)
@@ -174,7 +174,7 @@ def list_files(tag, inst_id, data_path=None, format_str=None,
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
              password=None, url='http://cedar.openmadrigal.org',
              file_type='netCDF4'):
-    """Downloads data from Madrigal.
+    """Download data from Madrigal.
 
     Parameters
     ----------
@@ -286,7 +286,7 @@ def load(fnames, tag='', inst_id=''):
 
 def list_remote_files(tag, inst_id, start=dt.datetime(1998, 10, 15),
                       stop=dt.datetime.utcnow(), user=None, password=None):
-    """Return a Pandas Series of every file for chosen remote data.
+    """Create a Pandas Series of every file for chosen remote data.
 
     Parameters
     ----------
@@ -320,7 +320,6 @@ def list_remote_files(tag, inst_id, start=dt.datetime(1998, 10, 15),
     pysatMadrigal.instruments.methods.general.list_remote_files
 
     """
-
     if tag == 'site':
         two_break = None
     elif tag == 'vtec':
