@@ -1,12 +1,10 @@
+#!/usr/bin/env python
+# Full license can be found in License.md
+# Full author list can be found in .zenodo.json file
+# DOI:10.5281/zenodo.3824979
+# ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-.
-"""Supports the Incoherent Scatter Radar at the Jicamarca Radio Observatory
-
-The Incoherent Scatter Radar (ISR) at the Jicamarca Radio Observatory (JRO)
-observes ion drifts, line-of-sight neutral winds, electron density and
-temperature, ion temperature, and ion composition through three overarching
-experiments.
-
-Downloads data from the JRO Madrigal Database.
+"""Supports the Incoherent Scatter Radar at the Jicamarca Radio Observatory.
 
 Properties
 ----------
@@ -30,7 +28,15 @@ Examples
 
 Note
 ----
-    Please provide name and email when downloading data with this routine.
+The Incoherent Scatter Radar (ISR) at the Jicamarca Radio Observatory (JRO)
+observes ion drifts, line-of-sight neutral winds, electron density and
+temperature, ion temperature, and ion composition through three overarching
+experiments.
+
+Downloads data from the JRO Madrigal Database.
+
+Please provide name (user) and email (password) when downloading data with this
+routine.
 
 """
 
@@ -40,7 +46,8 @@ import numpy as np
 
 from pysat import logger
 
-from pysatMadrigal.instruments.methods import general, jro
+from pysatMadrigal.instruments.methods import general
+from pysatMadrigal.instruments.methods import jro
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
@@ -55,23 +62,22 @@ inst_ids = {'': list(tags.keys())}
 
 pandas_format = False
 
-# Local attributes
-jro_fname1 = 'jro{{year:4d}}{{month:02d}}{{day:02d}}'
-jro_fname2 = '.{{version:03d}}.{file_type}'
-supported_tags = {ss: {'drifts': jro_fname1 + "drifts" + jro_fname2,
-                       'drifts_ave': jro_fname1 + "drifts_avg" + jro_fname2,
-                       'oblique_stan': jro_fname1 + jro_fname2,
-                       'oblique_rand': jro_fname1 + "?" + jro_fname2,
-                       'oblique_long': jro_fname1 + "?" + jro_fname2}
-                  for ss in inst_ids.keys()}
-remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
-                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
-
 # Madrigal tags
 madrigal_inst_code = 10
 madrigal_tag = {'': {'drifts': "1910", 'drifts_ave': "1911",
                      'oblique_stan': "1800", 'oblique_rand': "1801",
                      'oblique_long': "1802"}, }
+
+# Local attributes
+jro_fname = general.madrigal_file_format_str(madrigal_inst_code, verbose=False)
+supported_tags = {ss: {'drifts': jro_fname.replace("*", "drifts"),
+                       'drifts_ave': jro_fname.replace("*", "drifts_avg"),
+                       'oblique_stan': jro_fname.replace("*", ""),
+                       'oblique_rand': jro_fname.replace("*", "?"),
+                       'oblique_long': jro_fname.replace("*", "?")}
+                  for ss in inst_ids.keys()}
+remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
+                    for kk in inst_ids[ss]} for ss in inst_ids.keys()}
 
 # ----------------------------------------------------------------------------
 # Instrument test attributes
@@ -82,22 +88,12 @@ _test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
                     'oblique_rand': dt.datetime(2000, 11, 9),
                     'oblique_long': dt.datetime(2010, 4, 12)}}
 
+
 # ----------------------------------------------------------------------------
 # Instrument methods
 
-# Madrigal will sometimes include multiple days within a file
-# labeled with a single date.
-# Filter out this extra data using the pysat nanokernel processing queue.
-# To ensure this function is always applied first, we set the filter
-# function as the default function for (JRO).
-# Default function is run first by the nanokernel on every load call.
-preprocess = general.filter_data_single_date
-
-
 def init(self):
-    """Initializes the Instrument object with values specific to JRO ISR
-    """
-
+    """Initialize the Instrument object with values specific to JRO ISR."""
     ackn_str = '\n'.join([jro.acknowledgements(), general.cedar_rules()])
 
     logger.info(ackn_str)
@@ -108,7 +104,7 @@ def init(self):
 
 
 def clean(self):
-    """Routine to return JRO ISR data cleaned to the specified level
+    """Clean the JRO ISR data cleaned to the specified level.
 
     Note
     ----
@@ -116,14 +112,12 @@ def clean(self):
     'clean' is unknown for oblique modes, over 200 km for drifts
     'dusty' is the same as clean
     'Dirty' is the same as clean
-    'None' None
 
-    Routine is called by pysat, and not by the end user directly.
+    When called by pysat, a clean level of None will skip this routine.
 
     """
-
     # Default to selecting all of the data
-    idx = {'gdalt': [i for i in range(self.data.indexes['gdalt'].shape[0])]}
+    iclean = {'gdalt': [i for i in range(self.data.indexes['gdalt'].shape[0])]}
 
     if self.tag.find('oblique') == 0:
         # Oblique profile cleaning
@@ -142,16 +136,27 @@ def clean(self):
             if self.clean_level in ['clean', 'dusty']:
                 logger.warning('this level 2 data has no quality flags')
 
-            ida, = np.where((self.data.indexes['gdalt'] > 200.0))
-            idx['gdalt'] = np.unique(ida)
-        else:
-            logger.warning(' '.join(["interpretation of drifts below 200 km",
-                                     "should always be done in partnership",
-                                     "with the contact people"]))
+            idalt, = np.where((self.data.indexes['gdalt'] > 200.0))
+            iclean['gdalt'] = np.unique(idalt)
 
-    # downselect data based upon cleaning conditions above
-    self.data = self[idx]
+    # Downselect data based upon cleaning conditions above
+    self.data = self[iclean]
 
+    return
+
+
+def preprocess(self):
+    """Preprocess data to default loaded data to a single day."""
+    # Madrigal will sometimes include multiple days within a file
+    # labeled with a single date. This routine filters out this extra data
+    # using the pysat nanokernel processing queue.
+    general.filter_data_single_date(self)
+
+    # Warn the user about low altitude drifts if no cleaning is being performed
+    if self.clean_level == 'none' or self.clean_level is None:
+        logger.warning(' '.join(["interpretation of drifts below 200 km",
+                                 "should always be done in partnership",
+                                 "with the contact people"]))
     return
 
 
@@ -173,7 +178,7 @@ list_remote_files = functools.partial(general.list_remote_files,
 
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
              password=None, file_type='hdf5'):
-    """Downloads data from Madrigal.
+    """Download data from Madrigal.
 
     Parameters
     ----------
@@ -200,7 +205,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     Notes
     -----
     The user's names should be provided in field user. Ruby Payne-Scott should
-    be entered as Ruby+Payne-Scott
+    be entered as "Ruby Payne-Scott"
 
     The password field should be the user's email address. These parameters
     are passed to Madrigal when downloading.
@@ -212,21 +217,22 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     general.download(date_array, inst_code=str(madrigal_inst_code),
                      kindat=madrigal_tag[inst_id][tag], data_path=data_path,
                      user=user, password=password, file_type=file_type)
+    return
 
 
-def load(fnames, tag=None, inst_id=None):
-    """ Routine to load the JRO ISR data
+def load(fnames, tag='', inst_id=''):
+    """Load the JRO ISR data.
 
     Parameters
     -----------
     fnames : list
         List of filenames
-    tag : str or NoneType
+    tag : str
         tag name used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself. (default=None)
-    inst_id : str or NoneType
+        This input is nominally provided by pysat itself. (default='')
+    inst_id : str
         Instrument ID used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself. (default=None)
+        This input is nominally provided by pysat itself. (default='')
 
     Returns
     --------
@@ -238,10 +244,12 @@ def load(fnames, tag=None, inst_id=None):
     """
     # Define the xarray coordinate dimensions (apart from time)
     xcoords = {'drifts': {('time', 'gdalt', 'gdlatr', 'gdlonr', 'kindat',
-                           'kinst'): ['nwlos', 'range', 'vipn2', 'dvipn2',
+                           'kinst'): ['nwlos', 'range', 'vipn', 'dvipn', 'vipe',
+                                      'dvipe', 'vipn2', 'dvipn2',
                                       'vipe1', 'dvipe1', 'vi72', 'dvi72',
-                                      'vi82', 'dvi82', 'paiwl', 'pacwl',
-                                      'pbiwl', 'pbcwl', 'pciel', 'pccel',
+                                      'vi82', 'dvi82', 'vi7', 'dvi7', 'vi8',
+                                      'dvi8', 'paiwl', 'pacwl', 'pbiwl',
+                                      'pbcwl', 'pciel', 'pccel',
                                       'pdiel', 'pdcel', 'jro10', 'jro11'],
                           ('time', ): ['year', 'month', 'day', 'hour', 'min',
                                        'sec', 'spcst', 'pl', 'cbadn', 'inttms',

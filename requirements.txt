@@ -1,6 +1,7 @@
 h5py
-madrigalWeb
+madrigalWeb>=2.6
 numpy
+packaging
 pandas
-pysat>=3.0
+pysat>=3.0.3
 xarray

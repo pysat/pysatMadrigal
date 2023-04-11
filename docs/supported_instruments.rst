@@ -22,7 +22,7 @@ TEC is provided by MIT Haystack.
    :members:
 
 JRO_ISR
-----------------
+-------
 
 The incoherent scatter radar (ISR) at the
 `Jicamarca Radio Observatory <http://jro.igp.gob.pe/english/>`_ regularly
@@ -31,3 +31,22 @@ magnetic equator over Peru.
 
 .. automodule:: pysatMadrigal.instruments.jro_isr
    :members:
+
+
+Madrigal_Pandas
+---------------
+
+A general instrument for Madrigal time-series data.  This
+:py:class:`pysat.Instrument` uses Madrigal instrument codes and kindats to
+support the use of any of the Madrigal time-series data sets.  There are some
+further constraints in that the data set's Madrigal naming convention must be
+parsable by pysat.  Currently nine Madrigal instrument codes are supported by
+this :py:class:`pysat.Instrument`.  When possible, using a specific instrument
+module is recommended, since that instrument module will have additional
+support (e.g., cleaning methods, experiment acknowledgements, and references).
+
+.. automodule:: pysatMadrigal.instruments.madrigal_pandas
+   :members:
+
+
+      

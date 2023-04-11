@@ -1,13 +1,15 @@
-"""
-Coordinate transformation functions
-
-"""
+#!/usr/bin/env python
+# Full license can be found in License.md
+# Full author list can be found in .zenodo.json file
+# DOI:10.5281/zenodo.3824979
+# ----------------------------------------------------------------------------
+"""Coordinate transformation functions."""
 
 import numpy as np
 
 
 def geodetic_to_geocentric(lat_in, lon_in=None, inverse=False):
-    """Converts position from geodetic to geocentric or vice-versa.
+    """Convert position from geodetic to geocentric or vice-versa.
 
     Parameters
     ----------
@@ -31,7 +33,8 @@ def geodetic_to_geocentric(lat_in, lon_in=None, inverse=False):
 
     Note
     -----
-    Uses WGS-84 values
+    Uses WGS-84 values. Tested against:
+    https://www.vcalc.com/wiki/vcalc/geodetic+to+geocentric+latitude
 
     References
     ----------
@@ -71,8 +74,7 @@ def geodetic_to_geocentric(lat_in, lon_in=None, inverse=False):
 
 def geodetic_to_geocentric_horizontal(lat_in, lon_in, az_in, el_in,
                                       inverse=False):
-    """Converts from local horizontal coordinates in a geodetic system to local
-    horizontal coordinates in a geocentric system
+    """Convert from geodetic to geocentric local horizontal coordinates.
 
     Parameters
     ----------
@@ -107,7 +109,6 @@ def geodetic_to_geocentric_horizontal(lat_in, lon_in, az_in, el_in,
     Based on J.M. Ruohoniemi's geopack and R.J. Barnes radar.pro
 
     """
-
     az = np.radians(az_in)
     el = np.radians(el_in)
 
@@ -115,15 +116,15 @@ def geodetic_to_geocentric_horizontal(lat_in, lon_in, az_in, el_in,
     lat_out, lon_out, rad_earth = geodetic_to_geocentric(lat_in, lon_in,
                                                          inverse=inverse)
 
-    # Calcualte the deviation from vertical in radians
+    # Calculate the deviation from vertical in radians
     dev_vert = np.radians(lat_in - lat_out)
 
     # Calculate cartesian coordinated in local system
-    x_local = np.cos(el) * np.sin(az)
-    y_local = np.cos(el) * np.cos(az)
-    z_local = np.sin(el)
+    x_local = np.cos(el) * np.sin(az)  # W-E axis
+    y_local = np.cos(el) * np.cos(az)  # N-S axis
+    z_local = np.sin(el)  # Vertical axis
 
-    # Now rotate system about the x axis to align local vertical vector
+    # Now rotate system about the x-axis (W-E) to align local vertical vector
     # with Earth radial vector
     x_out = x_local
     y_out = y_local * np.cos(dev_vert) + z_local * np.sin(dev_vert)
@@ -136,8 +137,8 @@ def geodetic_to_geocentric_horizontal(lat_in, lon_in, az_in, el_in,
     return lat_out, lon_out, rad_earth, az_out, el_out
 
 
-def spherical_to_cartesian(az_in, el_in, r_in, inverse=False):
-    """Convert a position from spherical to cartesian, or vice-versa
+def local_spherical_to_cartesian(az_in, el_in, r_in, inverse=False):
+    """Convert a position from spherical to cartesian, or vice-versa.
 
     Parameters
     ----------
@@ -147,8 +148,9 @@ def spherical_to_cartesian(az_in, el_in, r_in, inverse=False):
         elevation/latitude in degrees or cartesian y in km (inverse=False/True)
     r_in : float
         distance from origin in km or cartesian z in km (inverse=False/True)
-    inverse : boolian
+    inverse : bool
         False to go from spherical to cartesian and True for the inverse
+        (default=False)
 
     Returns
     -------
@@ -161,29 +163,82 @@ def spherical_to_cartesian(az_in, el_in, r_in, inverse=False):
 
     Note
     -----
-    This transform is the same for local or global spherical/cartesian
-    transformations.
+    This transform differs from the standard by defining azimuth as starting
+    at zero from the positive y-axis instead of the positive x-axis.
 
     Returns elevation angle (angle from the xy plane) rather than zenith angle
     (angle from the z-axis)
 
     """
-
     if inverse:
         # Cartesian to Spherical
         xy_sq = az_in**2 + el_in**2
         z_out = np.sqrt(xy_sq + r_in**2)  # This is r
         y_out = np.degrees(np.arctan2(np.sqrt(xy_sq), r_in))  # This is zenith
         y_out = 90.0 - y_out  # This is the elevation
-        x_out = np.degrees(np.arctan2(el_in, az_in))  # This is azimuth
+        x_out = np.degrees(np.arctan2(az_in, el_in))  # This is azimuth
     else:
         # Spherical coordinate system uses zenith angle (degrees from the
         # z-axis) and not the elevation angle (degrees from the x-y plane)
         zen_in = np.radians(90.0 - el_in)
 
+        # Spherical to Cartesian: varies from standard to have azimuth
+        # start from zero at the y-axis
+        x_out = r_in * np.sin(zen_in) * np.sin(np.radians(az_in))
+        y_out = r_in * np.sin(zen_in) * np.cos(np.radians(az_in))
+        z_out = r_in * np.cos(zen_in)
+
+    return x_out, y_out, z_out
+
+
+def spherical_to_cartesian(theta_in, phi_in, r_in, inverse=False):
+    """Convert a position from spherical to cartesian, or vice-versa.
+
+    Parameters
+    ----------
+    theta_in : float
+        theta in degrees or cartesian x (inverse=False/True)
+    phi_in : float
+        phi in degrees or cartesian y (inverse=False/True)
+    r_in : float
+        distance from origin or cartesian z (inverse=False/True)
+    inverse : bool
+        False to go from spherical to cartesian and True for the inverse
+        (default=False)
+
+    Returns
+    -------
+    x_out : float
+        cartesian x or theta in degrees (inverse=False/True)
+    y_out : float
+        cartesian y or phi in degrees (inverse=False/True)
+    z_out : float
+        cartesian z or radial distance from origin (inverse=False/True)
+
+    Note
+    ----
+    This transform differs from the standard by defining azimuth as starting
+    at zero from the positive y-axis instead of the positive x-axis.
+
+    Returns elevation angle (angle from the xy plane) rather than zenith angle
+    (angle from the z-axis)
+
+    """
+    if inverse:
+        # Cartesian to Spherical
+        xy_sq = theta_in**2 + phi_in**2
+        z_out = np.sqrt(xy_sq + r_in**2)  # This is r
+        y_out = np.degrees(np.arctan2(np.sqrt(xy_sq), r_in))  # This is zenith
+        y_out = 90.0 - y_out  # This is the elevation or phi
+        x_out = np.degrees(np.arctan2(phi_in, theta_in))  # This is theta
+    else:
+        # Spherical coordinate system uses zenith angle (degrees from the
+        # z-axis) and not the elevation angle (degrees from the x-y plane)
+        zen_in = np.radians(90.0 - phi_in)
+
         # Spherical to Cartesian
-        x_out = r_in * np.sin(zen_in) * np.cos(np.radians(az_in))
-        y_out = r_in * np.sin(zen_in) * np.sin(np.radians(az_in))
+        x_out = r_in * np.sin(zen_in) * np.cos(np.radians(theta_in))
+        y_out = r_in * np.sin(zen_in) * np.sin(np.radians(theta_in))
         z_out = r_in * np.cos(zen_in)
 
     return x_out, y_out, z_out
@@ -191,7 +246,7 @@ def spherical_to_cartesian(az_in, el_in, r_in, inverse=False):
 
 def global_to_local_cartesian(x_in, y_in, z_in, lat_cent, lon_cent, rad_cent,
                               inverse=False):
-    """Converts a position from global to local cartesian or vice-versa
+    """Convert a position from global to local cartesian or vice-versa.
 
     Parameters
     ----------
@@ -222,7 +277,7 @@ def global_to_local_cartesian(x_in, y_in, z_in, lat_cent, lon_cent, rad_cent,
         local or global cartesian z in km (inverse=False/True)
 
     Note
-    -----
+    ----
     The global cartesian coordinate system has its origin at the center of the
     Earth, while the local system has its origin specified by the input
     latitude, longitude, and radius.  The global system has x intersecting
@@ -231,7 +286,6 @@ def global_to_local_cartesian(x_in, y_in, z_in, lat_cent, lon_cent, rad_cent,
     The local system has z pointing up, y pointing North, and x pointing East.
 
     """
-
     # Get the global cartesian coordinates of local origin
     x_cent, y_cent, z_cent = spherical_to_cartesian(lon_cent, lat_cent,
                                                     rad_cent)
@@ -242,9 +296,11 @@ def global_to_local_cartesian(x_in, y_in, z_in, lat_cent, lon_cent, rad_cent,
 
     # Get the amount of rotation needed to align the global x-axis with the
     # prime meridian
-    mer_rot = np.radians(lon_cent - 90.0)
+    mer_rot = np.radians(lon_cent + 90.0)
 
     if inverse:
+        # Local to global conversion
+        #
         # Rotate about the x-axis to align the z-axis with the Earth's
         # rotational axis
         xrot = x_in
@@ -258,6 +314,8 @@ def global_to_local_cartesian(x_in, y_in, z_in, lat_cent, lon_cent, rad_cent,
         y_out = xrot * np.sin(mer_rot) + yrot * np.cos(mer_rot) + y_cent
         z_out = zrot + z_cent
     else:
+        # Global to local conversion
+        #
         # Translate global origin to the local origin
         xtrans = x_in - x_cent
         ytrans = y_in - y_cent
@@ -278,8 +336,7 @@ def global_to_local_cartesian(x_in, y_in, z_in, lat_cent, lon_cent, rad_cent,
 
 def local_horizontal_to_global_geo(az, el, dist, lat_orig, lon_orig, alt_orig,
                                    geodetic=True):
-    """ Convert from local horizontal coordinates to geodetic or geocentric
-    coordinates
+    """Convert from local horizontal coords to geodetic or geocentric coords.
 
     Parameters
     ----------
@@ -314,12 +371,10 @@ def local_horizontal_to_global_geo(az, el, dist, lat_orig, lon_orig, alt_orig,
     Based on J.M. Ruohoniemi's geopack and R.J. Barnes radar.pro
 
     """
-
     # If the data are in geodetic coordiantes, convert to geocentric
     if geodetic:
-        (glat, glon, rearth, gaz, gel) = \
-            geodetic_to_geocentric_horizontal(lat_orig, lon_orig, az, el,
-                                              inverse=False)
+        (glat, glon, rearth, gaz, gel) = geodetic_to_geocentric_horizontal(
+            lat_orig, lon_orig, az, el, inverse=False)
         grad = rearth + alt_orig
     else:
         glat = lat_orig
@@ -329,7 +384,8 @@ def local_horizontal_to_global_geo(az, el, dist, lat_orig, lon_orig, alt_orig,
         gel = el
 
     # Convert from local horizontal to local cartesian coordiantes
-    x_loc, y_loc, z_loc = spherical_to_cartesian(gaz, gel, dist, inverse=False)
+    x_loc, y_loc, z_loc = local_spherical_to_cartesian(gaz, gel, dist,
+                                                       inverse=False)
 
     # Convert from local to global cartesian coordiantes
     x_glob, y_glob, z_glob = global_to_local_cartesian(x_loc, y_loc, z_loc,
