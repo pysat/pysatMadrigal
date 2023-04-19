@@ -4,24 +4,21 @@
 # DOI:10.5281/zenodo.3824979
 # ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-
-"""Supports the Ion Velocity Meter (IVM) onboard the Defense Meteorological
-Satellite Program (DMSP).
+"""Supports the Defense Meteorological Satellite Program (DMSP) IVM instruments.
 
-The IVM is comprised of the Retarding Potential Analyzer (RPA) and
-Drift Meter (DM). The RPA measures the energy of plasma along the
-direction of satellite motion. By fitting these measurements
-to a theoretical description of plasma the number density, plasma
-composition, plasma temperature, and plasma motion may be determined.
-The DM directly measures the arrival angle of plasma. Using the reported
-motion of the satellite the angle is converted into ion motion along
-two orthogonal directions, perpendicular to the satellite track. The IVM is
-part of the Special Sensor for Ions, Electrons, and Scintillations (SSIES)
-instrument suite on DMSP.
+The Ion Velocity Meter (IVM) is comprised of the Retarding Potential Analyzer
+(RPA) and Drift Meter (DM). The RPA measures the energy of plasma along the
+direction of satellite motion. By fitting these measurements to a theoretical
+description of plasma the number density, plasma composition, plasma
+temperature, and plasma motion may be determined. The DM directly measures the
+arrival angle of plasma. Using the reported motion of the satellite the angle is
+converted into ion motion along two orthogonal directions, perpendicular to the
+satellite track. The IVM is part of the Special Sensor for Ions, Electrons, and
+Scintillations (SSIES) instrument suite on DMSP.
 
-Downloads data from the National Science Foundation Madrigal Database.
-The routine is configured to utilize data files with instrument
-performance flags generated at the Center for Space Sciences at the
-University of Texas at Dallas.
+Downloads data from the National Science Foundation Madrigal Database. The
+routine is configured to utilize data files with instrument performance flags
+generated at the Center for Space Sciences at the University of Texas at Dallas.
 
 Properties
 ----------
@@ -58,7 +55,8 @@ import numpy as np
 
 from pysat import logger
 
-from pysatMadrigal.instruments.methods import general, dmsp
+from pysatMadrigal.instruments.methods import dmsp
+from pysatMadrigal.instruments.methods import general
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
@@ -112,7 +110,6 @@ _test_dates = {
 
 def init(self):
     """Initialize the Instrument object with values specific to DMSP IVM."""
-
     logger.info(general.cedar_rules())
     self.acknowledgements = general.cedar_rules()
     self.references = dmsp.references(self.name)
@@ -120,7 +117,7 @@ def init(self):
 
 
 def clean(self):
-    """Clean DMSP IVM data cleaned to the specified level.
+    """Clean DMSP IVM data to the specified level.
 
     Note
     ----
@@ -134,7 +131,6 @@ def clean(self):
     this routine.
 
     """
-
     if self.tag == 'utd':
         if self.clean_level == 'clean':
             iclean, = np.where((self['rpa_flag_ut'] <= 1)
@@ -176,7 +172,7 @@ load = general.load
 
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
              password=None, file_type='hdf5'):
-    """Downloads data from Madrigal.
+    """Download data from Madrigal.
 
     Parameters
     ----------

@@ -114,7 +114,7 @@ _test_download = {'': {tag: True for tag in tags.keys()}}
 
 
 def init(self, kindat=''):
-    """Initializes the Instrument object in support of Madrigal access
+    """Initialize the Instrument object in support of Madrigal access.
 
     Parameters
     ----------
@@ -122,7 +122,6 @@ def init(self, kindat=''):
         Madrigal instrument experiment code(s). (default='')
 
     """
-
     # Set the standard pysat attributes
     self.acknowledgements = general.cedar_rules()
     self.references = 'Please remember to cite the instrument articles.'
@@ -138,7 +137,7 @@ def init(self, kindat=''):
 
 
 def clean(self):
-    """Placeholder routine that would normally return cleaned data
+    """Raise warning that cleaning is not possible for general data.
 
     Note
     ----
@@ -149,7 +148,6 @@ def clean(self):
     Routine is called by pysat, and not by the end user directly.
 
     """
-
     if self.clean_level in ['clean', 'dusty', 'dirty']:
         logger.warning(''.join(["The generalized Madrigal data Instrument ",
                                 "can't support instrument-specific cleaning."]))
@@ -239,7 +237,7 @@ def list_files(tag, inst_id, data_path, kindat='', format_str=None,
 
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
              password=None, file_type='hdf5', kindat=''):
-    """Downloads data from Madrigal.
+    """Download data from Madrigal.
 
     Parameters
     ----------
@@ -277,7 +275,6 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     downloads.
 
     """
-
     general.download(date_array, inst_code=tag, kindat=kindat,
                      data_path=data_path, user=user, password=password,
                      file_type=file_type)

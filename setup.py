@@ -3,6 +3,7 @@
 # Copyright (C) 2020, Authors
 # Full license can be found in License.md and AUTHORS.md
 # -----------------------------------------------------------------------------
+"""Package setup."""
 
 from setuptools import setup
 

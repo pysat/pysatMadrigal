@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# Full license can be found in License.md
+# Full author list can be found in .zenodo.json file
+# DOI:10.5281/zenodo.3824979
+# ----------------------------------------------------------------------------
+"""Import the Instrument sub-modules and methods."""
 # Import Madrigal instruments
 from pysatMadrigal.instruments import dmsp_ivm
 from pysatMadrigal.instruments import gnss_tec

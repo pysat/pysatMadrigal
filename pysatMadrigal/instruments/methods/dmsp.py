@@ -26,7 +26,6 @@ def references(name):
         String providing reference guidenance for the DMSP data
 
     """
-
     refs = {'ivm': ' '.join(('F. J. Rich, Users Guide for the Topside',
                              'Ionospheric Plasma Monitor (SSIES, SSIES-2 and',
                              'SSIES-3) on Spacecraft of the Defense',
@@ -113,7 +112,6 @@ def update_DMSP_ephemeris(inst, ephem=None):
         DMSP IVM_EPHEM instrument object
 
     """
-
     # Ensure the right ephemera is loaded
     if ephem is None:
         logger.info('No ephemera provided for {:}'.format(inst.date))
@@ -292,7 +290,6 @@ def add_drifts_polar_cap_x_y(inst, rpa_flag_key=None,
     indicates whether RPA data was available (False) or not (True).
 
     """
-
     # Get the good RPA data, if available
     if rpa_flag_key in list(inst.data.keys()):
         rpa_idx, = np.where(inst[rpa_flag_key] != 1)

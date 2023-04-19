@@ -6,7 +6,7 @@ import pytest
 from pysatMadrigal.utils import coords
 
 
-class TestGeodeticGeocentric():
+class TestGeodeticGeocentric(object):
     """Unit tests for geodetic to geocentric conversion methods."""
 
     def setup_method(self):
@@ -29,7 +29,6 @@ class TestGeodeticGeocentric():
                                [45.1924232, 8.0, 6367.3459085])])
     def test_geodetic_to_geocentric(self, kwargs, target):
         """Test conversion from geodetic to geocentric coordinates."""
-
         self.out = coords.geodetic_to_geocentric(self.val['lat'],
                                                  lon_in=self.val['lon'],
                                                  **kwargs)
@@ -44,7 +43,6 @@ class TestGeodeticGeocentric():
 
     def test_geodetic_to_geocentric_and_back(self):
         """Test the reversibility of geodetic to geocentric conversions."""
-
         self.out = coords.geodetic_to_geocentric(self.val['lat'],
                                                  lon_in=self.val['lon'],
                                                  inverse=False)
@@ -66,7 +64,6 @@ class TestGeodeticGeocentric():
                                 52.2989610, 63.1180720])])
     def test_geodetic_to_geocentric_horizontal(self, kwargs, target):
         """Test conversion from geodetic to geocentric coordinates."""
-
         self.out = coords.geodetic_to_geocentric_horizontal(self.val['lat'],
                                                             self.val['lon'],
                                                             self.val['az'],
@@ -89,7 +86,6 @@ class TestGeodeticGeocentric():
         Inverse of az and el angles currently non-functional
 
         """
-
         self.out = coords.geodetic_to_geocentric_horizontal(self.val['lat'],
                                                             self.val['lon'],
                                                             self.val['az'],
@@ -128,7 +124,7 @@ class TestGeodeticGeocentricArray(TestGeodeticGeocentric):
         return
 
 
-class TestSphereCartesian():
+class TestSphereCartesian(object):
     """Unit tests for spherical/cartesian conversions."""
 
     def setup_method(self):
@@ -155,7 +151,6 @@ class TestSphereCartesian():
                                ['az', 'el', 'r'])])
     def test_spherical_to_cartesian(self, kwargs, input, target):
         """Test conversion from spherical to cartesian coordinates."""
-
         self.out = coords.spherical_to_cartesian(self.val[input[0]],
                                                  self.val[input[1]],
                                                  self.val[input[2]],
@@ -171,7 +166,6 @@ class TestSphereCartesian():
 
     def test_spherical_to_cartesian_and_back(self):
         """Test the reversibility of spherical to cartesian conversions."""
-
         self.out = coords.spherical_to_cartesian(self.val['x'], self.val['y'],
                                                  self.val['z'], inverse=True)
         self.out = coords.spherical_to_cartesian(self.out[0], self.out[1],
@@ -203,7 +197,7 @@ class TestSphereCartesianArray(TestSphereCartesian):
         return
 
 
-class TestGlobalLocal():
+class TestGlobalLocal(object):
     """Unit tests for global/local conversions."""
 
     def setup_method(self):
@@ -228,7 +222,6 @@ class TestGlobalLocal():
                                [9005.5925135, -4653.2653305, 15709.5775005])])
     def test_global_to_local_cartesian(self, kwargs, target):
         """Test conversion from global to local cartesian coordinates."""
-
         self.out = coords.global_to_local_cartesian(self.val['x'],
                                                     self.val['y'],
                                                     self.val['z'],
@@ -247,7 +240,6 @@ class TestGlobalLocal():
 
     def test_global_to_local_cartesian_and_back(self):
         """Test the reversibility of the global to loc cartesian transform."""
-
         self.out = coords.global_to_local_cartesian(self.val['x'],
                                                     self.val['y'],
                                                     self.val['z'],
@@ -285,7 +277,7 @@ class TestGlobalLocalArray(TestGlobalLocal):
         return
 
 
-class TestLocalHorizontalGlobal():
+class TestLocalHorizontalGlobal(object):
     """Tests for local horizontal to global geo and back."""
 
     def setup_method(self):
@@ -308,8 +300,7 @@ class TestLocalHorizontalGlobal():
                               ({'geodetic': False},
                                [49.60665778, 4.1652362, 7511.4633082])])
     def test_local_horizontal_to_global_geo(self, kwargs, target):
-        """Tests the conversion of the local horizontal to global geo"""
-
+        """Tests the conversion of the local horizontal to global geo."""
         self.out = coords.local_horizontal_to_global_geo(self.val['az'],
                                                          self.val['el'],
                                                          self.val['dist'],

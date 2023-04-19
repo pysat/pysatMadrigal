@@ -26,7 +26,7 @@ for the Space Physics community.  This module officially supports Python 3.7+.
 
 | Common modules | Community modules |
 | -------------- | ----------------- |
-| h5py           | madrigalWeb       |
+| h5py           | madrigalWeb>=2.6  |
 | numpy          | pysat >= 3.0.3    |
 | pandas         |                   |
 | xarray         |                   |
@@ -49,11 +49,6 @@ a local install use the "--user" flag after "install".
 cd pysatMadrigal/
 python setup.py install
 ```
-
-Note: pre-0.1.0 version
------------------------
-pysatMadrigal is currently provided as an alpha pre-release.  Feedback and
-contributions are appreciated.
 
 # Examples
 

@@ -21,7 +21,6 @@ def acknowledgements(name):
         Acknowledgement information to provide in studies using this data
 
     """
-
     ackn = {'tec': ''.join(["GPS TEC data products and access through the ",
                             "Madrigal distributed data system are provided to ",
                             "the community by the Massachusetts Institute of ",
@@ -64,7 +63,6 @@ def references(name):
         Suggested Instrument reference(s)
 
     """
-
     refs = {'tec': "Rideout and Coster (2006) doi:10.1007/s10291-006-0029-5"}
 
     return refs[name]

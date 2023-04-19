@@ -4,9 +4,7 @@
 # DOI:10.5281/zenodo.3824979
 # ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-.
-"""General routines for integrating CEDAR Madrigal instruments into pysat.
-
-"""
+"""General routines for integrating CEDAR Madrigal instruments into pysat."""
 
 import datetime as dt
 import gzip
@@ -40,7 +38,7 @@ def cedar_rules():
 
 
 def known_madrigal_inst_codes(pandas_format=None):
-    """Supplies known Madrigal instrument codes with a brief description.
+    """Supply known Madrigal instrument codes with a brief description.
 
     Parameters
     ----------
@@ -56,7 +54,6 @@ def known_madrigal_inst_codes(pandas_format=None):
         description of the corresponding instrument as the value.
 
     """
-
     time_series = {'120': 'Interplanetary Mag Field and Solar Wind',
                    '210': 'Geophysical Indicies', '211': 'AE Index',
                    '212': 'DST Index', '170': 'POES Spacecraft Particle Flux',
@@ -225,7 +222,7 @@ def known_madrigal_inst_codes(pandas_format=None):
 
 
 def madrigal_file_format_str(inst_code, strict=False, verbose=True):
-    """Supplies known Madrigal instrument codes with a brief description.
+    """Supply known Madrigal instrument codes with a brief description.
 
     Parameters
     ----------
@@ -256,7 +253,6 @@ def madrigal_file_format_str(inst_code, strict=False, verbose=True):
     these types.
 
     """
-
     if not isinstance(inst_code, int):
         inst_code = int(inst_code)
 
@@ -493,7 +489,7 @@ def madrigal_file_format_str(inst_code, strict=False, verbose=True):
 
 
 def load(fnames, tag='', inst_id='', xarray_coords=None):
-    """Loads data from Madrigal into Pandas or XArray.
+    """Load data from Madrigal into Pandas or XArray.
 
     Parameters
     ----------
@@ -824,7 +820,7 @@ def load(fnames, tag='', inst_id='', xarray_coords=None):
 def download(date_array, inst_code=None, kindat=None, data_path=None,
              user=None, password=None, url="http://cedar.openmadrigal.org",
              file_type='hdf5'):
-    """Downloads data from Madrigal.
+    """Download data from Madrigal.
 
     Parameters
     ----------
@@ -869,7 +865,6 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
     downloads.
 
     """
-
     if file_type not in file_types.keys():
         raise ValueError("Unknown file format {:}, accepts {:}".format(
             file_type, file_types.keys()))
@@ -921,7 +916,7 @@ def get_remote_filenames(inst_code=None, kindat='', user=None, password=None,
                          web_data=None, url="http://cedar.openmadrigal.org",
                          start=dt.datetime(1900, 1, 1), stop=dt.datetime.now(),
                          date_array=None):
-    """Retrieve the remote filenames for a specified Madrigal experiment
+    """Retrieve the remote filenames for a specified Madrigal experiment.
 
     Parameters
     ----------
@@ -979,7 +974,6 @@ def get_remote_filenames(inst_code=None, kindat='', user=None, password=None,
 
 
     """
-
     _check_madrigal_params(inst_code=inst_code, user=user, password=password)
 
     if kindat in ['', '*']:
@@ -1053,7 +1047,6 @@ def good_exp(exp, date_array=None):
         True if good, False if bad
 
     """
-
     gflag = False
 
     if exp.id != -1:
@@ -1154,7 +1147,6 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
                                               kindats=madrigal_tag)
 
     """
-
     _check_madrigal_params(inst_code=inst_code, user=user, password=password)
 
     # Test input
@@ -1273,7 +1265,7 @@ def list_files(tag, inst_id, data_path, format_str=None,
 
 
 def filter_data_single_date(inst):
-    """Filters data to a single date.
+    """Filter data to a single date.
 
     Parameters
     ----------
@@ -1314,7 +1306,6 @@ def filter_data_single_date(inst):
         preprocess = pysat.instruments.methods.madrigal.filter_data_single_date
 
     """
-
     # Only do this if loading by date!
     if inst._load_by_date and inst.pad is None:
         # Identify times for the loaded date
@@ -1328,7 +1319,7 @@ def filter_data_single_date(inst):
 
 
 def _check_madrigal_params(inst_code, user, password):
-    """Checks that parameters requried by Madrigal database are passed through.
+    """Check that parameters requried by Madrigal database are passed through.
 
     Parameters
     ----------
@@ -1348,7 +1339,6 @@ def _check_madrigal_params(inst_code, user, password):
         Default values of None will raise an error.
 
     """
-
     inst_codes = known_madrigal_inst_codes(None)
 
     if str(inst_code) not in inst_codes.keys():

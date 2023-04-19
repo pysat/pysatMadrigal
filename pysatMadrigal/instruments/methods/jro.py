@@ -38,7 +38,6 @@ def references():
         String providing reference guidenance for the JRO experiments
 
     """
-
     refs = "Depends on the radar experiment; contact PI"
     return refs
 
