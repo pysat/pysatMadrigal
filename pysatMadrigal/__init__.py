@@ -1,3 +1,10 @@
+"""Core library for pysatMadrigal.
+
+This is a library of `pysat` instrument modules and methods designed to support
+instruments archived at the Madrigal portal.
+
+"""
+
 import os
 from pysatMadrigal import instruments  # noqa F401
 from pysatMadrigal import utils  # noqa F401
