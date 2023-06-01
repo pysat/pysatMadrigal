@@ -4,7 +4,7 @@
 # DOI:10.5281/zenodo.3824979
 # ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-
-"""Supports the Special Sensor-J (SSJ) instrument and derived products from the
+"""Support the Special Sensor-J (SSJ) instrument and derived products from the
 Defense Meteorological Satellite Program (DMSP).
 
 The SSJ measures precipitating particles using spectrometery. The Auroral
@@ -62,7 +62,8 @@ import warnings
 from pysat import logger
 from pysat.utils.time import create_date_range
 
-from pysatMadrigal.instruments.methods import general, dmsp
+from pysatMadrigal.instruments.methods import dmsp
+from pysatMadrigal.instruments.methods import general
 
 # ----------------------------------------------------------------------------
 # Instrument attributes
@@ -97,7 +98,6 @@ _test_dates = {'': {'abi': dt.datetime(1982, 12, 30)}}
 
 def init(self):
     """Initialize the Instrument object with values specific to DMSP IVM."""
-
     self.acknowledgements = ''.join([
         general.cedar_rules(), '\nThe Air Force Research Laboratory Auroral ',
         'Boundary Index (ABI) was provided by the United States Air Force ',
@@ -128,7 +128,6 @@ def clean(self):
         If the 'dirty' level is invoked (same as no cleaning)
 
     """
-
     if self.clean_level == 'clean':
         iclean, = np.where(self['EQB_QC_FL'] <= 1)
     elif self.clean_level == 'dusty':
@@ -163,7 +162,7 @@ list_remote_files = functools.partial(general.list_remote_files,
 
 # Set the load routine
 def load(fnames, tag='', inst_id=''):
-    """Loads data from Madrigal after accounting for date tags.
+    """Load DMSP SSJ4 data from Madrigal after accounting for date tags.
 
     Parameters
     ----------
@@ -221,7 +220,7 @@ def load(fnames, tag='', inst_id=''):
 
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
              password=None, file_type='hdf5'):
-    """Downloads data from Madrigal.
+    """Download DMSP SSJ4 data from Madrigal.
 
     Parameters
     ----------
@@ -257,7 +256,6 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     downloads.
 
     """
-
     # Ensure the date range is correct
     if date_array.freq not in ['AS-JAN', 'YS', 'AS']:
         date_array = create_date_range(
