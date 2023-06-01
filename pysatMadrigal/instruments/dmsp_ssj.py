@@ -4,12 +4,13 @@
 # DOI:10.5281/zenodo.3824979
 # ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-
-"""Support the Special Sensor-J (SSJ) instrument and derived products from the
-Defense Meteorological Satellite Program (DMSP).
+"""Support the DMSP Special Sensor-J (SSJ) instrument and derived products.
 
-The SSJ measures precipitating particles using spectrometery. The Auroral
-Boundary Index (ABI) is automatically computed from this data set and marks the
-midnight equatorward boundary in each hemisphere.
+
+The Defense Meteorological Satellite Program (DMSP) SSJ measures precipitating
+particles using spectrometery. The Auroral Boundary Index (ABI) is automatically
+computed from this data set and marks the midnight equatorward boundary in each
+hemisphere.
 
 Further questions can be addressed to:
  Gordon Wilson
