@@ -129,9 +129,9 @@ def clean(self):
 
     """
     if self.clean_level == 'clean':
-        iclean, = np.where(self['EQB_QC_FL'] <= 1)
+        iclean, = np.where(self['eqb_qc_fl'] <= 1)
     elif self.clean_level == 'dusty':
-        iclean, = np.where(self['EQB_QC_FL'] <= 2)
+        iclean, = np.where(self['eqb_qc_fl'] <= 2)
     else:
         warnings.warn('No quality control level "dirty", using "none"')
         iclean = None
