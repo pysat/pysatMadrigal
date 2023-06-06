@@ -11,6 +11,16 @@ Meter (IVM) Madrigal data.
 .. automodule:: pysatMadrigal.instruments.dmsp_ivm
    :members:
 
+DMSP_SSJ
+--------
+
+Supports the Defense Meteorological Satelitte Program (DMSP) Special Sensor J
+(SSJ) Madrigal data.
+
+
+.. automodule:: pysatMadrigal.instruments.dmsp_ssj
+   :members:
+
 GNSS_TEC
 --------
 

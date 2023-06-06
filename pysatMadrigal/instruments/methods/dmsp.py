@@ -31,7 +31,20 @@ def references(name):
                              'SSIES-3) on Spacecraft of the Defense',
                              'Meteorological Satellite Program (Air Force',
                              'Phillips Laboratory, Hanscom AFB, MA, 1994),',
-                             'Vol. 1, p. 25.'))}
+                             'Vol. 1, p. 25.')),
+            'ssj': ''.join(['Gussenhoven, M. S., D. A. Hardy and W. J. Burke, ',
+                            'DMSP/F2 electron observations of equatorward ',
+                            'auroral boundaries and their relationship to ',
+                            'magnetospheric electric fields, J. Geophys. Res.,',
+                            ' 86, 768-778, 1981.\nGussenhoven, M. S., D. A. ',
+                            'Hardy and N. Heinemann, Systematics of the ',
+                            'equatorward diffuse auroral boundary, J. Geophys.',
+                            ' Res., 88, 5692-5708, 1983.\nHardy, D. A., E. ',
+                            'G. Holeman, W. J. Burke, L. C. Gentile and K. H. ',
+                            'Bounar (2008), Probability distributions of ',
+                            'electron precipitation at high magnetic latitudes',
+                            ', Journal of Geophysical Research, Volume 113, ',
+                            'Issue A6, doi10.1029/2007JA012746.'])}
 
     return refs[name]
 

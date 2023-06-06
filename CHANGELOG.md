@@ -22,6 +22,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
      between '.' delimiters, required for some Madrigal file formats
    * Standardized the Instrument method kwarg defaults
    * Added 'site' tag to the GNSS TEC Instrument
+   * Added a 'dmsp_ssj' instrument for Auroral Boundary Index data
    * Added support for varied use of `two_digit_year_break` to
      `methods.general.list_remote_files`
    * Implemented `two_digit_year_break` support for `vtec` GNSS TEC Instrument
@@ -35,6 +36,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
    * Added quick-fail for main pytest command
 * Bug
    * Fixed bugs in the coordinate conversion functions
+   * Fixed bug in the general download function that sets the stop date
 * Maintenance
    * Updated GitHub action and NEP29 versions
    * Updated the minimum Madrigal version to allow HDF4 downloads

@@ -75,7 +75,9 @@ platform = 'madrigal'
 name = 'pandas'
 tags = dict()
 pandas_format = True
-excluded_tags = ['8105']  # Pandas-style data that requires special support
+
+# Pandas-style data that requires special support
+excluded_tags = ['8105', '180']
 
 # Assign only tags with pysat-compatible file format strings
 pandas_codes = general.known_madrigal_inst_codes(pandas_format=True)
@@ -102,9 +104,8 @@ supported_tags = {ss: {tag: general.madrigal_file_format_str(tag)
 # Need to sort out test day setting for unit testing, maybe through a remote
 # function
 tag_dates = {'120': dt.datetime(1963, 11, 27), '170': dt.datetime(1998, 7, 1),
-             '180': dt.datetime(2000, 1, 1), '210': dt.datetime(1950, 1, 1),
-             '211': dt.datetime(1978, 1, 1), '212': dt.datetime(1957, 1, 1),
-             '7800': dt.datetime(2009, 11, 10)}
+             '210': dt.datetime(1950, 1, 1), '211': dt.datetime(1978, 1, 1),
+             '212': dt.datetime(1957, 1, 1), '7800': dt.datetime(2009, 11, 10)}
 _test_dates = {'': {tag: tag_dates[tag] if tag in tag_dates.keys()
                     else tag_dates['7800'] for tag in tags.keys()}}
 _test_download = {'': {tag: True for tag in tags.keys()}}
