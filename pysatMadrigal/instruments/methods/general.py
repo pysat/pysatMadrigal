@@ -883,7 +883,7 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
     start = date_array.min()
     stop = date_array.max()
     if start == stop:
-        stop += dt.timedelta(days=1)
+        stop = date_array.shift().max()
 
     # Initialize the connection to Madrigal
     logger.info('Connecting to Madrigal')
