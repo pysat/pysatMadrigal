@@ -42,6 +42,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
    * Updated the minimum Madrigal version to allow HDF4 downloads
    * Update pysat instrument testing suite, pytest syntax
    * Add manual GitHub Actions tests for pysat RC
+   * Removed code needed to work around pysat bugs
 
 [0.0.4] - 2021-06-11
 --------------------
