@@ -601,6 +601,9 @@ class TestNetCDFFiles(object):
         # Evaluate the loaded data
         self.eval_dataset_meta_output()
 
+        # Close for Windows OS
+        self.data.close()
+
         return
 
     def test_load_netcdf_extra_xarray_coord(self):
@@ -616,6 +619,9 @@ class TestNetCDFFiles(object):
 
         # Evaluate the loaded data
         self.eval_dataset_meta_output()
+
+        # Close for Windows OS
+        self.data.close()
 
         return
 
