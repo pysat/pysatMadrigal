@@ -4,7 +4,7 @@
 # DOI:10.5281/zenodo.3824979
 # ----------------------------------------------------------------------------
 # -*- coding: utf-8 -*-.
-"""Supports access to taped data of AE from the World Data Center A (Boulder)
+"""Supports access to taped data of AE from the World Data Center A (Boulder).
 
 Properties
 ----------
