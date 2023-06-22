@@ -59,4 +59,17 @@ support (e.g., cleaning methods, experiment acknowledgements, and references).
    :members:
 
 
+NGDC_AE
+-------
+
+An instrument for the Geophysical indices from NGDC, which include AE AL, AU,
+and AO.  The :py:attr:`name` is AE due to the Madrigal naming conventions.  The
+data set spans the years of 1978 through 1987, will all data saved in a single
+file.  Because of this, you only need to download the data once and any desired
+time period may be loaded.
+
+.. automodule:: pysatMadrigal.instruments.ngdc_ae
+   :members:
+
+
       
