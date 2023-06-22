@@ -105,7 +105,8 @@ tag_dates = {'120': dt.datetime(1963, 11, 27), '170': dt.datetime(1998, 7, 1),
              '7800': dt.datetime(2009, 11, 10)}
 _test_dates = {'': {tag: tag_dates[tag] if tag in tag_dates.keys()
                     else tag_dates['7800'] for tag in tags.keys()}}
-_test_download = {'': {tag: True if tag in tag_dates.keys() else False for tag in tags.keys()}}
+_test_download = {'': {tag: True if tag in tag_dates.keys() else False
+                       for tag in tags.keys()}}
 
 # ----------------------------------------------------------------------------
 # Instrument methods
