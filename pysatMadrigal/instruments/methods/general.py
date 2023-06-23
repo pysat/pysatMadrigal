@@ -819,7 +819,7 @@ def load(fnames, tag='', inst_id='', xarray_coords=None):
 
 def download(date_array, inst_code=None, kindat=None, data_path=None,
              user=None, password=None, url="http://cedar.openmadrigal.org",
-             file_type='hdf5'):
+             file_type='hdf5', **kwargs):
     """Download data from Madrigal.
 
     Parameters
@@ -847,6 +847,9 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
         File format for Madrigal data.  Load routines currently only accepts
         'hdf5' and 'netCDF4', but any of the Madrigal options may be used
         here. (default='hdf5')
+    **kwargs : dict
+        Additional kwarg catch, allows general use when tag/inst_id are not
+        needed for a given instrument.
 
     Raises
     ------
