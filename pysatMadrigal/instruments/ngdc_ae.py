@@ -243,7 +243,7 @@ def load(fnames, tag='', inst_id=''):
                                  meta.labels.units: unit_string,
                                  meta.labels.desc: desc_string}
 
-                    if unit_string.find('nT') > 0:
+                    if unit_string.find('nT') >= 0:
                         # Fill and error values only apply to index values
                         meta_dict[meta.labels.fill_val] = fill_val
                         meta_dict[meta.labels.notes] = notes
@@ -288,14 +288,6 @@ def load(fnames, tag='', inst_id=''):
         # Load the data into a pandas DataFrame
         data = pds.DataFrame.from_records(file_data[dmask], columns=labels,
                                           index=tindex)
-
-        # Raise a logging warning if there are duplicate times. This
-        # means the data should be stored as an xarray Dataset
-        if np.any(tindex.duplicated()):
-            pysat.logger.warning(''.join(["duplicated time indices, consider ",
-                                          "specifing additional coordinates ",
-                                          "and storing the data as an xarray ",
-                                          "Dataset"]))
 
     # Ensure that data is at least an empty Dataset
     if data is None:
