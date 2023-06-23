@@ -260,7 +260,7 @@ def load(fnames, tag='', inst_id=''):
         # Extended processing is the same for simple and HDF5 files
         #
         # Construct datetime index from times
-        time_keys = np.array(['year', 'month', 'day', 'hour', 'min', 'sec'])
+        time_keys = np.array(['year', 'month', 'day', 'hour', 'hm', 'hmi'])
         lower_labels = [ll.lower() for ll in labels]
         time_keys = [key for key in time_keys if key not in lower_labels]
         if len(time_keys) > 0:
