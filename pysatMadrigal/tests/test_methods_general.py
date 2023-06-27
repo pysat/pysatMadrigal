@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+ea#!/usr/bin/env python
 # Full license can be found in License.md
 # Full author list can be found in .zenodo.json file
 # DOI:10.5281/zenodo.3824979
@@ -502,7 +502,10 @@ class TestNetCDFFiles(object):
         # Remove the temporary directory and file
         for tfile in self.temp_files:
             if os.path.isfile(tfile):
-                os.remove(tfile)
+                try:
+                    os.remove(tfile)
+                except PermissionError:
+                    pass  # Windows is annoying
         self.data_path.cleanup()
 
         del self.data_path, self.temp_files, self.xarray_coords, self.data
@@ -649,7 +652,10 @@ class TestListFiles(object):
         # Remove the temporary file, if it exists
         for tfile in self.temp_files:
             if os.path.isfile(tfile):
-                os.remove(tfile)
+                try:
+                    os.remove(tfile)
+                except PermissionError:
+                    pass  # Windows hates everything
 
         del self.inst, self.temp_files, self.supported_tags
         return
