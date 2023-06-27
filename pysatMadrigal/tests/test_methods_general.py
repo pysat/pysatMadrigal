@@ -502,11 +502,14 @@ class TestNetCDFFiles(object):
         # Remove the temporary directory and file
         for tfile in self.temp_files:
             if os.path.isfile(tfile):
-                try:
-                    os.remove(tfile)
-                except PermissionError:
-                    pass  # Windows is annoying
-        self.data_path.cleanup()
+                os.remove(tfile)
+
+        try:
+            self.data_path.cleanup()
+        except PermissionError:
+            # Windows fix until `ignore_cleanup_errors=True` can be used in all
+            # supported versions
+            pass
 
         del self.data_path, self.temp_files, self.xarray_coords, self.data
         del self.meta
@@ -652,10 +655,7 @@ class TestListFiles(object):
         # Remove the temporary file, if it exists
         for tfile in self.temp_files:
             if os.path.isfile(tfile):
-                try:
-                    os.remove(tfile)
-                except PermissionError:
-                    pass  # Windows hates everything
+                os.remove(tfile)
 
         del self.inst, self.temp_files, self.supported_tags
         return
