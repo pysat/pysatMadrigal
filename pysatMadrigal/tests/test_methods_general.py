@@ -513,7 +513,7 @@ class TestNetCDFFiles(object):
         try:
             self.data_path.cleanup()
         except PermissionError:
-            # TODO (#https://github.com/pysat/pysat/issues/974): Windows fix
+            # TODO(#https://github.com/pysat/pysat/issues/974): Windows fix
             # until `ignore_cleanup_errors=True` can be used (3.10 is lowest)
             pass
 
