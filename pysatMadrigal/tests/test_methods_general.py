@@ -502,13 +502,19 @@ class TestNetCDFFiles(object):
         # Remove the temporary directory and file
         for tfile in self.temp_files:
             if os.path.isfile(tfile):
-                os.remove(tfile)
+                if hasattr(tfile, 'close'):
+                    tfile.close()
+
+                try:
+                    os.remove(tfile)
+                except PermissionError:
+                    pass  # Windows thinks files are always open
 
         try:
             self.data_path.cleanup()
         except PermissionError:
-            # Windows fix until `ignore_cleanup_errors=True` can be used in all
-            # supported versions
+            # TODO (#https://github.com/pysat/pysat/issues/974): Windows fix
+            # until `ignore_cleanup_errors=True` can be used (3.10 is lowest)
             pass
 
         del self.data_path, self.temp_files, self.xarray_coords, self.data
