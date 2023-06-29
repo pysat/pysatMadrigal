@@ -502,9 +502,6 @@ class TestNetCDFFiles(object):
         # Remove the temporary directory and file
         for tfile in self.temp_files:
             if os.path.isfile(tfile):
-                if hasattr(tfile, 'close'):
-                    tfile.close()
-
                 try:
                     os.remove(tfile)
                 except PermissionError:
