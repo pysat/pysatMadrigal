@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 --------------------
 * Enhancements
   * Moved the NGDC AE index Instrument from the general Madrigal Pandas
-    instrument to it's own, fixing the Windows memory issue and a problem
+    instrument to a new one, fixing the Windows memory issue and a problem
     with duplicated times
 * Maintenance
   * Add manual GitHub Actions tests for pysatMadrigal RC
