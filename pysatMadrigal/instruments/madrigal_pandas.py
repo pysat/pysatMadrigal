@@ -106,6 +106,11 @@ tag_dates = {'120': dt.datetime(1963, 11, 27), '170': dt.datetime(1998, 7, 1),
 _test_dates = {'': {tag: tag_dates[tag] if tag in tag_dates.keys()
                     else tag_dates['7800'] for tag in tags.keys()}}
 _test_download = {'': {tag: True for tag in tags.keys()}}
+_clean_warn = {'': {tag: {clean_level: [('logger', 'WARN',
+                                         "can't support instrument-specific",
+                                         clean_level)]
+                          for clean_level in ['clean', 'dusty', 'dirty']}
+                    for tag in inst_ids['']}}
 
 # ----------------------------------------------------------------------------
 # Instrument methods

@@ -104,6 +104,13 @@ _test_dates = {
     'f17': {tag: dt.datetime(2009, 1, 1) for tag in inst_ids['f17']},
     'f18': {tag: dt.datetime(2017, 12, 30) for tag in inst_ids['f18']}}
 
+_clean_warn = {inst_id: {tag: {clean_level: [('logger', 'WARN',
+                                              'this level 1 data has no qual',
+                                              clean_level)]
+                               for clean_level in ['clean', 'dusty', 'dirty']}
+                         for tag in inst_ids[inst_id] if inst_id != 'utd'}
+               for inst_id in inst_ids.keys()}
+
 # ----------------------------------------------------------------------------
 # Instrument methods
 

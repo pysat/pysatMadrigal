@@ -92,6 +92,10 @@ remote_tags = {
 
 _test_dates = {'': {'abi': dt.datetime(1982, 12, 30)}}
 
+_clean_warn = {'': {'abi': {'dirty': [('warning', UserWarning,
+                                       'No quality control level "dirty"',
+                                       'dirty')]}}}
+
 # ----------------------------------------------------------------------------
 # Instrument methods
 

@@ -88,6 +88,21 @@ _test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
                     'oblique_rand': dt.datetime(2000, 11, 9),
                     'oblique_long': dt.datetime(2010, 4, 12)}}
 
+_clean_warn = {'': {tag: {clean_level: [('logger', 'WARN',
+                                         'this level 2 data has no quality ',
+                                         clean_level)]
+                          for clean_level in ['clean', 'dusty']}
+                    for tag in inst_ids['']}}
+
+for tag in inst_ids['']:
+    if tag.find('oblique') == 0:
+        _clean_warn[''][tag]['dirty'] = [('logger', 'WARN',
+                                         'this level 2 data has no quality ',
+                                          'dirty')]
+        for clean_level in ['clean', 'dusty', 'dirty']:
+            _clean_warn[''][tag][clean_level].append(
+                ('logger', 'INFO', 'The double pulse, coded ', clean_level))
+
 
 # ----------------------------------------------------------------------------
 # Instrument methods
