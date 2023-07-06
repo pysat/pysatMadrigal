@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 * Maintenance
   * Add manual GitHub Actions tests for pysatMadrigal RC
   * Update GitHub Actions workflows for newer versions of pip
+  * Added clean warning test attributes to all Instruments
 
 [0.1.0] - 2023-04-11
 --------------------
