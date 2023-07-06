@@ -502,8 +502,17 @@ class TestNetCDFFiles(object):
         # Remove the temporary directory and file
         for tfile in self.temp_files:
             if os.path.isfile(tfile):
-                os.remove(tfile)
-        self.data_path.cleanup()
+                try:
+                    os.remove(tfile)
+                except PermissionError:
+                    pass  # Windows thinks files are always open
+
+        try:
+            self.data_path.cleanup()
+        except Exception:
+            # TODO(#https://github.com/pysat/pysat/issues/974): Windows fix
+            # until `ignore_cleanup_errors=True` can be used (3.10 is lowest)
+            pass
 
         del self.data_path, self.temp_files, self.xarray_coords, self.data
         del self.meta
@@ -601,6 +610,9 @@ class TestNetCDFFiles(object):
         # Evaluate the loaded data
         self.eval_dataset_meta_output()
 
+        # Close for Windows OS
+        self.data.close()
+
         return
 
     def test_load_netcdf_extra_xarray_coord(self):
@@ -616,6 +628,9 @@ class TestNetCDFFiles(object):
 
         # Evaluate the loaded data
         self.eval_dataset_meta_output()
+
+        # Close for Windows OS
+        self.data.close()
 
         return
 
