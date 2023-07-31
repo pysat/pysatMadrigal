@@ -25,8 +25,7 @@ routine.
 Warnings
 --------
 The entire data set (1 Jan 1978 through 31 Dec 1987) is provided in a single
-file on Madrigal. The download method will break this file up by year for
-easier access.
+file on Madrigal.
 
 Examples
 --------
@@ -222,12 +221,12 @@ def load(fnames, tag='', inst_id=''):
         # Split the date from the filename
         fname = fname_date[:-11]
         fdate = dt.datetime.strptime(fname_date[-10:], '%Y-%m-%d')
+        fstop = fdate
 
         if fstart is None:
             fstart = fdate
 
-        if fstop is None:
-            fstop = fdate
+    fstop += dt.timedelta(days=1)
 
     # There is only one file for this Instrument
     with h5py.File(fname, 'r') as filed:
@@ -280,7 +279,7 @@ def load(fnames, tag='', inst_id=''):
                                                        day=day)
 
         # Get the data mask
-        dmask = (fdate >= fstart) & (fdate <= fstop)
+        dmask = (fdate >= fstart) & (fdate < fstop)
 
         # Construct the time index
         hour = file_data[dmask]['hour']
