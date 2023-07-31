@@ -6,8 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 [0.1.X] - 2023-XX-XX
 --------------------
 * Enhancements
-  * Moved the OMNI-2 IMF index Instrument from the general Madrigal Pandas
-    instrument into a new one
+  * Moved the OMNI-2 IMF, Dst, and Geomagnetic index Instruments from the
+    general Madrigal Pandas instrument into new ones
   * Moved the NGDC AE index Instrument from the general Madrigal Pandas
     instrument to a new one, fixing the Windows memory issue and a problem
     with duplicated times
