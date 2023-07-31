@@ -37,7 +37,7 @@ Examples
     import pysat
     import pysatMadrigal as py_mad
 
-    # Download DMSP data from Madrigal
+    # Download AE data from Madrigal
     aei = pysat.Instrument(inst_module=py_mad.instruments.ngdc_ae)
     aei.download(start=py_mad.instruments.ngdc_ae.madrigal_start,
                  user='Firstname+Lastname', password='email@address.com')
