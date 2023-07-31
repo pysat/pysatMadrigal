@@ -50,7 +50,7 @@ A general instrument for Madrigal time-series data.  This
 :py:class:`pysat.Instrument` uses Madrigal instrument codes and kindats to
 support the use of any of the Madrigal time-series data sets.  There are some
 further constraints in that the data set's Madrigal naming convention must be
-parsable by pysat.  Currently nine Madrigal instrument codes are supported by
+parsable by pysat.  Currently four Madrigal instrument codes are supported by
 this :py:class:`pysat.Instrument`.  When possible, using a specific instrument
 module is recommended, since that instrument module will have additional
 support (e.g., cleaning methods, experiment acknowledgements, and references).
@@ -72,4 +72,15 @@ time period may be loaded.
    :members:
 
 
-      
+OMNI2_IMF
+---------
+
+An instrument for the interplanetary magnetic field (IMF) data from Omni 2. The
+data starts in 1963 and the entire data set is contained in a single file.  The
+file is occasionally updated, and so obtaining the most recent data means that
+all historic data must also be downloaded (or re-downloaded). OMNI data may
+also be obtained more directly using
+`pysatNASA <https://pysatnasa.readthedocs.io/en/latest/supported_instruments.html#omni-hro>`_.
+
+.. automodule:: pysatMadrigal.instruments.omni2_imf
+   :members:
