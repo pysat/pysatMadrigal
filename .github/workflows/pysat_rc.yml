@@ -1,5 +1,6 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+# This workflow will install Python dependencies, run tests and lint with a
+# variety of Python versions. For more information see:
+# https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Test with latest pysat RC
 
@@ -10,8 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-# TODO(#76): add windows tests when bugs are sorted
-        os: [ubuntu-latest, macos-latest]
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         python-version: ["3.10"]
 
     name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
@@ -26,10 +26,8 @@ jobs:
     - name: Install pysat RC
       run: pip install --pre -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ pysat
 
-    - name: Install standard dependencies
-      run: |
-        pip install -r requirements.txt
-        pip install -r test_requirements.txt
+    - name: Install standard dependencies and package
+      run: run pip install .[test]
 
     - name: Set up pysat
       run: |
@@ -37,7 +35,7 @@ jobs:
         python -c "import pysat; pysat.params['data_dirs'] = 'pysatData'"
 
     - name: Test with pytest
-      run: pytest -vs -x --cov=pysatMadrigal/
+      run: pytest
 
     - name: Publish results to coveralls
       env:
