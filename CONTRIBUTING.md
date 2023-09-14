@@ -47,8 +47,8 @@ include:
 Feature requests and feedback
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The best way to send feedback is to file an issue at
-[GitHub](https://github.com/pysat/pysatMadrigal/issues).
+The best way to send feedback is to file an
+[issue](https://github.com/pysat/pysatMadrigal/issues).
 
 If you are proposing a new feature or a change in something that already exists:
 
@@ -64,7 +64,7 @@ Development
 
 To set up `pysatMadrigal` for local development:
 
-1. Fork pysatMadrigal on [GitHub](https://github.com/pysat/pysatMadrigal/fork).
+1. Fork [pysatMadrigal on GitHub](https://github.com/pysat/pysatMadrigal/fork).
 
 2. Clone your fork locally:
 
