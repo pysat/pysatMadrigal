@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.6"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Angeline G. Burrell, et al.", email = "pysat.developers@gmail.com"}
+    {name = "Angeline G. Burrell et al.", email = "pysat.developers@gmail.com"}
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
