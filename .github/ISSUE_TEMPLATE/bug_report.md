@@ -26,4 +26,4 @@ solve the problem.
  - Other details about your setup that could be relevant
 
 # Additional context
-Add any other context about the problem here.
+Add any other context about the problem here, including expected behaviour.
