@@ -553,7 +553,6 @@ def update_meta_with_hdf5(file_ptr, meta):
                                          meta.labels.units: unit_string,
                                          meta.labels.desc: desc_string}
 
-    
     # Add additional metadata notes. Custom attributes attached to meta are
     # attached to the MetaHeader object later
     for key in file_ptr['Metadata']:

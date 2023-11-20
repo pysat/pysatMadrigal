@@ -6,6 +6,7 @@
 # -*- coding: utf-8 -*-
 """Methods supporting the Global Navigation Satellite System platform."""
 
+import datetime as dt
 import h5py
 import numpy as np
 import pandas as pds
@@ -198,7 +199,7 @@ def load_los(fnames, los_method, los_value, gnss_network='all'):
         if ftype != 'hdf5' and len(load_file_types[ftype]) > 0:
             pysat.logger.warning(
                 'unable to load non-HDF5 slant TEC files: {:}'.format(
-                    load_fyle_types[ftype]))
+                    load_file_types[ftype]))
 
     # Initalize the meta data
     meta = pysat.Meta()
@@ -317,4 +318,3 @@ def get_los_times(los_fnames):
                               for time_val in time_arr])
 
     return all_times
-
