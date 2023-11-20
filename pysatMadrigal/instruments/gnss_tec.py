@@ -93,6 +93,10 @@ remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
 _test_dates = {'': {'vtec': dt.datetime(2017, 11, 19),
                     'site': dt.datetime(2001, 1, 1),
                     'los': dt.datetime(2023, 1, 1)}}
+_test_load_opt = {'': {'los': [{'los_method': 'site', 'los_value': 'zzon',
+                                'gnss_network': 'glonass'},
+                               {'los_method': 'time',
+                                'los_value': dt.datetime(2023, 1, 1)}]}}
 
 _clean_warn = {'': {tag: {clean_level: [('logger', 'INFO',
                                          'Data provided at a clean level'
