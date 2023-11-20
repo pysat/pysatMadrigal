@@ -622,6 +622,8 @@ def convert_pandas_to_xarray(xarray_coords, data, time_ind):
 
     Returns
     -------
+    data : xr.Dataset
+        Data in the dataset format.
 
     """
     # If a list was provided, recast as a dict and grab the data columns
