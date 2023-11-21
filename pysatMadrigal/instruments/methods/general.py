@@ -651,7 +651,7 @@ def convert_pandas_to_xarray(xarray_coords, data, time_ind):
                                       repr(xcoords), '], use only: ',
                                       repr(data.columns)]))
         elif not np.all([xkey.lower() in data.columns
-                       for xkey in xarray_coords[xcoords]]):
+                         for xkey in xarray_coords[xcoords]]):
             good_ind = [i for i, xkey in enumerate(xarray_coords[xcoords])
                         if xkey.lower() in data.columns]
 

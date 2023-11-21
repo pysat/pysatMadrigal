@@ -54,7 +54,7 @@ class TestGNSSBadLoad(object):
 
         # Get the output and raise the logging warning
         with caplog.at_level(logging.WARN, logger='pysat'):
-            out = gnss.load_los(self.bad_fnames, "site", "zzon")
+            gnss.load_los(self.bad_fnames, "site", "zzon")
 
         # Test the logger warning
         assert len(caplog.records) == 2, "unexpected number of warnings"
