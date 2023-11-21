@@ -617,8 +617,8 @@ def convert_pandas_to_xarray(xarray_coords, data, time_ind):
         ('time', 'gdalt'): ['data1', 'data2']}]. (default=None)
     data : pds.DataFrame
         Data to be converted into the xarray format
-    time_ind : pds.DatetimeIndex
-        Time index for the data
+    time_ind : pds.DatetimeIndex or NoneType
+        Time index for the data or None for no time index
 
     Returns
     -------
@@ -637,18 +637,20 @@ def convert_pandas_to_xarray(xarray_coords, data, time_ind):
     coord_order = [len_dict[xkey] for xkey in sorted(
         [lkey for lkey in len_dict.keys()], reverse=True)]
 
-    # Append time to the data frame
-    data = data.assign(time=pds.Series(time_ind, index=data.index))
+    # Append time to the data frame, if provided
+    if time_ind is not None:
+        data = data.assign(time=pds.Series(time_ind, index=data.index))
 
     # Cycle through each of the coordinate dimensions
     xdatasets = list()
     for xcoords in coord_order:
-        if not np.all([xkey.lower() in data.columns for xkey in xcoords]):
+        if data.empty:
+            break
+        elif not np.all([xkey.lower() in data.columns for xkey in xcoords]):
             raise ValueError(''.join(['unknown coordinate key in [',
                                       repr(xcoords), '], use only: ',
                                       repr(data.columns)]))
-
-        if not np.all([xkey.lower() in data.columns
+        elif not np.all([xkey.lower() in data.columns
                        for xkey in xarray_coords[xcoords]]):
             good_ind = [i for i, xkey in enumerate(xarray_coords[xcoords])
                         if xkey.lower() in data.columns]
@@ -688,21 +690,25 @@ def convert_pandas_to_xarray(xarray_coords, data, time_ind):
     len_data = len(lcols)
 
     # Merge all of the datasets
-    data = xr.merge(xdatasets)
-    test_variables = [xkey for xkey in data.variables.keys()]
-    ltest = len(test_variables)
+    if len(xdatasets) > 0:
+        data = xr.merge(xdatasets)
+        test_variables = [xkey for xkey in data.variables.keys()]
+        ltest = len(test_variables)
 
-    # Test to see that all data was retrieved
-    if ltest != len_data:
-        if ltest < len_data:
-            estr = 'missing: {:}'.format(' '.join([
-                dvar for dvar in lcols if dvar not in test_variables]))
-        else:
-            estr = 'have extra: {:}'.format(' '.join([
-                tvar for tvar in test_variables if tvar not in lcols]))
-            raise ValueError(''.join([
-                'coordinates not supplied for all data columns',
-                ': {:d} != {:d}; '.format(ltest, len_data), estr]))
+        # Test to see that all data was retrieved
+        if ltest != len_data:
+            if ltest < len_data:
+                estr = 'missing: {:}'.format(' '.join([
+                    dvar for dvar in lcols if dvar not in test_variables]))
+            else:
+                estr = 'have extra: {:}'.format(' '.join([
+                    tvar for tvar in test_variables if tvar not in lcols]))
+                raise ValueError(''.join([
+                    'coordinates not supplied for all data columns',
+                    ': {:d} != {:d}; '.format(ltest, len_data), estr]))
+    else:
+        # Return an empty object
+        data = xr.Dataset()
 
     return data
 
