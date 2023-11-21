@@ -220,6 +220,7 @@ def load_los(fnames, los_method, los_value, gnss_network='all'):
 
     # Load the data by desired method
     data = list()
+    labels = list()
     for fname in load_file_types['hdf5']:
         with h5py.File(fname, 'r') as fin:
             sel_arr = fin['Data']['Table Layout'][sel_key]
@@ -250,14 +251,17 @@ def load_los(fnames, los_method, los_value, gnss_network='all'):
     # Load data into frame, with labels from metadata
     data = pds.DataFrame.from_records(data, columns=labels)
 
-    # Enforce lowercase variable names
-    data.columns = [item.lower() for item in data.columns]
+    if not data.empty:
+        # Enforce lowercase variable names
+        data.columns = [item.lower() for item in data.columns]
 
-    # Convert the data to an xarray Dataset
-    time_ind = general.build_madrigal_datetime_index(data)
+        # Convert the data to an xarray Dataset
+        time_ind = general.build_madrigal_datetime_index(data)
+    else:
+        time_ind = None
 
-    # Convert the output to xarray
-    data = general.convert_pandas_to_xarray(xcoords, data, time_ind)
+        # Convert the output to xarray
+        data = general.convert_pandas_to_xarray(xcoords, data, time_ind)
 
     return data, meta, lat_keys, lon_keys
 
