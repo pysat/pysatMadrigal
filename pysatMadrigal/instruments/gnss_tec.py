@@ -97,7 +97,7 @@ _test_load_opt = {'': {'los': [{'los_method': 'site', 'los_value': 'zzon',
                                 'gnss_network': 'glonass'},
                                {'los_method': 'time',
                                 'los_value': dt.datetime(2023, 1, 1)}]}}
-
+_test_download = {'': {'los': False}}  # Download is too large to test
 _clean_warn = {'': {tag: {clean_level: [('logger', 'INFO',
                                          'Data provided at a clean level'
                                          if tag != 'vtec' else
@@ -308,23 +308,26 @@ def load(fnames, tag='', inst_id='', los_method='site', los_value=None,
     else:
         raise ValueError('unknown tag provided for GNSS TEC Instrument')
 
-    # Squeeze the kindat and kinst 'coordinates', but keep them as floats
-    squeeze_dims = np.array(['kindat', 'kinst'])
-    squeeze_mask = [sdim in data.coords for sdim in squeeze_dims]
-    if np.any(squeeze_mask):
-        data = data.squeeze(dim=squeeze_dims[squeeze_mask])
+    if len(data.dims.keys()) > 0:
+        # Squeeze the kindat and kinst 'coordinates', but keep them as floats
+        squeeze_dims = np.array(['kindat', 'kinst'])
+        squeeze_mask = [sdim in data.coords for sdim in squeeze_dims]
+        if np.any(squeeze_mask):
+            data = data.squeeze(dim=squeeze_dims[squeeze_mask])
 
-    # Get the maximum and minimum values for time, latitude, and longitude
-    meta['time'] = {meta.labels.notes: data['time'].values.dtype.__doc__,
-                    meta.labels.min_val: np.nan, meta.labels.max_val: np.nan}
+        # Get the maximum and minimum values for time, latitude, and longitude
+        meta['time'] = {meta.labels.notes: data['time'].values.dtype.__doc__,
+                        meta.labels.min_val: np.nan,
+                        meta.labels.max_val: np.nan}
 
-    for lat_key in lat_keys:
-        meta[lat_key] = {meta.labels.min_val: -90.0, meta.labels.max_val: 90.0}
+        for lat_key in lat_keys:
+            meta[lat_key] = {meta.labels.min_val: -90.0,
+                             meta.labels.max_val: 90.0}
 
-    for lon_key in lon_keys:
-        min_lon = 0.0 if data[lon_key].values.min() >= 0.0 else -180.0
-        meta[lon_key] = {meta.labels.min_val: min_lon,
-                         meta.labels.max_val: min_lon + 360.0}
+            for lon_key in lon_keys:
+                min_lon = 0.0 if data[lon_key].values.min() >= 0.0 else -180.0
+                meta[lon_key] = {meta.labels.min_val: min_lon,
+                                 meta.labels.max_val: min_lon + 360.0}
 
     return data, meta
 
