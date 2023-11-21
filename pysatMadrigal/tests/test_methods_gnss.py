@@ -5,7 +5,10 @@
 # ----------------------------------------------------------------------------
 """Test methods for `pysatMadrigal.instruments.methods.gnss`."""
 
+import logging
 import pytest
+
+from pysat.utils.testing import eval_bad_input
 
 from pysatMadrigal.instruments.methods import gnss
 
@@ -30,4 +33,40 @@ class TestGNSSRefs(object):
         """Test the GNSS acknowledgements and references."""
         self.out = getattr(gnss, func)(*in_args)
         assert self.out.find(comp_str) >= 0
+        return
+
+
+class TestGNSSBadLoad(object):
+    """Test GNSS load warnings and errors."""
+
+    def setup_method(self):
+        """Run before every method to create a clean testing setup."""
+        self.bad_fnames = ['los_20230101.simple.gz', 'los_20230102.netCDF4']
+        return
+
+    def teardown_method(self):
+        """Run after every method to clean up previous testing."""
+        del self.bad_fnames
+        return
+
+    def test_bad_file_type_warning(self, caplog):
+        """Test logger warning for unsupported file types loading LoS data."""
+
+        # Get the output and raise the logging warning
+        with caplog.at_level(logging.WARN, logger='pysat'):
+            out = gnss.load_los(self.bad_fnames, "site", "zzon")
+
+        # Test the logger warning
+        assert len(caplog.records) == 2, "unexpected number of warnings"
+
+        for record in caplog.records:
+            assert record.levelname == "WARNING"
+            assert record.message.find("unable to load non-HDF5 slant TEC") >= 0
+        return
+
+    def test_bad_sel_type(self):
+        """Test ValueError raised for an unknown LoS down-selection type."""
+
+        eval_bad_input(gnss.load_los, ValueError, "unsupported selection type",
+                       input_args=[self.bad_fnames, "bad_sel", "bad_val"])
         return
