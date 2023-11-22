@@ -97,7 +97,7 @@ _test_load_opt = {'': {'los': [{'los_method': 'site', 'los_value': 'zzon',
                                 'gnss_network': 'glonass'},
                                {'los_method': 'time',
                                 'los_value': dt.datetime(2023, 1, 1)}]}}
-_test_download = {'': {'los': False}}  # Download is too large to test
+_test_download_ci = {'': {'los': False}}  # Download is too large to test
 _clean_warn = {'': {tag: {clean_level: [('logger', 'INFO',
                                          'Data provided at a clean level'
                                          if tag != 'vtec' else
