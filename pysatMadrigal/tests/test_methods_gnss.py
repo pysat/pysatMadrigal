@@ -5,6 +5,7 @@
 # ----------------------------------------------------------------------------
 """Test methods for `pysatMadrigal.instruments.methods.gnss`."""
 
+import datetime as dt
 import logging
 import pytest
 
@@ -69,4 +70,14 @@ class TestGNSSBadLoad(object):
 
         eval_bad_input(gnss.load_los, ValueError, "unsupported selection type",
                        input_args=[self.bad_fnames, "bad_sel", "bad_val"])
+        return
+
+    def test_empty_los_load(self):
+        """Test the returned dataset is empty for a LoS load."""
+        data, meta, lats, lons = gnss.load_los(self.bad_fnames, "time",
+                                               dt.datetime(2023, 1, 1))
+
+        assert len(data.dims.keys()) == 0
+        assert len(lats) == 2
+        assert len(lons) == 2
         return
