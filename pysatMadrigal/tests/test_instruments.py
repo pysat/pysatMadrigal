@@ -5,8 +5,12 @@
 # ----------------------------------------------------------------------------
 """Unit tests for the Instruments."""
 
+import datetime as dt
+
 # Import the test classes from pysat
+import pysat
 from pysat.tests.classes import cls_instrument_library as clslib
+from pysat.utils.testing import eval_bad_input
 
 import pysatMadrigal
 
@@ -34,3 +38,27 @@ class TestInstruments(clslib.InstLibTests):
     instrument test class.
 
     """
+
+
+class TestInstrumentLoadError(object):
+    """Class for unit testing errors raised when loading data."""
+
+    def setup_method(self):
+        """Run before every method to create a clean testing setup."""
+        self.inst_kwargs = [{'inst_module': pysatMadrigal.instruments.gnss_tec,
+                             'tag': 'los', 'los_method': 'site'}]
+        self.load_time = dt.datetime(2001, 1, 1)
+        return
+
+    def teardown_method(self):
+        """Run after every method to clean up previous testing."""
+        del self.inst_kwargs, self.load_time
+        return
+
+    def test_bad_los_value(self):
+        """Test ValueError when the `los_value` is omitted."""
+        inst = pysat.Instrument(**self.inst_kwargs)
+
+        eval_bad_input(inst.load, ValueError, "must specify a valid",
+                       input_kwargs={'date': self.load_time})
+        return
