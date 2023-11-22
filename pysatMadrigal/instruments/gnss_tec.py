@@ -100,7 +100,7 @@ _test_load_opt = {'': {'los': [{'los_method': 'site', 'los_value': 'zzon',
 _test_download_ci = {'': {'los': False}}  # Download is too large to test
 _clean_warn = {'': {tag: {clean_level: [('logger', 'INFO',
                                          'Data provided at a clean level'
-                                         if tag != 'vtec' else
+                                         if tag == 'site' else
                                          'further cleaning may be performed',
                                          clean_level)]
                           for clean_level in ['clean', 'dusty', 'dirty']}
@@ -129,12 +129,14 @@ def clean(self):
     `clean_level` is None.
 
     """
-    if self.tag in ["vtec", "site"]:
-        msg = "Data provided at a clean level"
-        if self.tag == "vtec":
-            msg = "".join([msg, ", further cleaning may be performed using ",
-                           "the measurement error 'dtec'"])
-        logger.info(msg)
+    msg = "Data provided at a clean level"
+    if self.tag == "vtec":
+        msg = "".join([msg, ", further cleaning may be performed using ",
+                       "the measurement error 'dtec'"])
+    elif self.tag == "los":
+        msg = "".join([msg, ", further cleaning may be performed using ",
+                       "the measurement error 'dlos_tec'"])
+    logger.info(msg)
 
     return
 
@@ -305,8 +307,6 @@ def load(fnames, tag='', inst_id='', los_method='site', los_value=None,
 
         data, meta, lat_keys, lon_keys = gnss.load_los(fnames, los_method,
                                                        los_value, gnss_network)
-    else:
-        raise ValueError('unknown tag provided for GNSS TEC Instrument')
 
     if len(data.dims.keys()) > 0:
         # Squeeze the kindat and kinst 'coordinates', but keep them as floats
