@@ -57,7 +57,7 @@ class TestInstrumentLoadError(object):
 
     def test_bad_los_value(self):
         """Test ValueError when the `los_value` is omitted."""
-        inst = pysat.Instrument(**self.inst_kwargs)
+        inst = pysat.Instrument(**self.inst_kwargs[0])
 
         eval_bad_input(inst.load, ValueError, "must specify a valid",
                        input_kwargs={'date': self.load_time})
