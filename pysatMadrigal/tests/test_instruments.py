@@ -6,6 +6,8 @@
 """Unit tests for the Instruments."""
 
 import datetime as dt
+import pathlib
+import os
 
 # Import the test classes from pysat
 import pysat
@@ -48,16 +50,32 @@ class TestInstrumentLoadError(object):
         self.inst_kwargs = [{'inst_module': pysatMadrigal.instruments.gnss_tec,
                              'tag': 'los', 'los_method': 'site'}]
         self.load_time = dt.datetime(2001, 1, 1)
+        self.fake_file = ''
         return
 
     def teardown_method(self):
         """Run after every method to clean up previous testing."""
-        del self.inst_kwargs, self.load_time
+        if os.path.isfile(self.fake_file):
+            os.remove(self.fake_file)
+
+        del self.inst_kwargs, self.load_time, self.fake_file
         return
 
     def test_bad_los_value(self):
         """Test ValueError when the `los_value` is omitted."""
         inst = pysat.Instrument(**self.inst_kwargs[0])
+
+        # Ensure a file is available
+        if self.load_time not in inst.files.files.keys():
+            self.fake_file = os.path.join(
+                inst.files.data_path,
+                self.inst_kwargs['inst_module'].supported_tags[inst.inst_id][
+                    inst.tag].format(file_type='hdf5').format(
+                        year=self.load_time.year, month=self.load_time.month,
+                        day=self.load_time.day, version=1))
+            pysat.utils.files.check_and_make_path(inst.files.data_path)
+            pathlib.Path(self.fake_file).touch()
+            inst = pysat.Instrument(**self.inst_kwargs[0])
 
         eval_bad_input(inst.load, ValueError, "must specify a valid",
                        input_kwargs={'date': self.load_time})
