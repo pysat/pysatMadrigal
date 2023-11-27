@@ -55,7 +55,7 @@ are required for selection), you may use the
 import datetime as dt
 import numpy as np
 
-from pysat import logger
+import pysat
 
 from pysatMadrigal.instruments.methods import general
 from pysatMadrigal.instruments.methods import gnss
@@ -98,6 +98,7 @@ _test_load_opt = {'': {'los': [{'los_method': 'site', 'los_value': 'zzon',
                                {'los_method': 'time',
                                 'los_value': dt.datetime(2023, 1, 1)}]}}
 _test_download_ci = {'': {'los': False}}  # Download is too large to test
+_password_req = {'': {'los': True}}  # Disable locally, download is too large
 _clean_warn = {'': {tag: {clean_level: [('logger', 'INFO',
                                          'Data provided at a clean level'
                                          if tag == 'site' else
@@ -115,7 +116,7 @@ def init(self):
     self.acknowledgements = '\n'.join([gnss.acknowledgements(self.name),
                                        general.cedar_rules()])
     self.references = gnss.references(self.name)
-    logger.info(self.acknowledgements)
+    pysat.logger.info(self.acknowledgements)
 
     return
 
@@ -136,7 +137,7 @@ def clean(self):
     elif self.tag == "los":
         msg = "".join([msg, ", further cleaning may be performed using ",
                        "the measurement error 'dlos_tec'"])
-    logger.info(msg)
+    pysat.logger.info(msg)
 
     return
 
@@ -244,6 +245,10 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     downloads.
 
     """
+    if tag == 'los':
+        pysat.logger.warning(
+            'LoS download is very large and succeptible to failure.')
+
     general.download(date_array, inst_code=str(madrigal_inst_code),
                      kindat=madrigal_tag[inst_id][tag], data_path=data_path,
                      user=user, password=password, file_type=file_type, url=url)
