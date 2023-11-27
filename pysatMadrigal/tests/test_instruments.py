@@ -6,8 +6,8 @@
 """Unit tests for the Instruments."""
 
 import datetime as dt
-import pathlib
 import os
+import pathlib
 
 # Import the test classes from pysat
 import pysat
