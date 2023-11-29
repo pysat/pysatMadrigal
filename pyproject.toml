@@ -53,7 +53,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-  "coveralls < 3.3",
+  "coveralls",
   "flake8",
   "flake8-docstrings",
   "hacking >= 1.0",
@@ -68,7 +68,7 @@ doc = [
   "numpydoc",
   "pyproject_parser",
   "sphinx",
-  "sphinx_rtd_theme >= 1.2.2"
+  "sphinx_rtd_theme >= 1.2.2, < 2.0.0"
 ]
 
 [project.urls]
