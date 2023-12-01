@@ -98,7 +98,6 @@ _test_load_opt = {'': {'los': [{'los_method': 'site', 'los_value': 'zzon',
                                {'los_method': 'time',
                                 'los_value': dt.datetime(2023, 1, 1)}]}}
 _test_download_ci = {'': {'los': False}}  # Download is too large to test
-_password_req = {'': {'los': True}}  # Disable locally, download is too large
 _clean_warn = {'': {tag: {clean_level: [('logger', 'INFO',
                                          'Data provided at a clean level'
                                          if tag == 'site' else
