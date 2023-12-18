@@ -178,7 +178,8 @@ load = general.load
 
 
 def download(date_array, tag='', inst_id='', data_path=None, user=None,
-             password=None, file_type='hdf5'):
+             password=None, file_type='hdf5',
+             url="http://millstonehill.haystack.mit.edu/"):
     """Download data from Madrigal.
 
     Parameters
@@ -202,6 +203,9 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
         Password for data download. (default=None)
     file_type : str
         File format for Madrigal data. (default='hdf5')
+    url : str
+        URL for the specific Madrigal data site.
+        (default='http://millstonehill.haystack.mit.edu/')
 
     Note
     ----
@@ -217,5 +221,5 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     """
     general.download(date_array, inst_code=str(madrigal_inst_code),
                      kindat=madrigal_tag[inst_id][tag], data_path=data_path,
-                     user=user, password=password, file_type=file_type)
+                     user=user, password=password, file_type=file_type, url=url)
     return
