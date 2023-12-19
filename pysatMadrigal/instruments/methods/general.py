@@ -19,7 +19,6 @@ import pysat
 from madrigalWeb import madrigalWeb
 
 
-logger = pysat.logger
 file_types = {'hdf5': 'hdf5', 'netCDF4': 'netCDF4', 'simple': 'simple.gz'}
 
 
@@ -481,11 +480,237 @@ def madrigal_file_format_str(inst_code, strict=False, verbose=True):
         if strict:
             raise ValueError(msg)
         elif verbose:
-            logger.warning(msg)
+            pysat.logger.warning(msg)
 
     fstr += "{file_type}"
 
     return fstr
+
+
+def sort_file_formats(fnames):
+    """Separate filenames by file format type.
+
+    Parameters
+    ----------
+    fnames : array-like
+        Iterable of filename strings, full path, to data files to be loaded.
+        This input is nominally provided by pysat itself.
+
+    Returns
+    -------
+    load_file_types : dict
+        A dictionary with file types as keys and a list of filenames for
+        each file type.
+
+    """
+    # Sort the files by file format type
+    load_file_types = {ftype: [] for ftype in file_types.keys()}
+    for fname in fnames:
+        for ftype in file_types.keys():
+            if fname.find(ftype) > 0:
+                load_file_types[ftype].append(fname)
+                break
+
+        if fname not in load_file_types[ftype]:
+            # Raise a logger warning if a file with an unknown extension
+            # is encountered
+            pysat.logger.warning(
+                'file with unknown file type: {:}'.format(fname))
+
+    return load_file_types
+
+
+def update_meta_with_hdf5(file_ptr, meta):
+    """Get meta data from a Madrigal HDF5 file.
+
+    Parameters
+    ----------
+    file_ptr : h5py._hl.files.File
+        Pointer to an open HDF5 file
+    meta : pysat.Meta
+        Existing Meta class to be updated
+
+    Returns
+    -------
+    file_labels : list
+        List of metadata available
+
+    """
+    # Get the Madrigal metadata
+    file_meta = file_ptr['Metadata']['Data Parameters']
+    file_labels = list()
+
+    # Load available info into pysat.Meta if not already present
+    for item in file_meta:
+        name_string = item[0].decode('UTF-8')
+        unit_string = item[3].decode('UTF-8')
+        desc_string = item[1].decode('UTF-8')
+        file_labels.append(name_string)
+
+        # Only update metadata if necessary
+        if name_string.lower() not in meta:
+            meta[name_string.lower()] = {meta.labels.name: name_string,
+                                         meta.labels.units: unit_string,
+                                         meta.labels.desc: desc_string}
+
+    # Add additional metadata notes. Custom attributes attached to meta are
+    # attached to the MetaHeader object later
+    for key in file_ptr['Metadata']:
+        if key != 'Data Parameters':
+            setattr(meta, key.replace(' ', '_'), file_ptr['Metadata'][key][:])
+
+    return file_labels
+
+
+def build_madrigal_datetime_index(mad_data):
+    """Create a datetime index using standard Madrigal variables.
+
+    Parameters
+    ----------
+    mad_data : pds.DataFrame
+        Madrigal data, expects time variables 'year', 'month', 'day', 'hour',
+       'min', and 'sec'
+
+    Returns
+    -------
+    data_time :
+        Datetime index for use by pysat
+
+    Raises
+    ------
+    ValueError
+        If expected time variables are missing
+
+    """
+    # Set the standard time keys
+    time_keys = np.array(['year', 'month', 'day', 'hour', 'min', 'sec'])
+
+    # Construct datetime index from times
+    if not np.all([key in mad_data.columns for key in time_keys]):
+        time_keys = [key for key in time_keys if key not in mad_data.columns]
+        raise ValueError(' '.join(["unable to construct time index, missing ",
+                                   repr(time_keys)]))
+
+    # Get the UT seconds of day and build the datetime index
+    uts = 3600.0 * mad_data.loc[:, 'hour'] + 60.0 * mad_data.loc[:, 'min'] \
+        + mad_data.loc[:, 'sec']
+    data_time = pysat.utils.time.create_datetime_index(
+        year=mad_data.loc[:, 'year'], month=mad_data.loc[:, 'month'],
+        day=mad_data.loc[:, 'day'], uts=uts)
+
+    return data_time
+
+
+def convert_pandas_to_xarray(xarray_coords, data, time_ind):
+    """Convert Madrigal HDF5/simple data from pandas to xarray.
+
+    Parameters
+    ----------
+    xarray_coords : list or NoneType
+        List of keywords to use as coordinates if xarray output is desired
+        instead of a Pandas DataFrame.  Can build an xarray Dataset
+        that have different coordinate dimensions by providing a dict
+        inside the list instead of coordinate variable name strings. Each dict
+        will have a tuple of coordinates as the key and a list of variable
+        strings as the value.  Empty list if None. For example,
+        xarray_coords=[{('time',): ['year', 'doy'],
+        ('time', 'gdalt'): ['data1', 'data2']}]. (default=None)
+    data : pds.DataFrame
+        Data to be converted into the xarray format
+    time_ind : pds.DatetimeIndex or NoneType
+        Time index for the data or None for no time index
+
+    Returns
+    -------
+    data : xr.Dataset
+        Data in the dataset format.
+
+    """
+    # If a list was provided, recast as a dict and grab the data columns
+    if not isinstance(xarray_coords, dict):
+        xarray_coords = {tuple(xarray_coords): [col for col in data.columns
+                                                if col not in xarray_coords]}
+
+    # Determine the order in which the keys should be processed:
+    #  Greatest to least number of dimensions
+    len_dict = {len(xcoords): xcoords for xcoords in xarray_coords.keys()}
+    coord_order = [len_dict[xkey] for xkey in sorted(
+        [lkey for lkey in len_dict.keys()], reverse=True)]
+
+    # Append time to the data frame, if provided
+    if time_ind is not None:
+        data = data.assign(time=pds.Series(time_ind, index=data.index))
+
+    # Cycle through each of the coordinate dimensions
+    xdatasets = list()
+    for xcoords in coord_order:
+        if data.empty:
+            break
+        elif not np.all([xkey.lower() in data.columns for xkey in xcoords]):
+            raise ValueError(''.join(['unknown coordinate key in [',
+                                      repr(xcoords), '], use only: ',
+                                      repr(data.columns)]))
+        elif not np.all([xkey.lower() in data.columns
+                         for xkey in xarray_coords[xcoords]]):
+            good_ind = [i for i, xkey in enumerate(xarray_coords[xcoords])
+                        if xkey.lower() in data.columns]
+
+            if len(good_ind) == 0:
+                raise ValueError('All data variables {:} are unknown.'.format(
+                    xarray_coords[xcoords]))
+            elif len(good_ind) < len(xarray_coords[xcoords]):
+                # Remove the coordinates that aren't present.
+                temp = np.array(xarray_coords[xcoords])[good_ind]
+
+                # Warn user, some of this may be due to a file format change.
+                bad_ind = [i for i in range(len(xarray_coords[xcoords]))
+                           if i not in good_ind]
+                pysat.logger.warning(
+                    'unknown data variable(s) {:}, using only: {:}'.format(
+                        np.array(xarray_coords[xcoords])[bad_ind], temp))
+
+                # Assign good data as a list.
+                xarray_coords[xcoords] = list(temp)
+
+        # Select the desired data values
+        sel_data = data[list(xcoords) + xarray_coords[xcoords]]
+
+        # Remove duplicates before indexing, to ensure data with the same values
+        # at different locations are kept
+        sel_data = sel_data.drop_duplicates()
+
+        # Set the indices
+        sel_data = sel_data.set_index(list(xcoords))
+
+        # Recast as an xarray
+        xdatasets.append(sel_data.to_xarray())
+
+    # Get the necessary information to test the data
+    lcols = data.columns
+    len_data = len(lcols)
+
+    # Merge all of the datasets
+    if len(xdatasets) > 0:
+        data = xr.merge(xdatasets)
+        test_variables = [xkey for xkey in data.variables.keys()]
+        ltest = len(test_variables)
+
+        # Test to see that all data was retrieved
+        if ltest != len_data:
+            if ltest < len_data:
+                estr = 'missing: {:}'.format(' '.join([
+                    dvar for dvar in lcols if dvar not in test_variables]))
+            else:
+                estr = 'have extra: {:}'.format(' '.join([
+                    tvar for tvar in test_variables if tvar not in lcols]))
+                raise ValueError(''.join([
+                    'coordinates not supplied for all data columns',
+                    ': {:d} != {:d}; '.format(ltest, len_data), estr]))
+    else:
+        # Return an empty object
+        data = xr.Dataset()
+
+    return data
 
 
 def load(fnames, tag='', inst_id='', xarray_coords=None):
@@ -534,13 +759,8 @@ def load(fnames, tag='', inst_id='', xarray_coords=None):
     for direct user interaction.
 
     """
-    # Test the file formats
-    load_file_types = {ftype: [] for ftype in file_types.keys()}
-    for fname in fnames:
-        for ftype in file_types.keys():
-            if fname.find(ftype) > 0:
-                load_file_types[ftype].append(fname)
-                break
+    # Test and sort the file formats
+    load_file_types = sort_file_formats(fnames)
 
     # Initialize xarray coordinates, if needed
     if xarray_coords is None:
@@ -637,30 +857,10 @@ def load(fnames, tag='', inst_id='', xarray_coords=None):
                 # Open the specified file and get the data and metadata
                 filed = h5py.File(fname, 'r')
                 file_data = filed['Data']['Table Layout']
-                file_meta = filed['Metadata']['Data Parameters']
 
-                # Load available info into pysat.Meta if this is the first file
+                new_labels = update_meta_with_hdf5(filed, meta)
                 if len(labels) == 0:
-                    for item in file_meta:
-                        name_string = item[0].decode('UTF-8')
-                        unit_string = item[3].decode('UTF-8')
-                        desc_string = item[1].decode('UTF-8')
-                        labels.append(name_string)
-
-                        # Only update metadata if necessary
-                        if name_string.lower() not in meta:
-                            meta[name_string.lower()] = {
-                                meta.labels.name: name_string,
-                                meta.labels.units: unit_string,
-                                meta.labels.desc: desc_string}
-
-                # Add additional metadata notes. Custom attributes attached to
-                # meta are attached to corresponding Instrument object when
-                # pysat receives data and meta from this routine
-                for key in filed['Metadata']:
-                    if key != 'Data Parameters':
-                        setattr(meta, key.replace(' ', '_'),
-                                filed['Metadata'][key][:])
+                    labels = new_labels
 
                 # Load data into frame, with labels from metadata
                 ldata = pds.DataFrame.from_records(file_data, columns=labels)
@@ -671,109 +871,11 @@ def load(fnames, tag='', inst_id='', xarray_coords=None):
             # Extended processing is the same for simple and HDF5 files
             #
             # Construct datetime index from times
-            time_keys = np.array(['year', 'month', 'day', 'hour', 'min', 'sec'])
-            if not np.all([key in ldata.columns for key in time_keys]):
-                time_keys = [key for key in time_keys
-                             if key not in ldata.columns]
-                raise ValueError(' '.join(["unable to construct time index, ",
-                                           "missing {:}".format(time_keys)]))
-
-            uts = 3600.0 * ldata.loc[:, 'hour'] + 60.0 * ldata.loc[:, 'min'] \
-                + ldata.loc[:, 'sec']
-            time = pysat.utils.time.create_datetime_index(
-                year=ldata.loc[:, 'year'], month=ldata.loc[:, 'month'],
-                day=ldata.loc[:, 'day'], uts=uts)
+            time = build_madrigal_datetime_index(ldata)
 
             # Declare index or recast as xarray
             if coord_len > 0:
-                # If a list was provided, recast as a dict and grab the data
-                # columns
-                if not isinstance(xarray_coords, dict):
-                    xarray_coords = {tuple(xarray_coords):
-                                     [col for col in ldata.columns
-                                      if col not in xarray_coords]}
-
-                # Determine the order in which the keys should be processed:
-                #  Greatest to least number of dimensions
-                len_dict = {len(xcoords): xcoords
-                            for xcoords in xarray_coords.keys()}
-                coord_order = [len_dict[xkey] for xkey in sorted(
-                    [lkey for lkey in len_dict.keys()], reverse=True)]
-
-                # Append time to the data frame
-                ldata = ldata.assign(time=pds.Series(time, index=ldata.index))
-
-                # Cycle through each of the coordinate dimensions
-                xdatasets = list()
-                for xcoords in coord_order:
-                    if not np.all([xkey.lower() in ldata.columns
-                                   for xkey in xcoords]):
-                        raise ValueError(''.join(['unknown coordinate key ',
-                                                  'in [{:}'.format(xcoords),
-                                                  '], use only: {:}'.format(
-                                                      ldata.columns)]))
-                    if not np.all([xkey.lower() in ldata.columns
-                                   for xkey in xarray_coords[xcoords]]):
-                        good_ind = [
-                            i for i, xkey in enumerate(xarray_coords[xcoords])
-                            if xkey.lower() in ldata.columns]
-
-                        if len(good_ind) == 0:
-                            raise ValueError(''.join([
-                                'All data variables {:} are unknown.'.format(
-                                    xarray_coords[xcoords])]))
-                        elif len(good_ind) < len(xarray_coords[xcoords]):
-                            # Remove the coordinates that aren't present.
-                            temp = np.array(xarray_coords[xcoords])[good_ind]
-
-                            # Warn user, some of this may be due to a file
-                            # format update or change.
-                            bad_ind = [i for i in
-                                       range(len(xarray_coords[xcoords]))
-                                       if i not in good_ind]
-                            logger.warning(''.join([
-                                'unknown data variable(s) {:}, '.format(
-                                    np.array(xarray_coords[xcoords])[bad_ind]),
-                                'using only: {:}'.format(temp)]))
-
-                            # Assign good data as a list.
-                            xarray_coords[xcoords] = list(temp)
-
-                    # Select the desired data values
-                    sel_data = ldata[list(xcoords) + xarray_coords[xcoords]]
-
-                    # Remove duplicates before indexing, to ensure data with
-                    # the same values at different locations are kept
-                    sel_data = sel_data.drop_duplicates()
-
-                    # Set the indices
-                    sel_data = sel_data.set_index(list(xcoords))
-
-                    # Recast as an xarray
-                    xdatasets.append(sel_data.to_xarray())
-
-                # Get the necessary information to test the data
-                lcols = ldata.columns
-                len_data = len(lcols)
-
-                # Merge all of the datasets
-                ldata = xr.merge(xdatasets)
-                test_variables = [xkey for xkey in ldata.variables.keys()]
-                ltest = len(test_variables)
-
-                # Test to see that all data was retrieved
-                if ltest != len_data:
-                    if ltest < len_data:
-                        estr = 'missing: {:}'.format(
-                            ' '.join([dvar for dvar in lcols
-                                      if dvar not in test_variables]))
-                    else:
-                        estr = 'have extra: {:}'.format(
-                            ' '.join([tvar for tvar in test_variables
-                                      if tvar not in lcols]))
-                        raise ValueError(''.join([
-                            'coordinates not supplied for all data columns',
-                            ': {:d} != {:d}; '.format(ltest, len_data), estr]))
+                ldata = convert_pandas_to_xarray(xarray_coords, ldata, time)
             else:
                 # Set the index to time
                 ldata.index = time
@@ -781,10 +883,10 @@ def load(fnames, tag='', inst_id='', xarray_coords=None):
                 # Raise a logging warning if there are duplicate times. This
                 # means the data should be stored as an xarray Dataset
                 if np.any(time.duplicated()):
-                    logger.warning(''.join(["duplicated time indices, ",
-                                            "consider specifing additional",
-                                            " coordinates and storing the ",
-                                            "data as an xarray Dataset"]))
+                    pysat.logger.warning(''.join([
+                        "duplicated time indices, consider specifing ",
+                        "additional coordinates and storing the data as an ",
+                        "xarray Dataset"]))
 
             # Compile a list of the data objects
             fdata.append(ldata)
@@ -884,9 +986,9 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
         stop = date_array.shift().max()
 
     # Initialize the connection to Madrigal
-    logger.info('Connecting to Madrigal')
+    pysat.logger.info('Connecting to Madrigal')
     web_data = madrigalWeb.MadrigalData(url)
-    logger.info('Connection established.')
+    pysat.logger.info('Connection established.')
 
     files = get_remote_filenames(inst_code=inst_code, kindat=kindat,
                                  user=user, password=password,
@@ -905,12 +1007,12 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
 
         if not os.path.isfile(local_file):
             fstr = ''.join(('Downloading data for ', local_file))
-            logger.info(fstr)
+            pysat.logger.info(fstr)
             web_data.downloadFile(mad_file.name, local_file, user, password,
                                   "pysat", format=file_type)
         else:
             estr = ''.join((local_file, ' already exists. Skipping.'))
-            logger.info(estr)
+            pysat.logger.info(estr)
 
     return
 
@@ -1018,7 +1120,7 @@ def get_remote_filenames(inst_code=None, kindat='', user=None, password=None,
     files = list()
     istr = "Found {:d} Madrigal experiments between {:s} and {:s}".format(
         len(exp_list), start.strftime('%d %B %Y'), stop.strftime('%d %B %Y'))
-    logger.info(istr)
+    pysat.logger.info(istr)
     for exp in exp_list:
         if good_exp(exp, date_array=date_array):
             file_list = web_data.getExperimentFiles(exp.id)
@@ -1175,7 +1277,7 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
             format_str = format_str.replace('.hdf5', '.h5')
 
     # Parse these filenames to grab out the ones we want
-    logger.info("Parsing filenames")
+    pysat.logger.info("Parsing filenames")
     if format_str.find('*') < 0:
         stored = pysat.utils.files.parse_fixed_width_filenames(filenames,
                                                                format_str)
@@ -1184,7 +1286,7 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
                                                              format_str, '.')
 
     # Process the parsed filenames and return a properly formatted Series
-    logger.info("Processing filenames")
+    pysat.logger.info("Processing filenames")
     return pysat.utils.files.process_parsed_filenames(stored,
                                                       two_digit_year_break)
 

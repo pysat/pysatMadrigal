@@ -11,6 +11,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
   * Moved the NGDC AE index Instrument from the general Madrigal Pandas
     instrument to a new one, fixing the Windows memory issue and a problem
     with duplicated times
+  * Added slant TEC (tag of 'los') to the gnss_tec Instrument
+  * Refactored general load function to extract useful parts of the code that
+    were used for specific load functions
 * Maintenance
   * Add manual GitHub Actions tests for pysatMadrigal RC
   * Update GitHub Actions workflows for newer versions of pip

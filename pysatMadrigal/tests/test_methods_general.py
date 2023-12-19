@@ -17,6 +17,7 @@ from madrigalWeb import madrigalWeb
 import netCDF4 as nc
 import pandas as pds
 import pysat
+from pysat.utils.testing import eval_bad_input
 import pytest
 import xarray as xr
 
@@ -40,6 +41,25 @@ class TestLocal(object):
         """Test the Madrigal acknowledgements."""
         self.out = general.cedar_rules()
         assert self.out.find("CEDAR 'Rules of the Road'") >= 0
+        return
+
+    def test_sort_file_format(self, caplog):
+        """Test successful sorting of file names by extension."""
+        # Get the output and raise the logging warning
+        with caplog.at_level(logging.WARN, logger='pysat'):
+            self.out = general.sort_file_formats(['test.hdf5', 'test.netCDF4',
+                                                  'test.simple.gz', 'test.bad'])
+
+        # Evaluate the output
+        assert isinstance(self.out, dict)
+        pysat.utils.testing.assert_lists_equal(list(self.out.keys()),
+                                               ['hdf5', 'netCDF4', 'simple'])
+
+        # Evaluate the logger warning
+        assert len(caplog.records) == 1, "unexpected number of warnings"
+        assert caplog.records[0].levelname == "WARNING"
+        assert caplog.records[0].message.find(
+            "file with unknown file type") >= 0
         return
 
     @pytest.mark.parametrize("xarray_coords", [None, ["lat"]])
@@ -244,11 +264,9 @@ class TestErrors(object):
         del self.kwargs['kindats'], self.kwargs['supported_tags']
         self.kwargs['inst_code'] = inst_code
 
-        # Get the expected error message and evaluate it
-        with pytest.raises(ValueError) as verr:
-            general._check_madrigal_params(**self.kwargs)
-
-        assert str(verr).find("Unknown Madrigal instrument code") >= 0
+        eval_bad_input(general._check_madrigal_params, ValueError,
+                       "Unknown Madrigal instrument code",
+                       input_kwargs=self.kwargs)
         return
 
     @pytest.mark.parametrize("bad_val", [None, 17, False, 12.34])
@@ -269,10 +287,9 @@ class TestErrors(object):
         self.kwargs[test_key] = bad_val
 
         # Get the expected error message and evaluate it
-        with pytest.raises(ValueError) as verr:
-            general._check_madrigal_params(**self.kwargs)
-
-        assert str(verr).find("The madrigal database requries a username") >= 0
+        eval_bad_input(general._check_madrigal_params, ValueError,
+                       "The madrigal database requries a username",
+                       input_kwargs=self.kwargs)
         return
 
     @pytest.mark.parametrize("del_val", ['kindats', 'supported_tags'])
@@ -289,19 +306,17 @@ class TestErrors(object):
         del self.kwargs[del_val]
 
         # Get the expected error message and evaluate it
-        with pytest.raises(ValueError) as verr:
-            general.list_remote_files('testing', 'tag', **self.kwargs)
-
-        assert str(verr).find("Must supply supported_tags and kindats") >= 0
+        eval_bad_input(general.list_remote_files, ValueError,
+                       "Must supply supported_tags and kindats",
+                       input_args=['testing', 'tag'], input_kwargs=self.kwargs)
         return
 
     def test_list_remote_files_bad_tag_inst_id(self):
         """Test that an error is thrown if None is passed through."""
         # Get the expected error message and evaluate it
-        with pytest.raises(KeyError) as kerr:
-            general.list_remote_files('testing', 'not_tag', **self.kwargs)
-
-        assert str(kerr).find('not_tag') >= 0
+        eval_bad_input(general.list_remote_files, KeyError, "not_tag",
+                       input_args=['testing', 'not_tag'],
+                       input_kwargs=self.kwargs)
         return
 
     @pytest.mark.parametrize("in_key, in_val, test_verr", [
@@ -323,10 +338,9 @@ class TestErrors(object):
         del self.kwargs['supported_tags'], self.kwargs['kindats']
         self.kwargs[in_key] = in_val
 
-        with pytest.raises(ValueError) as verr:
-            general.download([], **self.kwargs)
-
-        assert str(verr).find(test_verr) >= 0
+        # Get the expected error message and evaluate it
+        eval_bad_input(general.download, ValueError, test_verr,
+                       input_args=[[]], input_kwargs=self.kwargs)
         return
 
     def test_get_remote_filenames_bad_date_array(self):
@@ -334,10 +348,19 @@ class TestErrors(object):
         del self.kwargs['supported_tags'], self.kwargs['kindats']
         self.kwargs['date_array'] = []
 
-        with pytest.raises(ValueError) as verr:
-            general.get_remote_filenames(**self.kwargs)
+        # Get the expected error message and evaluate it
+        eval_bad_input(general.get_remote_filenames, ValueError,
+                       "unknown date_array supplied", input_kwargs=self.kwargs)
+        return
 
-        assert str(verr).find("unknown date_array supplied") >= 0
+    def test_convert_pandas_to_xarray_bad_data_vars(self):
+        """Test raises ValueError for unexpected date_array input."""
+        self.kwargs = [{('time', ): ['bad_var']}, pds.DataFrame([0]),
+                       pds.DatetimeIndex([dt.datetime(2001, 1, 1)])]
+
+        # Get the expected error message and evaluate it
+        eval_bad_input(general.convert_pandas_to_xarray, ValueError,
+                       "All data variables", input_args=self.kwargs)
         return
 
 
