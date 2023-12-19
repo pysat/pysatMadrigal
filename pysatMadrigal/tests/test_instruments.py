@@ -69,7 +69,7 @@ class TestInstrumentLoadError(object):
         if self.load_time not in inst.files.files.keys():
             self.fake_file = os.path.join(
                 inst.files.data_path,
-                self.inst_kwargs['inst_module'].supported_tags[inst.inst_id][
+                self.inst_kwargs[0]['inst_module'].supported_tags[inst.inst_id][
                     inst.tag].format(file_type='hdf5').format(
                         year=self.load_time.year, month=self.load_time.month,
                         day=self.load_time.day, version=1))
