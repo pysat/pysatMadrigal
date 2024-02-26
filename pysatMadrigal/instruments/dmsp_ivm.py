@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Full license can be found in License.md
 # Full author list can be found in .zenodo.json file
 # DOI:10.5281/zenodo.3824979
+#
+# DISTRIBUTION STATEMENT A: Approved for public release. Distribution is
+# unlimited.
 # ----------------------------------------------------------------------------
-# -*- coding: utf-8 -*-
 """Supports the Defense Meteorological Satellite Program (DMSP) IVM instruments.
 
 The Ion Velocity Meter (IVM) is comprised of the Retarding Potential Analyzer
@@ -44,8 +47,6 @@ Example
 Note
 ----
 Please provide name and email when downloading data with this routine.
-
-Code development supported by NSF grant 1259508
 
 """
 

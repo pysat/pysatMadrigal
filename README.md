@@ -47,7 +47,8 @@ a local install use the "--user" flag after "install".
 
 ```
 cd pysatMadrigal/
-python setup.py install
+python -m build .
+pip install .
 ```
 
 # Examples
@@ -67,7 +68,7 @@ Afterward, pysat will identify them using the `platform` and `name` keywords.
 
 ```
 pysat.utils.registry.register('pysatMadrigal.instruments.dmsp_ivm')
-dst = pysat.Instrument('dmsp', 'ivm', tag='utd', inst_id='f15')
+ivm = pysat.Instrument('dmsp', 'ivm', tag='utd', inst_id='f15')
 ```
 
 The package also include analysis tools.  Detailed examples are in the

@@ -1,4 +1,12 @@
-# -*- coding: utf-8 -*-.
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Full license can be found in License.md
+# Full author list can be found in .zenodo.json file
+# DOI:10.5281/zenodo.3824979
+#
+# DISTRIBUTION STATEMENT A: Approved for public release. Distribution is
+# unlimited.
+# ----------------------------------------------------------------------------
 """Supports the MIT Haystack GNSS TEC data products.
 
 The Global Navigation Satellite System (GNSS) is used in conjunction with a
