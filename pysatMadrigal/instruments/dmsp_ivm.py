@@ -105,6 +105,8 @@ _test_dates = {
     'f17': {tag: dt.datetime(2009, 1, 1) for tag in inst_ids['f17']},
     'f18': {tag: dt.datetime(2017, 12, 30) for tag in inst_ids['f18']}}
 
+# TODO(#99): Remove when compliant with multi-day load tests
+_new_tests = {'f18': {'': False}}
 _clean_warn = {inst_id: {tag: {clean_level: [('logger', 'WARN',
                                               'this level 1 data has no qual',
                                               clean_level)]
