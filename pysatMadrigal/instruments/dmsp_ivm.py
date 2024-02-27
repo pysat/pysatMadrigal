@@ -107,6 +107,8 @@ _test_dates = {
 
 # TODO(#99): Remove when compliant with multi-day load tests
 _new_tests = {'f18': {'': False}}
+
+# Set the clean warnings for testing
 _clean_warn = {inst_id: {tag: {clean_level: [('logger', 'WARN',
                                               'this level 1 data has no qual',
                                               clean_level)]
