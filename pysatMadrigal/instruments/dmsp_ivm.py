@@ -113,7 +113,7 @@ _clean_warn = {inst_id: {tag: {clean_level: [('logger', 'WARN',
                                               'this level 1 data has no qual',
                                               clean_level)]
                                for clean_level in ['clean', 'dusty', 'dirty']}
-                         for tag in inst_ids[inst_id] if inst_id != 'utd'}
+                         for tag in inst_ids[inst_id] if tag != 'utd'}
                for inst_id in inst_ids.keys()}
 
 # ----------------------------------------------------------------------------
