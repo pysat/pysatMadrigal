@@ -106,7 +106,7 @@ _test_dates = {
     'f18': {tag: dt.datetime(2017, 12, 30) for tag in inst_ids['f18']}}
 
 # TODO(#99): Remove when compliant with multi-day load tests
-_new_tests = {'f18': {'': False}}
+_new_tests = {'f18': {'': False}, 'f14': {'utd': False}}
 
 # Set the clean warnings for testing
 _clean_warn = {inst_id: {tag: {clean_level: [('logger', 'WARN',
