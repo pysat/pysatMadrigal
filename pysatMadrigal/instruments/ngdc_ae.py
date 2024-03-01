@@ -90,11 +90,11 @@ _test_dates = {inst_id: {tag: madrigal_start for tag in inst_ids[inst_id]}
                for inst_id in inst_ids.keys()}
 _test_download = {inst_id: {tag: True for tag in inst_ids[inst_id]}
                   for inst_id in inst_ids.keys()}
-_clean_warn = {inst_id: {tag: {'dusty': [('logger', 'WARN',
-                                          "'dusty' and 'clean' are the same",
-                                          'dusty')]}
-                         for tag in inst_ids[inst_id]}
-               for inst_id in inst_ids.keys()}
+_clean_warn = {
+    inst_id: {tag: {'dusty': [('logger', 'WARN',
+                               "'dusty' and 'clean' levels are the same",
+                               'dusty')]}
+              for tag in inst_ids[inst_id]} for inst_id in inst_ids.keys()}
 
 # ----------------------------------------------------------------------------
 # Instrument methods
