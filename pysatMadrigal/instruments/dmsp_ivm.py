@@ -112,7 +112,7 @@ _new_tests = {'f18': {'': False}}
 _clean_warn = {inst_id: {tag: {clean_level: [('logger', 'WARN',
                                               'this level 1 data has no qual',
                                               clean_level)]
-                               if tag != 'utd' else [] 
+                               if tag != 'utd' else []
                                for clean_level in ['clean', 'dusty', 'dirty']}
                          for tag in inst_ids[inst_id]}
                for inst_id in inst_ids.keys()}
