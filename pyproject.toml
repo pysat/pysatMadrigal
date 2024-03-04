@@ -79,7 +79,7 @@ Source = "https://github.com/pysat/pysatMadrigal"
 [tool.coverage.report]
 
 [tool.pytest.ini_options]
-addopts = "--cov=pysatMadrigal"  # HERE: add back -x
+addopts = "-x --cov=pysatMadrigal"
 markers = [
   "all_inst",
   "download",
