@@ -108,7 +108,10 @@ def init(self):
     self.acknowledgements = ''.join([
         general.cedar_rules(), '\nThe Air Force Research Laboratory Auroral ',
         'Boundary Index (ABI) was provided by the United States Air Force ',
-        'Research Laboratory, Kirtland Air Force Base, New Mexico.'])
+        'Research Laboratory, Kirtland Air Force Base, New Mexico.\n',
+        'Please send a copy of all publications that use the ABI to Dr. ',
+        'Gordon Wilson at: gordon.wilson@kirtland.af.mil\n',
+        'Dr. Wilson considers this data set deprecated.'])
 
     logger.info(self.acknowledgements)
     self.references = dmsp.references(self.name)
