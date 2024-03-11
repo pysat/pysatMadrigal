@@ -7,7 +7,7 @@
 # DISTRIBUTION STATEMENT A: Approved for public release. Distribution is
 # unlimited.
 # ----------------------------------------------------------------------------
-"""Supports access to F10.7, Kp, and Ap data archieved at Madrigal.
+"""Supports access to F10.7, Kp, and Ap data archived at Madrigal.
 
 Properties
 ----------
@@ -98,14 +98,7 @@ _clean_warn = {inst_id: {tag: {clvl: [('logger', 'WARN',
 
 
 def init(self):
-    """Initialize the Instrument object in support of Madrigal access.
-
-    Parameters
-    ----------
-    kindat : str
-        Madrigal instrument experiment code(s). (default='')
-
-    """
+    """Initialize the Instrument object in support of Madrigal access."""
     # Set the standard pysat attributes
     self.acknowledgements = general.cedar_rules()
     self.references = "\n".join(
@@ -179,7 +172,7 @@ list_remote_files = functools.partial(general.list_remote_files,
 
 
 def load(fnames, tag='', inst_id=''):
-    """Load the Madrigal Dst data.
+    """Load the Madrigal geoindex data.
 
     Parameters
     -----------
@@ -195,7 +188,7 @@ def load(fnames, tag='', inst_id=''):
     Returns
     --------
     data : pds.DataFrame
-        Object containing IMF data
+        Object containing geoindex data
     meta : pysat.Meta
         Object containing metadata such as column names and units
 
