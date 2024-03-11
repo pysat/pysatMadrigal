@@ -14,7 +14,7 @@ Meter (IVM) Madrigal data.
 DMSP_SSJ
 --------
 
-Supports the Defense Meteorological Satelitte Program (DMSP) Special Sensor J
+Supports the Defense Meteorological Satellite Program (DMSP) Special Sensor J
 (SSJ) Madrigal data.
 
 
@@ -88,7 +88,7 @@ support (e.g., cleaning methods, experiment acknowledgements, and references).
 NGDC_AE
 -------
 
-An instrument for the Geophysical indices from NGDC, which include AE AL, AU,
+An instrument for the Geophysical indices from NGDC, which include AE, AL, AU,
 and AO.  The :py:attr:`name` is AE due to the Madrigal naming conventions.  The
 data set spans the years of 1978 through 1987, will all data saved in a single
 file.  Because of this, you only need to download the data once and any desired
@@ -101,7 +101,7 @@ time period may be loaded.
 OMNI2_IMF
 ---------
 
-An instrument for the interplanetary magnetic field (IMF) data from Omni 2. The
+An instrument for the interplanetary magnetic field (IMF) data from OMNI 2. The
 data starts in 1963 and the entire data set is contained in a single file.  The
 file is occasionally updated, and so obtaining the most recent data means that
 all historic data must also be downloaded (or re-downloaded). OMNI data may
