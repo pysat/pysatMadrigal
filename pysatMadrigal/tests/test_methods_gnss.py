@@ -62,6 +62,7 @@ class TestGNSSBadLoad(object):
             gnss.load_los(self.bad_fnames, "site", "zzon")
 
         # Test the logger warning
+        # TODO(#101) Use pysat eval warnings
         assert len(caplog.records) == 2, "unexpected number of warnings"
 
         for record in caplog.records:
