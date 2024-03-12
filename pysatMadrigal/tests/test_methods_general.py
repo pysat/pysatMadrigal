@@ -358,7 +358,7 @@ class TestErrors(object):
                        "unknown date_array supplied", input_kwargs=self.kwargs)
         return
 
-    # (TODO #102) Expand testing of pandas to xarray method below
+    # TODO(#102) Expand testing of pandas to xarray method below
     def test_convert_pandas_to_xarray_bad_data_vars(self):
         """Test raises ValueError for unexpected date_array input."""
         self.kwargs = [{('time', ): ['bad_var']}, pds.DataFrame([0]),
