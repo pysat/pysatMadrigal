@@ -75,7 +75,9 @@ platform = 'madrigal'
 name = 'pandas'
 tags = dict()
 pandas_format = True
-excluded_tags = ['8105']  # Pandas-style data that requires special support
+
+# Pandas-style data that requires special support
+excluded_tags = ['120', '180', '210', '211', '212', '8105']
 
 # Assign only tags with pysat-compatible file format strings
 pandas_codes = general.known_madrigal_inst_codes(pandas_format=True)
@@ -98,16 +100,20 @@ supported_tags = {ss: {tag: general.madrigal_file_format_str(tag)
 
 # ----------------------------------------------------------------------------
 # Instrument test attributes
-
-# Need to sort out test day setting for unit testing, maybe through a remote
-# function
-tag_dates = {'120': dt.datetime(1963, 11, 27), '170': dt.datetime(1998, 7, 1),
-             '180': dt.datetime(2000, 1, 1), '210': dt.datetime(1950, 1, 1),
-             '211': dt.datetime(1978, 1, 1), '212': dt.datetime(1957, 1, 1),
-             '7800': dt.datetime(2009, 11, 10)}
+tag_dates = {'170': dt.datetime(1998, 7, 1), '7800': dt.datetime(2009, 11, 10)}
 _test_dates = {'': {tag: tag_dates[tag] if tag in tag_dates.keys()
                     else tag_dates['7800'] for tag in tags.keys()}}
 _test_download = {'': {tag: True for tag in tags.keys()}}
+
+# TODO(#99): Remove when compliant with multi-day load tests
+_new_tests = {'': {'7800': False}}
+
+# Set the clean warnings for testing
+_clean_warn = {'': {tag: {clean_level: [('logger', 'WARN',
+                                         "can't support instrument-specific",
+                                         clean_level)]
+                          for clean_level in ['clean', 'dusty', 'dirty']}
+                    for tag in inst_ids['']}}
 
 # ----------------------------------------------------------------------------
 # Instrument methods
@@ -235,27 +241,25 @@ def list_files(tag, inst_id, data_path, kindat='', format_str=None,
     return out
 
 
-def download(date_array, tag='', inst_id='', data_path=None, user=None,
-             password=None, file_type='hdf5', kindat=''):
+def download(date_array, tag, inst_id, data_path, user=None, password=None,
+             file_type='hdf5', kindat=''):
     """Download data from Madrigal.
 
     Parameters
     ----------
     date_array : array-like
-        list of datetimes to download data for. The sequence of dates need not
+        List of datetimes to download data for. The sequence of dates need not
         be contiguous.
     tag : str
-        Madrigal Instrument code cast as a string. (default='')
+        Madrigal Instrument code cast as a string.
     inst_id : str
-        Satellite ID string identifier used for particular dataset. (default='')
+        Instrument ID used for particular dataset.
     data_path : str
-        Path to directory to download data to. (default=None)
-    user : str
-        User string input used for download. Provided by user and passed via
-        pysat. If an account is required for dowloads this routine here must
-        error if user not supplied. (default=None)
-    password : str
-        Password for data download. (default=None)
+        Path to directory to download data to.
+    user : str or NoneType
+        User name, raises an error if user not supplied. (default=None)
+    password : str or NoneType
+        User email, raises an error if not supplied. (default=None)
     file_type : str
         File format for Madrigal data. (default='hdf5')
     kindat : str
@@ -263,8 +267,13 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
         instrument.  May be a single value, blank (all), or a comma-delimited
         list. (defaut='')
 
-    Notes
-    -----
+    Raises
+    ------
+    ValueError
+        If user or password are not supplied
+
+    Note
+    ----
     The user's names should be provided in field user. Maria Goeppert Mayer
     should be entered as "Maria Goeppert Mayer"
 

@@ -1,4 +1,4 @@
-coveralls<3.3
+coveralls
 flake8
 flake8-docstrings
 hacking>=1.0
@@ -7,4 +7,4 @@ numpydoc
 pytest-cov
 pytest-ordering
 sphinx
-sphinx_rtd_theme
+sphinx_rtd_theme>=1.2.2,<2.0.0

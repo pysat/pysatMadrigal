@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Full license can be found in License.md
 # Full author list can be found in .zenodo.json file
 # DOI:10.5281/zenodo.3824979
+#
+# DISTRIBUTION STATEMENT A: Approved for public release. Distribution is
+# unlimited.
 # ----------------------------------------------------------------------------
-# -*- coding: utf-8 -*-
 """Supports the Defense Meteorological Satellite Program (DMSP) IVM instruments.
 
 The Ion Velocity Meter (IVM) is comprised of the Retarding Potential Analyzer
@@ -44,8 +47,6 @@ Example
 Note
 ----
 Please provide name and email when downloading data with this routine.
-
-Code development supported by NSF grant 1259508
 
 """
 
@@ -103,6 +104,18 @@ _test_dates = {
     'f16': {tag: dt.datetime(2009, 1, 1) for tag in inst_ids['f16']},
     'f17': {tag: dt.datetime(2009, 1, 1) for tag in inst_ids['f17']},
     'f18': {tag: dt.datetime(2017, 12, 30) for tag in inst_ids['f18']}}
+
+# TODO(#99): Remove when compliant with multi-day load tests
+_new_tests = {'f18': {'': False}, 'f14': {'utd': False}}
+
+# Set the clean warnings for testing
+_clean_warn = {inst_id: {tag: {clean_level: [('logger', 'WARN',
+                                              'this level 1 data has no qual',
+                                              clean_level)]
+                               if tag != 'utd' else []
+                               for clean_level in ['clean', 'dusty', 'dirty']}
+                         for tag in inst_ids[inst_id]}
+               for inst_id in inst_ids.keys()}
 
 # ----------------------------------------------------------------------------
 # Instrument methods

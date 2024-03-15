@@ -26,7 +26,8 @@ GNSS
 ----
 
 Supports the Global Navigation Satellite System instruments by providing
-reference and acknowledgement information.
+reference and acknowledgement information, specialised load functions, and
+supporting information for probing the line-of-sight (LoS) files.
 
 
 .. automodule:: pysatMadrigal.instruments.methods.gnss

@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Full license can be found in License.md
 # Full author list can be found in .zenodo.json file
 # DOI:10.5281/zenodo.3824979
+#
+# DISTRIBUTION STATEMENT A: Approved for public release. Distribution is
+# unlimited.
 # ----------------------------------------------------------------------------
-# -*- coding: utf-8 -*-.
 """Supports the Incoherent Scatter Radar at the Jicamarca Radio Observatory.
 
 Properties
@@ -87,6 +90,26 @@ _test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
                     'oblique_stan': dt.datetime(2010, 4, 19),
                     'oblique_rand': dt.datetime(2000, 11, 9),
                     'oblique_long': dt.datetime(2010, 4, 12)}}
+
+# TODO(#99): Remove when compliant with multi-day load tests
+_new_tests = {'': {'drifts': False, 'drifts_ave': False, 'oblique_stan': False,
+                   'oblique_rand': False, 'oblique_long': False}}
+
+# Set the clean warnings for testing
+_clean_warn = {'': {tag: {clean_level: [('logger', 'WARN',
+                                         'this level 2 data has no quality ',
+                                         clean_level)]
+                          for clean_level in ['clean', 'dusty']}
+                    for tag in inst_ids['']}}
+
+for tag in inst_ids['']:
+    if tag.find('oblique') == 0:
+        _clean_warn[''][tag]['dirty'] = [('logger', 'WARN',
+                                         'this level 2 data has no quality ',
+                                          'dirty')]
+        for clean_level in ['clean', 'dusty', 'dirty']:
+            _clean_warn[''][tag][clean_level].append(
+                ('logger', 'INFO', 'The double pulse, coded ', clean_level))
 
 
 # ----------------------------------------------------------------------------

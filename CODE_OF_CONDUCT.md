@@ -56,9 +56,9 @@ project may be further defined and clarified by project maintainers.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported by contacting the project team at pysat.developers@gmail.com. The
-project team will review and investigate all complaints, and will respond in a
-way that it deems appropriate to the circumstances. The project team is
-obligated to maintain confidentiality with regard to the reporter of an
+pysatMadrigal project team will review and investigate all complaints, and will
+respond in a way that it deems appropriate to the circumstances. The project
+team is obligated to maintain confidentiality with regard to the reporter of an
 incident. Further details of specific enforcement policies may be posted
 separately.
 
@@ -69,7 +69,14 @@ members of the project's leadership.
 ## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant][homepage],
-version 1.4, available at [https://contributor-covenant.org/version/1/4][version]
+version 1.4, available at
+[https://contributor-covenant.org/version/1/4][version]
+
+## FAQ
+
+For answers to common questions about this code of conduct, see
+[https://www.contributor-covenant.org/faq][faq]
 
 [homepage]: https://contributor-covenant.org
 [version]: https://contributor-covenant.org/version/1/4/
+[faq]: https://www.contributor-covenant.org/faq

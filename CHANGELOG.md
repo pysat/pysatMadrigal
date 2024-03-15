@@ -3,6 +3,24 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+[0.2.0] - 2024-03-15
+--------------------
+* Enhancements
+  * Moved the OMNI-2 IMF, Dst, and Geomagnetic index Instruments from the
+    general Madrigal Pandas instrument into new ones
+  * Moved the NGDC AE index Instrument from the general Madrigal Pandas
+    instrument to a new one, fixing the Windows memory issue and a problem
+    with duplicated times
+  * Added slant TEC (tag of 'los') to the gnss_tec Instrument
+  * Refactored general load function to extract useful parts of the code that
+    were used for specific load functions
+* Maintenance
+  * Add manual GitHub Actions tests for pysatMadrigal RC
+  * Update GitHub Actions workflows for newer versions of pip, updated actions
+  * Added clean warning test attributes to all Instruments
+  * Updated documentation to comply with current Ecosystem guidelines
+  * Replaced setup.py with pyproject.toml
+
 [0.1.0] - 2023-04-11
 --------------------
 * Enhancements
@@ -16,6 +34,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
      between '.' delimiters, required for some Madrigal file formats
    * Standardized the Instrument method kwarg defaults
    * Added 'site' tag to the GNSS TEC Instrument
+   * Added a 'dmsp_ssj' instrument for Auroral Boundary Index data
    * Added support for varied use of `two_digit_year_break` to
      `methods.general.list_remote_files`
    * Implemented `two_digit_year_break` support for `vtec` GNSS TEC Instrument
@@ -29,11 +48,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
    * Added quick-fail for main pytest command
 * Bug
    * Fixed bugs in the coordinate conversion functions
+   * Fixed bug in the general download function that sets the stop date
 * Maintenance
    * Updated GitHub action and NEP29 versions
    * Updated the minimum Madrigal version to allow HDF4 downloads
    * Update pysat instrument testing suite, pytest syntax
    * Add manual GitHub Actions tests for pysat RC
+   * Removed code needed to work around pysat bugs
 
 [0.0.4] - 2021-06-11
 --------------------

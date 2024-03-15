@@ -1,7 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Full license can be found in License.md
 # Full author list can be found in .zenodo.json file
 # DOI:10.5281/zenodo.3824979
+#
+# DISTRIBUTION STATEMENT A: Approved for public release. Distribution is
+# unlimited.
 # ----------------------------------------------------------------------------
 """Test methods for `pysatMadrigal.instruments.methods.jro`."""
 
@@ -42,8 +46,8 @@ class TestJROCalcLoc(object):
 
     def setup_method(self):
         """Run before every method to create a clean testing setup."""
-        self.inst = pysat.Instrument('pysat', 'testing_xarray', num_samples=100)
-        self.stime = pysat.instruments.pysat_testing_xarray._test_dates['']['']
+        self.inst = pysat.Instrument('pysat', 'ndtesting', num_samples=100)
+        self.stime = pysat.instruments.pysat_ndtesting._test_dates['']['']
 
         # Set the hard-coded values
         self.az = 206.0
@@ -62,7 +66,7 @@ class TestJROCalcLoc(object):
         return
 
     def transform_testing_to_jro(self, azel_type=''):
-        """Alter `testing_xarray` to mirror the JRO-ISR data."""
+        """Alter `ndtesting` to mirror the JRO-ISR data."""
         # Load the data
         self.inst.load(date=self.stime)
 

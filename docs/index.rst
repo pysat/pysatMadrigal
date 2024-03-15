@@ -9,7 +9,7 @@ to download, load, and support analysis for data sets available at the Madrigal
 data base as pysat.Instrument objects.
 
 .. toctree::
-   :maxdepth: -1
+   :maxdepth: 2
 
    overview.rst
    installation.rst
@@ -19,6 +19,11 @@ data base as pysat.Instrument objects.
    examples.rst
    develop_guide.rst
    history.rst
+   acknowledgements.rst
+
+
+.. admonition:: DISTRIBUTION STATEMENT A: Approved for public release.
+		Distribution is unlimited.
 
 
 Indices and tables

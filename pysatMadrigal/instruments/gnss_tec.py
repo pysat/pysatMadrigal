@@ -1,9 +1,17 @@
-# -*- coding: utf-8 -*-.
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Full license can be found in License.md
+# Full author list can be found in .zenodo.json file
+# DOI:10.5281/zenodo.3824979
+#
+# DISTRIBUTION STATEMENT A: Approved for public release. Distribution is
+# unlimited.
+# ----------------------------------------------------------------------------
 """Supports the MIT Haystack GNSS TEC data products.
 
 The Global Navigation Satellite System (GNSS) is used in conjunction with a
 world-wide receiver network to produce total electron content (TEC) data
-products, including vertical and line-of-sight TEC.
+products, including vertical and line-of-sight (or slant) TEC.
 
 Downloads data from the MIT Haystack Madrigal Database.
 
@@ -14,7 +22,9 @@ platform
 name
     'tec'
 tag
-    'vtec', 'site'
+    'vtec', 'site', 'los'
+inst_id
+    '' (not used)
 
 Examples
 --------
@@ -24,22 +34,36 @@ Examples
     import pysat
     import pysatMadrigal as pymad
 
+    # Get and load all vertical TEC for 19 Nov 2017
     vtec = pysat.Instrument(inst_module=pymad.instruments.gnss_tec, tag='vtec')
     vtec.download(dt.datetime(2017, 11, 19), dt.datetime(2017, 11, 20),
                   user='Firstname+Lastname', password='email@address.com')
     vtec.load(date=dt.datetime(2017, 11, 19))
 
+    # Get and load the GLONASS slant TEC from the zzon site on 1 Jan 2023
+    stec = pysat.Instrument(inst_module=pymad.instruments.gnss_tec, tag='los')
+    stec.download(start=dt.datetime(2023, 1, 1), user='Firstname+Lastname',
+                  password='email@address.com')
+    stec.load(2023, 1, los_method='site', los_value='zzon',
+              gnss_network='glonass')
 
 Note
 ----
 Please provide name and email when downloading data with this routine.
+
+The line-of-sight data is too large to load an entire file at once. Data may be
+loaded by individual receiver site for any number of days (recommended to load
+one day) or a given time. To discover the available sites and times (exact times
+are required for selection), you may use the
+`pysatMadrigal.instruments.methods.gnss.get_los_times` and
+`pysatMadrigal.instruments.methods.gnss.get_los_receiver_sites` functions.
 
 """
 
 import datetime as dt
 import numpy as np
 
-from pysat import logger
+import pysat
 
 from pysatMadrigal.instruments.methods import general
 from pysatMadrigal.instruments.methods import gnss
@@ -49,20 +73,22 @@ from pysatMadrigal.instruments.methods import gnss
 
 platform = 'gnss'
 name = 'tec'
-tags = {'vtec': 'vertical TEC', 'site': 'Sites used in daily TEC data'}
+tags = {'vtec': 'vertical TEC', 'site': 'Sites used in daily TEC data',
+        'los': 'line-of-sight TEC'}
 inst_ids = {'': [tag for tag in tags.keys()]}
 
 pandas_format = False
 
 # Madrigal tags
 madrigal_inst_code = 8000
-madrigal_tag = {'': {'vtec': '3500', 'site': '3506'}}
-# TODO(#12): `, 'los': '3505'}}`
+madrigal_tag = {'': {'vtec': '3500', 'site': '3506', 'los': '3505'}}
 
 # Local attributes
 fname = general.madrigal_file_format_str(madrigal_inst_code,
                                          verbose=False).split("*")
 supported_tags = {ss: {'vtec': ''.join(['gps', fname[1], 'g', fname[2]]),
+                       'los': ''.join(['los_{{year:04d}}{{month:02d}}',
+                                       '{{day:02d}}', fname[2]]),
                        'site': ''.join(['site_{{year:04d}}{{month:02d}}',
                                         '{{day:02d}}', fname[2]])}
                   for ss in inst_ids.keys()}
@@ -73,7 +99,20 @@ remote_tags = {ss: {kk: supported_tags[ss][kk].format(file_type='hdf5')
 # Instrument test attributes
 
 _test_dates = {'': {'vtec': dt.datetime(2017, 11, 19),
-                    'site': dt.datetime(2001, 1, 1)}}
+                    'site': dt.datetime(2001, 1, 1),
+                    'los': dt.datetime(2023, 1, 1)}}
+_test_load_opt = {'': {'los': [{'los_method': 'site', 'los_value': 'zzon',
+                                'gnss_network': 'glonass'},
+                               {'los_method': 'time',
+                                'los_value': dt.datetime(2023, 1, 1)}]}}
+_test_download_ci = {'': {'los': False}}  # Download is too large to test
+_clean_warn = {'': {tag: {clean_level: [('logger', 'INFO',
+                                         'Data provided at a clean level'
+                                         if tag == 'site' else
+                                         'further cleaning may be performed',
+                                         clean_level)]
+                          for clean_level in ['clean', 'dusty', 'dirty']}
+                    for tag in inst_ids['']}}
 
 # ----------------------------------------------------------------------------
 # Instrument methods
@@ -84,7 +123,7 @@ def init(self):
     self.acknowledgements = '\n'.join([gnss.acknowledgements(self.name),
                                        general.cedar_rules()])
     self.references = gnss.references(self.name)
-    logger.info(self.acknowledgements)
+    pysat.logger.info(self.acknowledgements)
 
     return
 
@@ -98,12 +137,14 @@ def clean(self):
     `clean_level` is None.
 
     """
-    if self.tag in ["vtec", "site"]:
-        msg = "Data provided at a clean level"
-        if self.tag == "vtec":
-            msg = "".join([msg, ", further cleaning may be performed using ",
-                           "the measurement error 'dtec'"])
-        logger.info(msg)
+    msg = "Data provided at a clean level"
+    if self.tag == "vtec":
+        msg = "".join([msg, ", further cleaning may be performed using ",
+                       "the measurement error 'dtec'"])
+    elif self.tag == "los":
+        msg = "".join([msg, ", further cleaning may be performed using ",
+                       "the measurement error 'dlos_tec'"])
+    pysat.logger.info(msg)
 
     return
 
@@ -211,6 +252,10 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     downloads.
 
     """
+    if tag == 'los':
+        pysat.logger.warning(
+            'LoS download is very large and succeptible to failure.')
+
     general.download(date_array, inst_code=str(madrigal_inst_code),
                      kindat=madrigal_tag[inst_id][tag], data_path=data_path,
                      user=user, password=password, file_type=file_type, url=url)
@@ -218,7 +263,8 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
     return
 
 
-def load(fnames, tag='', inst_id=''):
+def load(fnames, tag='', inst_id='', los_method='site', los_value=None,
+         gnss_network='all'):
     """Load the GNSS TEC data.
 
     Parameters
@@ -231,6 +277,14 @@ def load(fnames, tag='', inst_id=''):
     inst_id : str
         Instrument ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default='')
+    los_method : str
+        For 'los' tag only, load data for a unique GNSS receiver site ('site')
+        or at a unique time ('time') (default='site')
+    los_value : str, dt.datetime, or NoneType
+        For 'los' tag only, load data at this unique site or time (default=None)
+    gnss_nework : bool
+        For 'los' tag only, limit data by GNSS network if not 'all'. Currently
+        supports 'all', 'gps', and 'glonass' (default='all')
 
     Returns
     -------
@@ -239,47 +293,53 @@ def load(fnames, tag='', inst_id=''):
     meta : pysat.Meta
         Object containing metadata such as column names and units
 
+    Raises
+    ------
+    ValueError
+        If tag is 'los' and no valid 'los_value' is provided or unknown tag
+
+    Note
+    ----
+    The line-of-sight data is too large to load an entire file at once. Data
+    may be loaded by individual receiver site for any number of days
+    (recommended to load one day) or a given time. To discover the available
+    sites and times (exact times are required for selection), you may use the
+    `pysatMadrigal.instruments.methods.gnss.get_los_times` and
+    `pysatMadrigal.instruments.methods.gnss.get_los_receiver_sites` functions.
+
     """
-    # Define the xarray coordinate dimensions (apart from time)
-    # Not needed for netCDF
-    xcoords = {'vtec': {('time', 'gdlat', 'glon', 'kindat', 'kinst'):
-                        ['gdalt', 'tec', 'dtec'],
-                        ('time', ): ['year', 'month', 'day', 'hour', 'min',
-                                     'sec', 'ut1_unix', 'ut2_unix', 'recno']},
-               'site': {('time', 'gps_site'): ['gdlatr', 'gdlonr']}}
-
     # Load the specified data
-    data, meta = general.load(fnames, tag, inst_id, xarray_coords=xcoords[tag])
-
-    # Squeeze the kindat and kinst 'coordinates', but keep them as floats
-    squeeze_dims = np.array(['kindat', 'kinst'])
-    squeeze_mask = [sdim in data.coords for sdim in squeeze_dims]
-    if np.any(squeeze_mask):
-        data = data.squeeze(dim=squeeze_dims[squeeze_mask])
-
-    # Fix the units for tec and dtec
     if tag == 'vtec':
-        meta['tec'] = {meta.labels.units: 'TECU', meta.labels.min_val: 0.0,
-                       meta.labels.max_val: np.nan}
-        meta['dtec'] = {meta.labels.units: 'TECU', meta.labels.min_val: 0.0,
+        data, meta, lat_keys, lon_keys = gnss.load_vtec(fnames)
+    elif tag == 'site':
+        data, meta, lat_keys, lon_keys = gnss.load_site(fnames)
+    elif tag == 'los':
+        if los_value is None:
+            raise ValueError('must specify a valid {:}'.format(los_method))
+
+        data, meta, lat_keys, lon_keys = gnss.load_los(fnames, los_method,
+                                                       los_value, gnss_network)
+
+    if len(data.dims.keys()) > 0:
+        # Squeeze the kindat and kinst 'coordinates', but keep them as floats
+        squeeze_dims = np.array(['kindat', 'kinst'])
+        squeeze_mask = [sdim in data.coords for sdim in squeeze_dims]
+        if np.any(squeeze_mask):
+            data = data.squeeze(dim=squeeze_dims[squeeze_mask])
+
+        # Get the maximum and minimum values for time, latitude, and longitude
+        meta['time'] = {meta.labels.notes: data['time'].values.dtype.__doc__,
+                        meta.labels.min_val: np.nan,
                         meta.labels.max_val: np.nan}
 
-    # Get the maximum and minimum values for time, latitude, longitude,
-    # and altitude
-    meta['time'] = {meta.labels.notes: data['time'].values.dtype.__doc__,
-                    meta.labels.min_val: np.nan, meta.labels.max_val: np.nan}
-    if tag == 'vtec':
-        meta['gdalt'] = {meta.labels.min_val: 0.0, meta.labels.max_val: np.nan}
-        lat_key = 'gdlat'
-        lon_key = 'glon'
-    else:
-        lat_key = 'gdlatr'
-        lon_key = 'gdlonr'
+        for lat_key in lat_keys:
+            meta[lat_key] = {meta.labels.min_val: -90.0,
+                             meta.labels.max_val: 90.0}
 
-    meta[lat_key] = {meta.labels.min_val: -90.0, meta.labels.max_val: 90.0}
-    min_lon = 0.0 if data[lon_key].values.min() >= 0.0 else -180.0
-    meta[lon_key] = {meta.labels.min_val: min_lon,
-                     meta.labels.max_val: min_lon + 360.0}
+            for lon_key in lon_keys:
+                min_lon = 0.0 if data[lon_key].values.min() >= 0.0 else -180.0
+                meta[lon_key] = {meta.labels.min_val: min_lon,
+                                 meta.labels.max_val: min_lon + 360.0}
 
     return data, meta
 
@@ -320,10 +380,10 @@ def list_remote_files(tag, inst_id, start=dt.datetime(1998, 10, 15),
     pysatMadrigal.instruments.methods.general.list_remote_files
 
     """
-    if tag == 'site':
-        two_break = None
-    elif tag == 'vtec':
+    if tag == 'vtec':
         two_break = 99
+    else:
+        two_break = None
 
     files = general.list_remote_files(
         tag, inst_id, supported_tags=remote_tags,

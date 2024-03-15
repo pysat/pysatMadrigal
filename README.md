@@ -3,9 +3,9 @@
         <img width="20%" src="https://raw.githubusercontent.com/pysat/pysatMadrigal/main/docs/figures/pysatMadrigal.png" alt="pysatMadrigal" title="pysatMadrigal"</img>
 </div>
 
-# pysatMadrigal
+# pysatMadrigal: pysat support for Madrigal data sets
 [![Documentation Status](https://readthedocs.org/projects/pysatmadrigal/badge/?version=latest)](https://pysatmadrigal.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+[![Pytest with Flake8](https://github.com/pysat/pysatMadrigal/actions/workflows/main.yml/badge.svg)](https://github.com/pysat/pysatMadrigal/actions/workflows/main.yml)
 [![Coverage Status](https://coveralls.io/repos/github/pysat/pysatMadrigal/badge.svg?branch=main)](https://coveralls.io/github/pysat/pysatMadrigal?branch=main)
 [![DOI](https://zenodo.org/badge/258384773.svg)](https://zenodo.org/badge/latestdoi/258384773)
 [![PyPI version](https://badge.fury.io/py/pysatMadrigal.svg)](https://badge.fury.io/py/pysatMadrigal)
@@ -22,12 +22,12 @@ give some examples on how to use the routines.
 ## Prerequisites
 
 pysatMadrigal uses common Python modules, as well as modules developed by and
-for the Space Physics community.  This module officially supports Python 3.7+.
+for the Space Physics community.  This module officially supports Python 3.6+.
 
 | Common modules | Community modules |
 | -------------- | ----------------- |
 | h5py           | madrigalWeb>=2.6  |
-| numpy          | pysat >= 3.0.3    |
+| numpy          | pysat >= 3.1.0    |
 | pandas         |                   |
 | xarray         |                   |
 
@@ -47,7 +47,8 @@ a local install use the "--user" flag after "install".
 
 ```
 cd pysatMadrigal/
-python setup.py install
+python -m build .
+pip install .
 ```
 
 # Examples
@@ -67,5 +68,8 @@ Afterward, pysat will identify them using the `platform` and `name` keywords.
 
 ```
 pysat.utils.registry.register('pysatMadrigal.instruments.dmsp_ivm')
-dst = pysat.Instrument('dmsp', 'ivm', tag='utd', inst_id='f15')
+ivm = pysat.Instrument('dmsp', 'ivm', tag='utd', inst_id='f15')
 ```
+
+The package also include analysis tools.  Detailed examples are in the
+[documentation](https://pysatmadrigal.readthedocs.io/en/latest/?badge=latest).
