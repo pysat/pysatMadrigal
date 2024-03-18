@@ -104,6 +104,11 @@ tag_dates = {'170': dt.datetime(1998, 7, 1), '7800': dt.datetime(2009, 11, 10)}
 _test_dates = {'': {tag: tag_dates[tag] if tag in tag_dates.keys()
                     else tag_dates['7800'] for tag in tags.keys()}}
 _test_download = {'': {tag: True for tag in tags.keys()}}
+
+# TODO(#99): Remove when compliant with multi-day load tests
+_new_tests = {'': {'7800': False}}
+
+# Set the clean warnings for testing
 _clean_warn = {'': {tag: {clean_level: [('logger', 'WARN',
                                          "can't support instrument-specific",
                                          clean_level)]

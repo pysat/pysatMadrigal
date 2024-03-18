@@ -60,6 +60,7 @@ class TestLocal(object):
                                                ['hdf5', 'netCDF4', 'simple'])
 
         # Evaluate the logger warning
+        # TODO(#101) Use pysat warnings test
         assert len(caplog.records) == 1, "unexpected number of warnings"
         assert caplog.records[0].levelname == "WARNING"
         assert caplog.records[0].message.find(
@@ -357,6 +358,7 @@ class TestErrors(object):
                        "unknown date_array supplied", input_kwargs=self.kwargs)
         return
 
+    # TODO(#102) Expand testing of pandas to xarray method below
     def test_convert_pandas_to_xarray_bad_data_vars(self):
         """Test raises ValueError for unexpected date_array input."""
         self.kwargs = [{('time', ): ['bad_var']}, pds.DataFrame([0]),

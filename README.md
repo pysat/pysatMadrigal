@@ -22,7 +22,7 @@ give some examples on how to use the routines.
 ## Prerequisites
 
 pysatMadrigal uses common Python modules, as well as modules developed by and
-for the Space Physics community.  This module officially supports Python 3.7+.
+for the Space Physics community.  This module officially supports Python 3.6+.
 
 | Common modules | Community modules |
 | -------------- | ----------------- |

@@ -7,7 +7,7 @@
 # DISTRIBUTION STATEMENT A: Approved for public release. Distribution is
 # unlimited.
 # ----------------------------------------------------------------------------
-"""Supports access to Dst data archieved at Madrigal.
+"""Supports access to Dst data archived at Madrigal.
 
 Properties
 ----------

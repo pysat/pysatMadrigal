@@ -19,8 +19,10 @@ Programs
 
 Disclaimers
 ===========
-Any opinions, findings, and conclusions or recommendations expressed in this
-material are those of the author(s) and do not necessarily reflect the views
+Any opinions or actions taken by the listed funding institutions are those of 
+the institutions and do not necessarily reflect the views of the pysat development
+team or individual authors. Any opinions, findings, and conclusions or recommendations 
+expressed in this material are those of the author(s) and do not necessarily reflect the views
 of the funding agencies.
 
 Support and Thanks

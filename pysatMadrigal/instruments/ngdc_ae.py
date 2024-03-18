@@ -90,25 +90,18 @@ _test_dates = {inst_id: {tag: madrigal_start for tag in inst_ids[inst_id]}
                for inst_id in inst_ids.keys()}
 _test_download = {inst_id: {tag: True for tag in inst_ids[inst_id]}
                   for inst_id in inst_ids.keys()}
-_clean_warn = {inst_id: {tag: {'dusty': [('logger', 'WARN',
-                                          "'dusty' and 'clean' are the same",
-                                          'dusty')]}
-                         for tag in inst_ids[inst_id]}
-               for inst_id in inst_ids.keys()}
+_clean_warn = {
+    inst_id: {tag: {'dusty': [('logger', 'WARN',
+                               "'dusty' and 'clean' levels are the same",
+                               'dusty')]}
+              for tag in inst_ids[inst_id]} for inst_id in inst_ids.keys()}
 
 # ----------------------------------------------------------------------------
 # Instrument methods
 
 
 def init(self):
-    """Initialize the Instrument object in support of Madrigal access.
-
-    Parameters
-    ----------
-    kindat : str
-        Madrigal instrument experiment code(s). (default='')
-
-    """
+    """Initialize the Instrument object in support of Madrigal access."""
     # Set the standard pysat attributes
     self.acknowledgements = general.cedar_rules()
     self.references = ''.join(['Davis, T. Neil and Masahisa Sugiura. “Auroral',
@@ -126,8 +119,8 @@ def clean(self):
 
     Note
     ----
-    Supports 'clean', 'dusty', 'dirty' in the sense that it prints
-    a message noting there is no cleaning.
+    Supports 'clean', 'dusty', 'dirty' in the sense that all
+    levels use the flag to clean data the same way.
     'None' is also supported as it signifies no cleaning.
 
     Routine is called by pysat, and not by the end user directly.

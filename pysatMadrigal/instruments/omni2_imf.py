@@ -7,7 +7,7 @@
 # DISTRIBUTION STATEMENT A: Approved for public release. Distribution is
 # unlimited.
 # ----------------------------------------------------------------------------
-"""Supports access to OMNI 2 IMF data archieved at Madrigal.
+"""Supports access to OMNI 2 IMF data archived at Madrigal.
 
 Properties
 ----------
@@ -109,14 +109,7 @@ _clean_warn = {inst_id: {tag: {clvl: [('logger', 'WARN',
 
 
 def init(self):
-    """Initialize the Instrument object in support of Madrigal access.
-
-    Parameters
-    ----------
-    kindat : str
-        Madrigal instrument experiment code(s). (default='')
-
-    """
+    """Initialize the Instrument object in support of Madrigal access."""
     # Set the standard pysat attributes
     self.acknowledgements = ''.join([general.cedar_rules(), '\nFor full ',
                                      'acknowledgement info, please see: ',
@@ -225,9 +218,9 @@ def load(fnames, tag='', inst_id=''):
     if data.index[-1] > madrigal_end:
         pysat.logger.critical(''.join(['There is data beyond ',
                                        '{:}'.format(madrigal_end), ' in the ',
-                                       'Omni2 IMF file, please notify the ',
+                                       'OMNI2 IMF file, please notify the ',
                                        'pysatMadrigal developers so that they ',
-                                       'can update this Instrument']))
+                                       'can update this Instrument.']))
 
     # Select the data for the desired time period
     data = data[fstart:fstop]

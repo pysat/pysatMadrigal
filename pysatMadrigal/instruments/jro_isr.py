@@ -91,6 +91,11 @@ _test_dates = {'': {'drifts': dt.datetime(2010, 1, 19),
                     'oblique_rand': dt.datetime(2000, 11, 9),
                     'oblique_long': dt.datetime(2010, 4, 12)}}
 
+# TODO(#99): Remove when compliant with multi-day load tests
+_new_tests = {'': {'drifts': False, 'drifts_ave': False, 'oblique_stan': False,
+                   'oblique_rand': False, 'oblique_long': False}}
+
+# Set the clean warnings for testing
 _clean_warn = {'': {tag: {clean_level: [('logger', 'WARN',
                                          'this level 2 data has no quality ',
                                          clean_level)]

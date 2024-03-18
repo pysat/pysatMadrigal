@@ -3,7 +3,7 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-[0.2.0] - 2024-XX-XX
+[0.2.0] - 2024-03-15
 --------------------
 * Enhancements
   * Moved the OMNI-2 IMF, Dst, and Geomagnetic index Instruments from the
@@ -16,7 +16,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
     were used for specific load functions
 * Maintenance
   * Add manual GitHub Actions tests for pysatMadrigal RC
-  * Update GitHub Actions workflows for newer versions of pip
+  * Update GitHub Actions workflows for newer versions of pip, updated actions
   * Added clean warning test attributes to all Instruments
   * Updated documentation to comply with current Ecosystem guidelines
   * Replaced setup.py with pyproject.toml
