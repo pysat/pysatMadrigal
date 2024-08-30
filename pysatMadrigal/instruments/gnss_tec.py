@@ -264,7 +264,7 @@ def download(date_array, tag='', inst_id='', data_path=None, user=None,
 
 
 def load(fnames, tag='', inst_id='', los_method='site', los_value=None,
-         gnss_network='all'):
+         los_range=0, gnss_network='all'):
     """Load the GNSS TEC data.
 
     Parameters
@@ -278,10 +278,18 @@ def load(fnames, tag='', inst_id='', los_method='site', los_value=None,
         Instrument ID used to identify particular data set to be loaded.
         This input is nominally provided by pysat itself. (default='')
     los_method : str
-        For 'los' tag only, load data for a unique GNSS receiver site ('site')
-        or at a unique time ('time') (default='site')
-    los_value : str, dt.datetime, or NoneType
-        For 'los' tag only, load data at this unique site or time (default=None)
+        Load data for a unique GNSS receiver site ('site'), a unique time
+        ('time'), a unique unix time ('unix', 'ut1_unix', 'ut2_unix'), a unique
+        PRN ('prn', 'sat', 'sat_id'), a unique orientation ('azm', 'elm'), or
+        a unique location ('gdlatr', 'gdlonr', 'gdlat', 'glon').
+    los_value : int, float, str, or dt.datetime
+        For 'los' tag only, load data at this unique site, PRN, time,
+        orientation, or location.
+    los_range : int or float
+        For time, orientation, or location methods specifiy a range that will
+        be included in the output.  Expects a single value and will return
+        values from `los_value - los_range <= value <= los_value + los_range`
+        (default=0)
     gnss_nework : bool
         For 'los' tag only, limit data by GNSS network if not 'all'. Currently
         supports 'all', 'gps', and 'glonass' (default='all')
@@ -317,8 +325,9 @@ def load(fnames, tag='', inst_id='', los_method='site', los_value=None,
         if los_value is None:
             raise ValueError('must specify a valid {:}'.format(los_method))
 
-        data, meta, lat_keys, lon_keys = gnss.load_los(fnames, los_method,
-                                                       los_value, gnss_network)
+        data, meta, lat_keys, lon_keys = gnss.load_los(
+            fnames, los_method, los_value, los_range=los_range,
+            gnss_network=gnss_network)
 
     if len(data.dims.keys()) > 0:
         # Squeeze the kindat and kinst 'coordinates', but keep them as floats

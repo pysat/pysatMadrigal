@@ -156,7 +156,7 @@ def load_site(fnames):
     return data, meta, lat_keys, lon_keys
 
 
-def load_los(fnames, los_method, los_value, gnss_network='all'):
+def load_los(fnames, los_method, los_value, los_range=0, gnss_network='all'):
     """Load the GNSS slant TEC data.
 
     Parameters
@@ -164,10 +164,18 @@ def load_los(fnames, los_method, los_value, gnss_network='all'):
     fnames : list
         List of filenames
     los_method : str
-        For 'los' tag only, load data for a unique GNSS receiver site ('site')
-        or at a unique time ('time')
-    los_value : str or dt.datetime
-        For 'los' tag only, load data at this unique site or time
+        Load data for a unique GNSS receiver site ('site'), a unique time
+        ('time'), a unique unix time ('unix', 'ut1_unix', 'ut2_unix'), a unique
+        PRN ('prn', 'sat', 'sat_id'), a unique orientation ('azm', 'elm'), or
+        a unique location ('gdlatr', 'gdlonr', 'gdlat', 'glon').
+    los_value : int, float, str, or dt.datetime
+        For 'los' tag only, load data at this unique site, PRN, time,
+        orientation, or location.
+    los_range : int or float
+        For time, orientation, or location methods specifiy a range that will
+        be included in the output.  Expects a single value and will return
+        values from `los_value - los_range <= value <= los_value + los_range`
+        (default=0)
     gnss_network : bool
         Limit data by GNSS network, if not 'all'.  Currently supports 'all',
         'gps', and 'glonass' (default='all')
@@ -185,12 +193,11 @@ def load_los(fnames, los_method, los_value, gnss_network='all'):
 
     """
     # Define the xarray coordinate dimensions and lat/lon keys
-    xcoords = {('time', 'gps_site', 'sat_id', 'kindat', 'kinst'):
+    xcoords = {('time', 'gps_site', 'sat_id', 'gnss_type', 'kindat', 'kinst'):
                ['pierce_alt', 'los_tec', 'dlos_tec', 'tec', 'azm', 'elm',
                 'gdlat', 'glon', 'rec_bias', 'drec_bias'],
                ('time', ): ['year', 'month', 'day', 'hour', 'min',
                             'sec', 'ut1_unix', 'ut2_unix', 'recno'],
-               ('time', 'sat_id', ): ['gnss_type'],
                ('time', 'gps_site', ): ['gdlatr', 'gdlonr']}
     lat_keys = ['gdlatr', 'gdlat']
     lon_keys = ['gdlonr', 'glon']
@@ -208,16 +215,37 @@ def load_los(fnames, los_method, los_value, gnss_network='all'):
     meta = pysat.Meta()
 
     # Load the data using the desired method
-    if los_method.lower() == 'site':
+    if los_method.lower() in ['site', 'gps_site']:
         sel_key = 'gps_site'
+        sel_range = None
 
         # Convert the site to bytes
         los_value = np.bytes_(los_value)
-    elif los_method.lower() == 'time':
-        sel_key = 'ut1_unix'
+    elif los_method.lower() in ['time', 'unix', 'ut1_unix', 'ut2_unix']:
+        sel_key = los_method.lower() if los_method.lower().find(
+            'ut') == 0 else 'ut1_unix'
 
-        # Convert the input datetime to UNIX seconds
-        los_value = (los_value - dt.datetime(1970, 1, 1)).total_seconds()
+        # Convert the input datetime to UNIX seconds if needed
+        if isinstance(los_value, dt.datetime):
+            los_value = (los_value - dt.datetime(1970, 1, 1)).total_seconds()
+
+        # Determine selection range
+        if los_range == 0:
+            sel_range = None
+        else:
+            sel_range = [los_value - los_range, los_value + los_range]
+    elif los_method.lower() in ['sat', 'sat_id', 'prn']:
+        sel_key = 'sat_id'
+        sel_range = None
+    elif los_method.lower() in ['azm', 'elm', 'gdlatr', 'gdlat', 'gdlonr',
+                                'glon']:
+        sel_key = los_method.lower()
+
+        # Determine selection range
+        if los_range == 0:
+            sel_range = None
+        else:
+            sel_range = [los_value - los_range, los_value + los_range]
     else:
         raise ValueError('unsupported selection type: {:}'.format(los_method))
 
@@ -227,7 +255,11 @@ def load_los(fnames, los_method, los_value, gnss_network='all'):
     for fname in load_file_types['hdf5']:
         with h5py.File(fname, 'r') as fin:
             sel_arr = fin['Data']['Table Layout'][sel_key]
-            sel_mask = sel_arr == los_value
+
+            if sel_range is None:
+                sel_mask = sel_arr == los_value
+            else:
+                sel_mask = (sel_arr >= sel_range[0]) & (sel_arr <= sel_range[1])
 
             if gnss_network.lower() != 'all':
                 # Redefine the selection mask to include network as well
@@ -258,13 +290,17 @@ def load_los(fnames, los_method, los_value, gnss_network='all'):
         # Enforce lowercase variable names
         data.columns = [item.lower() for item in data.columns]
 
-        # Convert the data to an xarray Dataset
-        time_ind = general.build_madrigal_datetime_index(data)
+        # Get the time index saved in the correct location
+        if los_method.lower() in ['time', 'unix', 'ut1_unix', 'ut2_unix']:
+            data['time'] = general.build_madrigal_datetime_index(data)
+            time_ind = None
+        else:
+            time_ind = general.build_madrigal_datetime_index(data)
     else:
         time_ind = None
 
-        # Convert the output to xarray
-        data = general.convert_pandas_to_xarray(xcoords, data, time_ind)
+    # Convert the output to xarray
+    data = general.convert_pandas_to_xarray(xcoords, data, time_ind)
 
     return data, meta, lat_keys, lon_keys
 
