@@ -354,7 +354,8 @@ def load(fnames, tag='', inst_id='', los_method='site', los_value=None,
 
 
 def list_remote_files(tag, inst_id, start=dt.datetime(1998, 10, 15),
-                      stop=dt.datetime.utcnow(), user=None, password=None):
+                      stop=dt.datetime.now(tz=dt.timezone.utc), user=None,
+                      password=None):
     """Create a Pandas Series of every file for chosen remote data.
 
     Parameters
@@ -367,10 +368,10 @@ def list_remote_files(tag, inst_id, start=dt.datetime(1998, 10, 15),
         provided by pysat itself.
     start : dt.datetime or NoneType
         Starting time for file list. If None, replaced with default.
-        (default=10-15-1998)
+        (default=dt.datetime(1998, 10, 15))
     stop : dt.datetime or NoneType
         Ending time for the file list. If None, replaced with default.
-        (default=time of run)
+        (default=dt.datetime.now(tz=dt.timezone.utc))
     user : str or NoneType
         Username to be passed along to resource with relevant data.
         (default=None)

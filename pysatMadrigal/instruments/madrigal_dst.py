@@ -67,7 +67,7 @@ pandas_format = True
 madrigal_inst_code = 212
 madrigal_tag = {'': {'': "30006"}}
 madrigal_start = dt.datetime(1957, 1, 1)
-madrigal_end = dt.datetime.utcnow()
+madrigal_end = dt.datetime.now(tz=dt.timezone.utc)
 
 # Local attributes
 #

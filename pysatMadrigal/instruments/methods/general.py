@@ -1053,7 +1053,7 @@ def get_remote_filenames(inst_code=None, kindat='', user=None, password=None,
         (default=dt.datetime(1900, 1, 1))
     stop : dt.datetime or NoneType
         Ending time for the file list, None reverts to default
-        (default=dt.datetime.utcnow())
+        (default=dt.datetime.now(tz=dt.timezone.utc))
     date_array : dt.datetime or NoneType
         Array of datetimes to download data for. The sequence of dates need not
         be contiguous and will be used instead of start and stop if supplied.
@@ -1102,7 +1102,7 @@ def get_remote_filenames(inst_code=None, kindat='', user=None, password=None,
         start = dt.datetime(1900, 1, 1)
 
     if stop is None:
-        stop = dt.datetime.utcnow()
+        stop = dt.datetime.now(tz=dt.timezone.utc)
 
     # If start and stop are identical, increment
     if start == stop:
@@ -1178,7 +1178,7 @@ def list_remote_files(tag, inst_id, inst_code=None, kindats=None, user=None,
                       password=None, supported_tags=None,
                       url="http://cedar.openmadrigal.org",
                       two_digit_year_break=None, start=dt.datetime(1900, 1, 1),
-                      stop=dt.datetime.utcnow()):
+                      stop=dt.datetime.now(tz=dt.timezone.utc)):
     """List files available from Madrigal.
 
     Parameters

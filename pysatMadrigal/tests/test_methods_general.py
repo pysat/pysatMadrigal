@@ -817,7 +817,7 @@ class TestMadrigalExp(object):
         """Create a clean testing environment."""
         self.exp = None
         self.start = dt.datetime(1950, 1, 1)
-        self.stop = dt.datetime.utcnow()
+        self.stop = dt.datetime.now(tz=dt.timezone.utc)
         return
 
     def teardown_method(self):
