@@ -64,7 +64,7 @@ Examples
 
 import datetime as dt
 
-from pysat import logger
+import pysat
 
 from pysatMadrigal.instruments.methods import general
 
@@ -135,10 +135,11 @@ def init(self, kindat=''):
     # If the kindat (madrigal tag) is not known, advise user
     self.kindat = kindat
     if self.kindat == '':
-        logger.warning('`inst_id` did not supply KINDAT, all will be returned.')
+        pysat.logger.warning(
+            '`inst_id` did not supply KINDAT, all will be returned.')
 
     # Remind the user of the Rules of the Road
-    logger.info(self.acknowledgements)
+    pysat.logger.info(self.acknowledgements)
     return
 
 
@@ -155,8 +156,9 @@ def clean(self):
 
     """
     if self.clean_level in ['clean', 'dusty', 'dirty']:
-        logger.warning(''.join(["The generalized Madrigal data Instrument ",
-                                "can't support instrument-specific cleaning."]))
+        pysat.logger.warning(''.join(["The generalized Madrigal data ",
+                                      "Instrument can't support instrument-",
+                                      "specific cleaning."]))
 
     return
 
