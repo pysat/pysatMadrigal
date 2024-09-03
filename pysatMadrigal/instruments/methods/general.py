@@ -1023,7 +1023,7 @@ def download(date_array, inst_code=None, kindat=None, data_path=None,
 def get_remote_filenames(inst_code=None, kindat='', user=None, password=None,
                          web_data=None, url="http://cedar.openmadrigal.org",
                          start=dt.datetime(1900, 1, 1),
-                         stop=dt.datetime.now(tz=dt.datetime.utc),
+                         stop=dt.datetime.now(tz=dt.timezone.utc),
                          date_array=None):
     """Retrieve the remote filenames for a specified Madrigal experiment.
 
