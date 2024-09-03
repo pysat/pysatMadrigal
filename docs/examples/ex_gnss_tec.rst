@@ -120,3 +120,9 @@ specified, as illustrated in the following example.
    tec.load(date=ftime, los_method='glon', los_value=-30, los_range=10,
             gnss_network='gps')
 
+
+When loading data by a specific time or receiver, it may be desirable to
+determine what times and receivers are available.  The functions
+:py:func:`pysatMadrigal.instruments.methods.gnss.get_los_receiver_sites` and
+:py:func:`pysatMadrigal.instruments.methods.gnss.get_los_times` can be used on
+a list of filenames to determine what loading options are available.
