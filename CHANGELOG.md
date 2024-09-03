@@ -6,7 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 [0.X.X] - 2024-XX-XX
 --------------------
 * Enhancements
-  * Added more partial load options for the GNSS line of sight data.
+  * Added more partial load options for the GNSS line of site data.
+* Maintenance
+  * Updated datetime calls to `utcnow` to be `now` with timezone UTC.
 
 [0.2.0] - 2024-03-15
 --------------------
