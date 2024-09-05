@@ -1104,6 +1104,8 @@ def get_remote_filenames(inst_code=None, kindat='', user=None, password=None,
 
     if stop is None:
         stop = dt.datetime.now(tz=dt.timezone.utc)
+
+    # Ensure the end time does not have timezone information
     stop = pysat.utils.time.filter_datetime_input(stop)
 
     # If start and stop are identical, increment
