@@ -67,7 +67,8 @@ pandas_format = True
 madrigal_inst_code = 210
 madrigal_tag = {'': {'': "30007"}}
 madrigal_start = dt.datetime(1950, 1, 1)
-madrigal_end = dt.datetime.utcnow()
+madrigal_end = pysat.utils.time.filter_datetime_input(
+    dt.datetime.now(tz=dt.timezone.utc))  # Filters out timezone
 
 # Local attributes
 #

@@ -64,7 +64,7 @@ Examples
 
 import datetime as dt
 
-from pysat import logger
+import pysat
 
 from pysatMadrigal.instruments.methods import general
 
@@ -135,10 +135,11 @@ def init(self, kindat=''):
     # If the kindat (madrigal tag) is not known, advise user
     self.kindat = kindat
     if self.kindat == '':
-        logger.warning('`inst_id` did not supply KINDAT, all will be returned.')
+        pysat.logger.warning(
+            '`inst_id` did not supply KINDAT, all will be returned.')
 
     # Remind the user of the Rules of the Road
-    logger.info(self.acknowledgements)
+    pysat.logger.info(self.acknowledgements)
     return
 
 
@@ -155,8 +156,9 @@ def clean(self):
 
     """
     if self.clean_level in ['clean', 'dusty', 'dirty']:
-        logger.warning(''.join(["The generalized Madrigal data Instrument ",
-                                "can't support instrument-specific cleaning."]))
+        pysat.logger.warning(''.join(["The generalized Madrigal data ",
+                                      "Instrument can't support instrument-",
+                                      "specific cleaning."]))
 
     return
 
@@ -292,7 +294,8 @@ def download(date_array, tag, inst_id, data_path, user=None, password=None,
 
 def list_remote_files(tag, inst_id, kindat='', user=None, password=None,
                       url="http://cedar.openmadrigal.org",
-                      start=dt.datetime(1900, 1, 1), stop=dt.datetime.utcnow()):
+                      start=dt.datetime(1900, 1, 1),
+                      stop=dt.datetime.now(tz=dt.timezone.utc)):
     """List files available from Madrigal.
 
     Parameters
@@ -320,7 +323,8 @@ def list_remote_files(tag, inst_id, kindat='', user=None, password=None,
     start : dt.datetime
         Starting time for file list (default=dt.datetime(1900, 1, 1))
     stop : dt.datetime
-        Ending time for the file list (default=dt.datetime.utcnow())
+        Ending time for the file list
+       (default=dt.datetime.now(tz=dt.timezone.utc))
 
     Returns
     -------
