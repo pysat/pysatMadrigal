@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
   * Added more partial load options for the GNSS line of site data.
 * Maintenance
   * Updated datetime calls to `utcnow` to be `now` with timezone UTC.
+  * Updated controlled information statement for accuracy and clarity
 
 [0.2.0] - 2024-03-15
 --------------------
