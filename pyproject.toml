@@ -49,7 +49,7 @@ dependencies = [
   "numpy",
   "packaging",
   "pandas",
-  "pysat>=3.2.3",
+  "pysat>=3.2.2",
   "xarray"]
 
 [project.optional-dependencies]
