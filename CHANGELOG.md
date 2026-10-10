@@ -3,13 +3,15 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-[0.X.X] - 2024-XX-XX
+[0.X.X] - 2026-XX-XX
 --------------------
 * Enhancements
   * Added more partial load options for the GNSS line of site data.
 * Maintenance
   * Updated datetime calls to `utcnow` to be `now` with timezone UTC.
   * Updated controlled information statement for accuracy and clarity
+  * Updated to Python 3.14
+  * Replaced 'm2r2' with 'myst_parser'
 
 [0.2.0] - 2024-03-15
 --------------------
