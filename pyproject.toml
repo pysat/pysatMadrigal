@@ -7,10 +7,10 @@ name = "pysatMadrigal"
 version = "0.2.0"
 description = 'Madrigal instrument support for the pysat ecosystem'
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.10"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Angeline G. Burrell et al.", email = "pysat.developers@gmail.com"}
+    {name = "Russell Stoneback et al.", email = "pysat.developers@gmail.com"}
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -19,11 +19,12 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: BSD License",
   "Natural Language :: English",
-  "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.6",
-  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Operating System :: POSIX :: Linux",
   "Operating System :: MacOS :: MacOS X",
   "Operating System :: Microsoft :: Windows"
@@ -48,7 +49,7 @@ dependencies = [
   "numpy",
   "packaging",
   "pandas",
-  "pysat>=3.1.0",
+  "pysat>=3.2.3",
   "xarray"]
 
 [project.optional-dependencies]
